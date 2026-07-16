@@ -5491,3 +5491,79 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     will-change: transform, opacity !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.8 — definitive portrait particle fix
+   --------------------------------------------------------------------------
+   Previous attempts animated transform/top on .particle, but earlier mobile
+   declarations marked those same properties !important. CSS animations cannot
+   override an !important declaration. The moving light is now rendered by a
+   pseudo-element with its own conflict-free transform animation.
+   ========================================================================== */
+
+@keyframes ng-particle-down-pseudo {
+  0%   { transform: translateY(-12px); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(14px); opacity: 0; }
+}
+
+@keyframes ng-particle-up-pseudo {
+  0%   { transform: translateY(14px); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(-12px); opacity: 0; }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .flowline .particle,
+  .flowline .particle:nth-child(n) {
+    top: 0 !important;
+    left: 1px !important;
+    width: 4px !important;
+    height: 100% !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    animation: none !important;
+    overflow: visible !important;
+  }
+
+  .flowline .particle::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 4px;
+    height: 9px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--flow-color), white 16%) 50%, transparent 100%);
+    box-shadow:
+      0 0 10px color-mix(in srgb, var(--flow-color), transparent 8%),
+      0 0 2px rgba(255,255,255,.72);
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .flowline.dir-right.is-active .particle::after {
+    animation: ng-particle-down-pseudo var(--flow-speed, 3.8s) cubic-bezier(.45,0,.55,1) infinite;
+  }
+
+  .flowline.dir-left.is-active .particle::after {
+    animation: ng-particle-up-pseudo var(--flow-speed, 3.8s) cubic-bezier(.45,0,.55,1) infinite;
+  }
+
+  .flowline.is-active .particle:nth-child(2)::after {
+    animation-delay: calc(var(--flow-speed, 3.8s) / -3);
+  }
+
+  .flowline.is-active .particle:nth-child(3)::after {
+    animation-delay: calc(var(--flow-speed, 3.8s) / -1.5);
+  }
+
+  .flowline.is-off .particle::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
