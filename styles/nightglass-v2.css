@@ -5338,3 +5338,115 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     transform-origin: center !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.6 — portrait flow animation repair
+   --------------------------------------------------------------------------
+   - Restore clearly visible moving particles in portrait.
+   - Place the directional arrow beside the vertical connector instead of
+     beneath it.
+   ========================================================================== */
+
+@keyframes ng-flow-down-portrait-v2 {
+  0%   { top: -12px; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: calc(100% + 12px); opacity: 0; }
+}
+
+@keyframes ng-flow-up-portrait-v2 {
+  0%   { top: calc(100% + 12px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: -12px; opacity: 0; }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .flow {
+    grid-template-rows: 76px 28px 76px 28px 76px !important;
+  }
+
+  .flowbox {
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-columns: 6px 14px !important;
+    grid-template-rows: 1fr !important;
+    align-items: center !important;
+    justify-content: center !important;
+    justify-items: center !important;
+    column-gap: 8px !important;
+    overflow: visible !important;
+  }
+
+  .flowline {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 6px !important;
+    min-width: 6px !important;
+    max-width: 6px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    overflow: hidden !important;
+    align-self: center !important;
+  }
+
+  .flowline .particle,
+  .flowline .particle:nth-child(n) {
+    left: 1px !important;
+    width: 4px !important;
+    height: 10px !important;
+    margin: 0 !important;
+    top: -12px !important;
+    transform: none !important;
+    opacity: 0;
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--flow-color), white 12%) 50%, transparent 100%) !important;
+    box-shadow:
+      0 0 10px color-mix(in srgb, var(--flow-color), transparent 10%),
+      0 0 2px rgba(255,255,255,.65) !important;
+    will-change: top, opacity !important;
+  }
+
+  .flowline .particle:nth-child(2) {
+    left: 1px !important;
+    width: 4px !important;
+  }
+
+  .flowline .particle:nth-child(3) {
+    left: 1px !important;
+    width: 4px !important;
+  }
+
+  .flowline.dir-right.is-active .particle {
+    animation-name: ng-flow-down-portrait-v2 !important;
+  }
+
+  .flowline.dir-left.is-active .particle {
+    animation-name: ng-flow-up-portrait-v2 !important;
+  }
+
+  .arrow {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 14px !important;
+    min-width: 14px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    margin: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+    align-self: center !important;
+  }
+
+  .arrow .ico {
+    display: inline-block !important;
+    transform: rotate(90deg) !important;
+    transform-origin: center !important;
+  }
+}
