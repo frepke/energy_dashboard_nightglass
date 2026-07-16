@@ -4850,3 +4850,231 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     overflow: hidden !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.3 — iPhone portrait flow + card correction
+   --------------------------------------------------------------------------
+   - Restore a desktop-like horizontal flow row on iPhone portrait.
+   - Fix oversized day-stat cards by disabling the legacy inline SVG history
+     layer and enforcing a compact fixed card height.
+   ========================================================================== */
+
+/* Legacy inline history SVG is no longer used. On mobile Safari it can still
+   participate in layout and stretch the card far beyond the intended height. */
+.card-history-bg {
+  display: none !important;
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  /* Keep the live flow visually close to the desktop composition. */
+  .energy-panel {
+    gap: 8px !important;
+  }
+
+  .flow {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(22px, .24fr)
+      minmax(0, 1fr)
+      minmax(22px, .24fr)
+      minmax(0, 1fr) !important;
+    grid-template-rows: minmax(92px, auto) !important;
+    align-items: stretch !important;
+    gap: 5px !important;
+    overflow: hidden !important;
+  }
+
+  .flow .node,
+  .node {
+    min-height: 92px !important;
+    height: 92px !important;
+    padding: 10px 8px !important;
+    gap: 8px !important;
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    align-items: center !important;
+    border-radius: 16px !important;
+  }
+
+  .node-icon,
+  .node .icon,
+  .flow .icon {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .node .icon svg,
+  .flow .icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .node .label {
+    font-size: 7px !important;
+    letter-spacing: .16em !important;
+    margin-top: 0 !important;
+  }
+
+  .node .value {
+    font-size: clamp(17px, 5.6vw, 24px) !important;
+    line-height: 1.02 !important;
+    white-space: nowrap !important;
+  }
+
+  .node .sub {
+    font-size: 8px !important;
+    line-height: 1.06 !important;
+    white-space: nowrap !important;
+  }
+
+  .flowbox {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 1px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    transform: none !important;
+    overflow: hidden !important;
+  }
+
+  .flow-caption {
+    display: none !important;
+  }
+
+  .flowline {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 6px !important;
+    min-height: 6px !important;
+    margin: 0 !important;
+    border-radius: var(--radius-pill) !important;
+    overflow: hidden !important;
+    contain: paint !important;
+  }
+
+  .flowline::before {
+    inset: 0 !important;
+    background:
+      linear-gradient(90deg, transparent 0%, rgba(255,255,255,.10) 45%, transparent 100%),
+      linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--flow-color), transparent 74%) 50%, transparent 100%) !important;
+  }
+
+  .flowline .particle {
+    top: 50% !important;
+    left: -30px !important;
+    width: 22px !important;
+    height: 4px !important;
+    margin-top: -2px !important;
+    margin-left: 0 !important;
+    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--flow-color), white 10%) 50%, transparent 100%) !important;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--flow-color), transparent 26%) !important;
+    border-radius: var(--radius-pill) !important;
+  }
+
+  .flowline.dir-right.is-active .particle {
+    animation-name: flow-right !important;
+  }
+
+  .flowline.dir-left.is-active .particle {
+    animation-name: flow-left !important;
+  }
+
+  .arrow {
+    width: 100% !important;
+    min-height: 12px !important;
+    height: 12px !important;
+    margin: 0 !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+
+  .arrow .ico {
+    transform: none !important;
+  }
+
+  /* Daily statistic cards: 2 columns, compact fixed height, desktop-like. */
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+  }
+
+  .card,
+  .card[data-history-card] {
+    min-height: 126px !important;
+    height: 126px !important;
+    max-height: 126px !important;
+    padding: 9px 10px !important;
+    overflow: hidden !important;
+  }
+
+  .card[data-history-card] {
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .card[data-history-card] .card-metric {
+    margin-top: 4px !important;
+    padding-bottom: 0 !important;
+  }
+
+  .card-topline {
+    min-height: 16px !important;
+    gap: 5px !important;
+  }
+
+  .card-icon {
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 6px !important;
+  }
+
+  .card h3 {
+    font-size: 9px !important;
+    letter-spacing: .08em !important;
+  }
+
+  .card-metric > strong,
+  .card strong,
+  .card .value {
+    font-size: clamp(16px, 5vw, 21px) !important;
+    line-height: 1.02 !important;
+  }
+
+  .card-grid .card-metric > strong,
+  .card-grid strong {
+    font-size: clamp(13px, 4vw, 17px) !important;
+    line-height: 1.06 !important;
+  }
+
+  .card-metric > small,
+  .card > small:not(.price-line):not(.solar-price):not(.gas-price) {
+    font-size: 8px !important;
+    line-height: 1.14 !important;
+  }
+
+  .card-corner-detail,
+  .card[data-history-card] > .price-line,
+  .card[data-history-card] > .solar-price,
+  .card[data-history-card] > .gas-price {
+    right: 7px !important;
+    bottom: 7px !important;
+    height: 16px !important;
+    min-height: 16px !important;
+    padding: 0 5px !important;
+    font-size: 7px !important;
+    gap: 3px !important;
+  }
+
+  .history-watermark.is-visible {
+    opacity: .14 !important;
+  }
+}
