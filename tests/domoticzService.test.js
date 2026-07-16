@@ -557,5 +557,66 @@ describe('domoticzService', () => {
       await expect(service.cachedFetch('http://host/q', 5_000)).resolves.toEqual({ version: 2 });
       expect(globalThis.fetch).toHaveBeenCalledTimes(2);
     });
+
+    it('deduplicates concurrent cache-miss requests for the same URL', async () => {
+      vi.spyOn(Date, 'now').mockImplementation(() => 1_000);
+
+      let resolveRequest;
+      const pendingResponse = new Promise(res => { resolveRequest = res; });
+      globalThis.fetch.mockReturnValue(pendingResponse);
+
+      const service = await loadService();
+
+      // Launch two concurrent requests before the first one resolves.
+      const p1 = service.cachedFetch('http://host/dedup', 55_000);
+      const p2 = service.cachedFetch('http://host/dedup', 55_000);
+
+      // Both promises must be the same object (deduplicated).
+      expect(p1).toBe(p2);
+
+      // Resolve the single underlying fetch.
+      resolveRequest(responseJson({ value: 42 }));
+
+      await expect(p1).resolves.toEqual({ value: 42 });
+      await expect(p2).resolves.toEqual({ value: 42 });
+
+      // Only one network request should have been made.
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not deduplicate uncached (ttl=0) concurrent requests', async () => {
+      vi.spyOn(Date, 'now').mockImplementation(() => 1_000);
+
+      globalThis.fetch
+        .mockResolvedValueOnce(responseJson({ v: 1 }))
+        .mockResolvedValueOnce(responseJson({ v: 2 }));
+
+      const service = await loadService();
+
+      const p1 = service.cachedFetch('http://host/live', 0);
+      const p2 = service.cachedFetch('http://host/live', 0);
+
+      // Force-fresh calls must not be deduplicated.
+      expect(p1).not.toBe(p2);
+      await expect(p1).resolves.toEqual({ v: 1 });
+      await expect(p2).resolves.toEqual({ v: 2 });
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('releases the in-flight entry after a failed request so a retry is possible', async () => {
+      vi.spyOn(Date, 'now').mockImplementation(() => 1_000);
+
+      globalThis.fetch
+        .mockResolvedValueOnce(responseJson({}, 503, 'Service Unavailable'))
+        .mockResolvedValueOnce(responseJson({ ok: true }));
+
+      const service = await loadService();
+
+      await expect(service.cachedFetch('http://host/retry', 55_000)).rejects.toThrow('HTTP 503');
+
+      // After failure the in-flight entry must be gone, allowing a retry.
+      await expect(service.cachedFetch('http://host/retry', 55_000)).resolves.toEqual({ ok: true });
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    });
   });
 });

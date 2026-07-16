@@ -105,6 +105,7 @@ let weatherRefreshTimeoutId = null;
 const refreshController = createRefreshController(setStatus);
 const websocketController = createWebSocketController({
   refreshAll: refreshController.refreshAll,
+  refreshDistribution: refreshController.refreshDistributionOnly,
   setStatus,
   getForecastDeviceId: refreshController.getForecastDeviceId,
   onOpen: () => {

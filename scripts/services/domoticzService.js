@@ -49,6 +49,16 @@ export const CACHE_SWEEP_INTERVAL = 5 * 60_000;
 /** @type {Map<string, CacheEntry>} */
 const _cache = new Map();
 
+/**
+ * In-flight request registry — maps cache key → pending Promise.
+ * When a cache miss triggers a network request, the Promise is stored here
+ * until it settles. A concurrent cache miss for the same key will reuse the
+ * existing Promise instead of spawning a duplicate network request.
+ *
+ * @type {Map<string, Promise<*>>}
+ */
+const _inflight = new Map();
+
 let _sweepTimer = null;
 
 /**
@@ -128,10 +138,12 @@ export function getCacheStats() {
 
 /**
  * Removes all entries from the cache and cancels the pending sweep timer.
+ * Also clears any in-flight request registry so stale promises don't persist.
  * Intended for use in tests and after a hard configuration reload.
  */
 export function clearCache() {
   _cache.clear();
+  _inflight.clear();
   if (_sweepTimer !== null) {
     clearTimeout(_sweepTimer);
     _sweepTimer = null;
@@ -220,6 +232,9 @@ function fetchWithTimeout(url, options, timeoutMs) {
  * A cache miss performs a real fetch, stores the response, and starts the
  * sweep timer if it is not already running.
  *
+ * Concurrent cache misses for the same key are deduplicated: only one network
+ * request is made and all callers share the same Promise.
+ *
  * @param {string} url               - URL to fetch (also used as cache key by default).
  * @param {number} [ttl=CACHE_TTL]   - How long the response stays valid (ms).
  * @param {object} [options={}]      - Passed to `fetch()`.
@@ -250,9 +265,13 @@ export function cachedFetch(url, ttl = CACHE_TTL, options = {}) {
       _cache.set(key, hit);
       return Promise.resolve(hit.data);
     }
+
+    // Deduplicate concurrent cache misses: reuse any in-flight request.
+    const pending = _inflight.get(key);
+    if (pending) return pending;
   }
 
-  return fetchWithTimeout(url, Object.assign({ cache: 'no-store' }, fetchOpts), timeoutMs)
+  const request = fetchWithTimeout(url, Object.assign({ cache: 'no-store' }, fetchOpts), timeoutMs)
     .then(r => {
       if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
       return r.json();
@@ -260,7 +279,13 @@ export function cachedFetch(url, ttl = CACHE_TTL, options = {}) {
     .then(data => {
       if (useCache) cacheSet(key, data, ttlMs);
       return data;
+    })
+    .finally(() => {
+      _inflight.delete(key);
     });
+
+  if (useCache) _inflight.set(key, request);
+  return request;
 }
 
 // ---- Text variant of cachedFetch (for HTML/plain-text endpoints) --------
@@ -281,9 +306,13 @@ export function cachedFetchText(url, ttl = CACHE_TTL, options = {}) {
       _cache.set(key, hit);
       return Promise.resolve(hit.data);
     }
+
+    // Deduplicate concurrent cache misses: reuse any in-flight request.
+    const pending = _inflight.get(key);
+    if (pending) return pending;
   }
 
-  return fetchWithTimeout(url, Object.assign({ cache: 'no-store' }, fetchOpts), timeoutMs)
+  const request = fetchWithTimeout(url, Object.assign({ cache: 'no-store' }, fetchOpts), timeoutMs)
     .then(r => {
       if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
       return r.text();
@@ -291,7 +320,13 @@ export function cachedFetchText(url, ttl = CACHE_TTL, options = {}) {
     .then(data => {
       if (useCache) cacheSet(key, data, ttlMs);
       return data;
+    })
+    .finally(() => {
+      _inflight.delete(key);
     });
+
+  if (useCache) _inflight.set(key, request);
+  return request;
 }
 
 // ---- URL helpers ----

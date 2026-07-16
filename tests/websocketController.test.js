@@ -27,8 +27,8 @@ class FakeWebSocket {
     if (this.onopen) this.onopen();
   }
 
-  message() {
-    if (this.onmessage) this.onmessage({ data: '{}' });
+  message(data = '{}') {
+    if (this.onmessage) this.onmessage({ data });
   }
 
   close() {
@@ -122,5 +122,86 @@ describe('websocketController', () => {
 
     socket.close();
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls refreshDistribution instead of refreshAll when pushed device is not the forecast device', async () => {
+    const now = 10_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+
+    const { createWebSocketController } = await loadController();
+    const refreshAll = vi.fn();
+    const refreshDistribution = vi.fn();
+
+    const ctrl = createWebSocketController({
+      refreshAll,
+      refreshDistribution,
+      setStatus: vi.fn(),
+      getForecastDeviceId: () => '99',
+    });
+
+    ctrl.startWebSocket();
+    const socket = FakeWebSocket.instances[0];
+    socket.open();
+    await Promise.resolve();
+
+    // Push for a distribution device (idx=1) — not the forecast device (idx=99).
+    socket.message(JSON.stringify({ idx: '1', name: 'P1 Energy' }));
+
+    expect(refreshDistribution).toHaveBeenCalledTimes(1);
+    expect(refreshAll).not.toHaveBeenCalled();
+  });
+
+  it('calls refreshAll when the pushed device is the forecast device', async () => {
+    const now = 10_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+
+    const { createWebSocketController } = await loadController();
+    const refreshAll = vi.fn();
+    const refreshDistribution = vi.fn();
+
+    const ctrl = createWebSocketController({
+      refreshAll,
+      refreshDistribution,
+      setStatus: vi.fn(),
+      getForecastDeviceId: () => '99',
+    });
+
+    ctrl.startWebSocket();
+    const socket = FakeWebSocket.instances[0];
+    socket.open();
+    await Promise.resolve();
+
+    // Push for the forecast device (idx=99).
+    socket.message(JSON.stringify({ idx: '99', name: 'Price Forecast' }));
+
+    expect(refreshAll).toHaveBeenCalledWith('ws');
+    expect(refreshDistribution).not.toHaveBeenCalled();
+  });
+
+  it('falls back to refreshAll when the message payload cannot be parsed', async () => {
+    const now = 10_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+
+    const { createWebSocketController } = await loadController();
+    const refreshAll = vi.fn();
+    const refreshDistribution = vi.fn();
+
+    const ctrl = createWebSocketController({
+      refreshAll,
+      refreshDistribution,
+      setStatus: vi.fn(),
+      getForecastDeviceId: () => '99',
+    });
+
+    ctrl.startWebSocket();
+    const socket = FakeWebSocket.instances[0];
+    socket.open();
+    await Promise.resolve();
+
+    // Invalid JSON payload.
+    socket.message('not-json');
+
+    expect(refreshAll).toHaveBeenCalledWith('ws');
+    expect(refreshDistribution).not.toHaveBeenCalled();
   });
 });
