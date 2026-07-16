@@ -396,10 +396,12 @@ describe('refreshPrices', () => {
     mockApiLive.mockResolvedValue(forecast);
     const { ctrl } = makeController();
     await ctrl.refreshAll('poll');
+    // The second poll in the same hour skips refreshPrices (hour-boundary cadence),
+    // so renderBars, pushPriceHistory, and setElecBadge are not called again.
     await ctrl.refreshAll('poll');
     expect(renderBars).toHaveBeenCalledTimes(1);
     expect(pushPriceHistory).toHaveBeenCalledTimes(1);
-    expect(setElecBadge).toHaveBeenCalledTimes(2);
+    expect(setElecBadge).toHaveBeenCalledTimes(1);
   });
 
   it('calls setGasBadge when gas_now present', async () => {
@@ -458,6 +460,33 @@ describe('refreshPrices', () => {
     const { ctrl } = makeController();
     await ctrl.refreshAll('poll');
     expect(renderBars).toHaveBeenCalled();
+  });
+
+  it('skips refreshPrices on subsequent poll ticks within the same hour', async () => {
+    mockFindForecast.mockResolvedValue('42');
+    mockApiLive.mockResolvedValue(makeForecast([makeHour(0, 0.25)]));
+    const { ctrl } = makeController();
+
+    // First poll: prices fetched because lastPriceFetchHourTs === 0.
+    await ctrl.refreshAll('poll');
+    expect(mockApiLive).toHaveBeenCalledTimes(1);
+
+    // Second poll in the same hour: prices should be skipped.
+    await ctrl.refreshAll('poll');
+    expect(mockApiLive).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-fetches prices when a WebSocket push arrives regardless of hour boundary', async () => {
+    mockFindForecast.mockResolvedValue('42');
+    mockApiLive.mockResolvedValue(makeForecast([makeHour(0, 0.25)]));
+    const { ctrl } = makeController();
+
+    await ctrl.refreshAll('poll');
+    expect(mockApiLive).toHaveBeenCalledTimes(1);
+
+    // A 'ws' reason must always re-fetch prices.
+    await ctrl.refreshAll('ws');
+    expect(mockApiLive).toHaveBeenCalledTimes(2);
   });
 });
 

@@ -11,6 +11,7 @@ import { t } from '../i18n.js';
 
 export function createWebSocketController({
   refreshAll,
+  refreshDistribution,
   setStatus,
   getForecastDeviceId,
   onOpen,
@@ -44,6 +45,23 @@ export function createWebSocketController({
     }
   }
 
+  /**
+   * Parses a raw WebSocket message string from Domoticz and returns the device
+   * idx as a string, or null when the payload cannot be parsed or has no idx.
+   *
+   * @param {string} raw - The `event.data` string from the WebSocket message.
+   * @returns {string|null}
+   */
+  function parseWsIdx(raw) {
+    try {
+      const msg = JSON.parse(raw);
+      const idx = msg && (msg.idx ?? msg.ID ?? msg.id);
+      return idx !== undefined && idx !== null ? String(idx) : null;
+    } catch {
+      return null;
+    }
+  }
+
   function startWebSocket() {
     if (!CFG.ws || !('WebSocket' in window)) return false;
     try {
@@ -60,10 +78,22 @@ export function createWebSocketController({
         if (typeof onOpen === 'function') onOpen();
         primeWebSocketSubscriptions();
       };
-      socket.onmessage = () => {
+      socket.onmessage = (event) => {
         const n = Date.now();
-        if (n - lastWsRefresh > 750) {
-          lastWsRefresh = n;
+        if (n - lastWsRefresh <= 750) return;
+        lastWsRefresh = n;
+
+        // Delta optimisation: when the pushed device is not the forecast device
+        // only the live distribution values need updating.  Fall back to a full
+        // refresh when the payload cannot be parsed or when no delta handler is
+        // configured.
+        const pushedIdx = parseWsIdx(event && event.data);
+        const forecastIdx = getForecastDeviceId ? String(getForecastDeviceId() || '') : '';
+        const isForecastPush = !pushedIdx || !forecastIdx || pushedIdx === forecastIdx;
+
+        if (!isForecastPush && typeof refreshDistribution === 'function') {
+          refreshDistribution('ws');
+        } else {
           refreshAll('ws');
         }
       };

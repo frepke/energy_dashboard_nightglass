@@ -66,6 +66,8 @@ export function createRefreshController(setStatus) {
   let lastPriceView = null;
   let lastGasNow = null;
   let lastForecastUpdated = null;
+  /** Hour timestamp (ms) at which prices were last fetched; 0 = never. */
+  let lastPriceFetchHourTs = 0;
 
   function renderUpdatedLabel() {
     const el = $('#updated');
@@ -298,18 +300,61 @@ export function createRefreshController(setStatus) {
         ok = false;
         msg.push(e.message);
       }
-      try {
-        await refreshPrices();
-        if (forecastDeviceId) msg.push('prijzen');
-      } catch (e) {
-        ok = false;
-        msg.push(e.message);
+
+      // Only fetch the pricing forecast when the current hour has changed since
+      // the last successful fetch.  This avoids redundant API calls on every
+      // fast-cadence poll tick while still updating the chart when a new price
+      // hour begins (or on the very first run / after a forced 'ws' push).
+      const now = new Date();
+      now.setMinutes(0, 0, 0);
+      const currentHourTs = now.getTime();
+      const shouldFetchPrices = reason === 'ws' || lastPriceFetchHourTs !== currentHourTs;
+
+      if (shouldFetchPrices) {
+        try {
+          await refreshPrices();
+          lastPriceFetchHourTs = currentHourTs;
+          if (forecastDeviceId) msg.push('prijzen');
+        } catch (e) {
+          ok = false;
+          msg.push(e.message);
+        }
       }
+
       setStatus(
         ok,
         (reason === 'ws' ? t('status-push-updated') : t('status-live-updated'))
           + formatTime(new Date())
           + (ok ? '' : ' - ' + msg.join(' / ')),
+      );
+    } finally {
+      refreshBusy = false;
+    }
+  }
+
+  /**
+   * Refreshes only live distribution data (P1, solar, gas) without fetching
+   * the pricing forecast.  Intended for WebSocket delta pushes where the pushed
+   * device is not the forecast device, reducing redundant API calls.
+   *
+   * Shares the `refreshBusy` guard with `refreshAll` so concurrent calls are
+   * dropped safely.
+   */
+  async function refreshDistributionOnly() {
+    if (refreshBusy) return;
+    refreshBusy = true;
+    let ok = true;
+    let errMsg = '';
+    try {
+      try {
+        await refreshDistribution();
+      } catch (e) {
+        ok = false;
+        errMsg = e.message;
+      }
+      setStatus(
+        ok,
+        t('status-push-updated') + formatTime(new Date()) + (ok ? '' : ' - ' + errMsg),
       );
     } finally {
       refreshBusy = false;
@@ -364,6 +409,7 @@ export function createRefreshController(setStatus) {
 
   return {
     refreshAll,
+    refreshDistributionOnly,
     startPolling,
     stopPolling,
     getForecastDeviceId,

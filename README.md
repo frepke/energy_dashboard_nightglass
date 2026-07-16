@@ -70,7 +70,7 @@ De grafiek staat over het volledige tegeloppervlak op de achtergrond. Tekst en b
 
 Er worden geen willekeurige of kunstmatige meetwaarden gemaakt. Alleen ontbrekende afgeleide reeksen worden berekend, en uitsluitend uit echte, op tijd uitgelijnde Domoticz-punten. Bij aanwijzen van een tegel vermeldt de browsertooltip of de reeks rechtstreeks uit Domoticz komt of is afgeleid, hoeveel punten zijn gebruikt en wanneer de historie is opgehaald.
 
-Om Domoticz niet onnodig te belasten worden de achtergrondgrafieken maximaal eenmaal per tien minuten ververst. De normale livewaarden blijven onafhankelijk daarvan via polling of WebSocket bijgewerkt worden. Oude lokale opslag uit de 60-minutenimplementatie wordt bij de eerste start opgeruimd.
+Om Domoticz niet onnodig te belasten worden de achtergrondgrafieken maximaal eenmaal per vijf minuten ververst. De normale livewaarden blijven onafhankelijk daarvan via polling of WebSocket bijgewerkt worden. Oude lokale opslag uit de 60-minutenimplementatie wordt bij de eerste start opgeruimd.
 
 De drie grote energietegels tonen vanaf 2.7 uitsluitend unieke live-informatie:
 
