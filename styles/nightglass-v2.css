@@ -5185,3 +5185,156 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     font-size: 10px !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.5 — portrait flow that actually fits
+   --------------------------------------------------------------------------
+   A three-column desktop flow cannot remain readable on a 390–430px portrait
+   viewport. Portrait now uses a compact vertical sequence with full-width
+   nodes and native vertical connectors. Landscape keeps the 3x2 card grid.
+   ========================================================================== */
+
+@keyframes ng-flow-down-portrait {
+  0%   { transform: translateY(-18px); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(22px); opacity: 0; }
+}
+
+@keyframes ng-flow-up-portrait {
+  0%   { transform: translateY(22px); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(-18px); opacity: 0; }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .flow {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 76px 26px 76px 26px 76px !important;
+    gap: 0 !important;
+    align-items: stretch !important;
+    overflow: hidden !important;
+  }
+
+  .flow .node,
+  .node {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 76px !important;
+    height: 76px !important;
+    padding: 9px 14px !important;
+    display: grid !important;
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: center !important;
+    border-radius: 16px !important;
+  }
+
+  .node-icon,
+  .node .icon,
+  .flow .icon {
+    width: 46px !important;
+    height: 46px !important;
+  }
+
+  .node-text {
+    min-width: 0 !important;
+    gap: 2px !important;
+    justify-items: start !important;
+    text-align: left !important;
+  }
+
+  .node .label {
+    font-size: 8px !important;
+    letter-spacing: .15em !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .node .value {
+    font-size: clamp(22px, 7vw, 29px) !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .node .sub {
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .flowbox {
+    position: relative !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 26px !important;
+    min-height: 26px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: grid !important;
+    grid-template-rows: 17px 9px !important;
+    align-items: center !important;
+    justify-items: center !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .flowline {
+    position: relative !important;
+    width: 6px !important;
+    min-width: 6px !important;
+    max-width: 6px !important;
+    height: 17px !important;
+    min-height: 17px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: var(--radius-pill) !important;
+  }
+
+  .flowline::before {
+    background:
+      linear-gradient(180deg, transparent, rgba(255,255,255,.11), transparent),
+      linear-gradient(180deg, transparent, color-mix(in srgb, var(--flow-color), transparent 70%), transparent) !important;
+  }
+
+  .flowline .particle {
+    top: 50% !important;
+    left: 1px !important;
+    width: 4px !important;
+    height: 10px !important;
+    margin: -5px 0 0 !important;
+    border-radius: var(--radius-pill) !important;
+    background: linear-gradient(180deg, transparent, var(--flow-color) 50%, transparent) !important;
+    box-shadow: 0 0 10px var(--flow-color) !important;
+  }
+
+  .flowline.dir-right.is-active .particle {
+    animation-name: ng-flow-down-portrait !important;
+  }
+
+  .flowline.dir-left.is-active .particle {
+    animation-name: ng-flow-up-portrait !important;
+  }
+
+  .arrow {
+    width: 100% !important;
+    height: 9px !important;
+    min-height: 9px !important;
+    margin: 0 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+
+  .arrow .ico {
+    display: inline-block !important;
+    transform: rotate(90deg) !important;
+    transform-origin: center !important;
+  }
+}
