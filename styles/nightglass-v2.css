@@ -4740,3 +4740,113 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.2 — compact iPhone portrait layout
+   ========================================================================== */
+@media (max-width: 560px) and (orientation: portrait) {
+  .dashboard {
+    padding-top: calc(7px + env(safe-area-inset-top, 0px)) !important;
+    padding-right: calc(7px + env(safe-area-inset-right, 0px)) !important;
+    padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-left: calc(7px + env(safe-area-inset-left, 0px)) !important;
+  }
+
+  .energy-panel {
+    gap: 5px !important;
+    padding: 7px !important;
+  }
+
+  .section-heading {
+    min-height: 20px !important;
+  }
+
+  .flow {
+    grid-template-rows: 78px 32px 78px 32px 78px !important;
+  }
+
+  .flow .node,
+  .node {
+    min-height: 78px !important;
+    height: 78px !important;
+    padding: 8px 11px !important;
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    border-radius: 15px !important;
+  }
+
+  .node-icon,
+  .node .icon,
+  .flow .icon {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .node .label {
+    font-size: 8px !important;
+  }
+
+  .node .value {
+    font-size: clamp(21px, 7vw, 27px) !important;
+  }
+
+  .node .sub {
+    font-size: 9px !important;
+  }
+
+  .flowbox {
+    width: 26px !important;
+    min-width: 26px !important;
+    max-width: 26px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    grid-template-rows: 22px 10px !important;
+  }
+
+  .flowline {
+    width: 7px !important;
+    min-width: 7px !important;
+    max-width: 7px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+  }
+
+  .flowline .particle {
+    width: 5px !important;
+    height: 18px !important;
+    margin-left: -2.5px !important;
+  }
+
+  .arrow {
+    height: 10px !important;
+    margin: 0 !important;
+    font-size: 11px !important;
+  }
+
+  .prices-panel {
+    min-height: 310px !important;
+    height: 310px !important;
+    padding: 7px !important;
+  }
+
+  .pricesHeader {
+    gap: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .usage-window-selector {
+    gap: 4px !important;
+  }
+
+  .usage-window-selector button {
+    height: 26px !important;
+    min-width: 28px !important;
+    padding-inline: 6px !important;
+  }
+
+  .chart {
+    min-height: 220px !important;
+    height: 220px !important;
+    overflow: hidden !important;
+  }
+}
