@@ -4551,3 +4551,192 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     animation: none !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.1 — iPhone flow layout fix
+   --------------------------------------------------------------------------
+   iOS Safari paints transformed connector elements in a separate layer. The
+   previous mobile rule rotated a 100px-wide horizontal connector by 90deg;
+   its visual box then overlapped the neighbouring nodes while its layout box
+   stayed horizontal. These final rules use a native vertical connector in
+   portrait and a compact native horizontal connector in landscape.
+   ========================================================================== */
+
+@keyframes flow-down-mobile {
+  0%   { top: -34px; opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { top: calc(100% + 34px); opacity: 0; }
+}
+
+@keyframes flow-up-mobile {
+  0%   { top: calc(100% + 34px); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { top: -34px; opacity: 0; }
+}
+
+/* Phone portrait: compact stacked nodes with real vertical connectors. */
+@media (max-width: 560px) and (orientation: portrait) {
+  .energy-panel {
+    grid-template-rows: auto auto auto !important;
+    gap: 7px !important;
+    overflow: hidden !important;
+    contain: paint;
+  }
+
+  .flow {
+    position: relative;
+    isolation: isolate;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto 54px auto 54px auto !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .flow .node,
+  .node {
+    z-index: 2;
+    min-height: 96px !important;
+    height: auto !important;
+    padding: 12px 14px !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    align-items: center !important;
+  }
+
+  .flowbox {
+    position: relative !important;
+    z-index: 1;
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: grid !important;
+    grid-template-rows: 1fr auto !important;
+    align-items: center !important;
+    justify-items: center !important;
+    gap: 0 !important;
+    transform: none !important;
+    overflow: hidden !important;
+  }
+
+  .flow-caption { display: none !important; }
+
+  .flowline {
+    position: relative !important;
+    width: 8px !important;
+    min-width: 8px !important;
+    max-width: 8px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    border-radius: var(--radius-pill) !important;
+    overflow: hidden !important;
+    contain: paint;
+  }
+
+  .flowline::before {
+    background:
+      linear-gradient(180deg, transparent, rgba(255,255,255,.12), transparent),
+      linear-gradient(180deg, transparent, color-mix(in srgb, var(--flow-color), transparent 72%), transparent) !important;
+  }
+
+  .flowline .particle {
+    left: 50% !important;
+    top: -34px;
+    width: 6px !important;
+    height: 30px !important;
+    margin: 0 0 0 -3px !important;
+    background: linear-gradient(180deg, transparent, var(--flow-color) 50%, transparent) !important;
+  }
+
+  .flowline.dir-right.is-active .particle {
+    animation-name: flow-down-mobile !important;
+  }
+
+  .flowline.dir-left.is-active .particle {
+    animation-name: flow-up-mobile !important;
+  }
+
+  .arrow {
+    height: 14px !important;
+    margin: -1px 0 0 !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    overflow: visible !important;
+  }
+
+  .arrow .ico {
+    display: inline-block;
+    transform: rotate(90deg);
+    transform-origin: center;
+  }
+}
+
+/* Phone landscape: keep the complete flow on one compact row. */
+@media (max-width: 899px) and (orientation: landscape) {
+  .energy-panel {
+    grid-template-rows: auto minmax(92px, auto) auto !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+    contain: paint;
+  }
+
+  .flow {
+    position: relative;
+    isolation: isolate;
+    grid-template-columns:
+      minmax(126px, 1fr)
+      minmax(42px, .36fr)
+      minmax(126px, 1fr)
+      minmax(42px, .36fr)
+      minmax(126px, 1fr) !important;
+    grid-template-rows: minmax(92px, auto) !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+  }
+
+  .flow .node,
+  .node {
+    min-height: 92px !important;
+    padding: 8px 10px !important;
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+  }
+
+  .flowbox {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 2px !important;
+    align-self: center !important;
+    transform: none !important;
+    overflow: hidden !important;
+  }
+
+  .flow-caption { display: none !important; }
+
+  .flowline {
+    width: 100% !important;
+    height: 8px !important;
+    min-height: 8px !important;
+    overflow: hidden !important;
+    contain: paint;
+  }
+
+  .arrow {
+    margin-top: 5px !important;
+    font-size: 14px !important;
+  }
+
+  .cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
