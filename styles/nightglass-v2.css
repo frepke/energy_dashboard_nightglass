@@ -5450,3 +5450,44 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     transform-origin: center !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.7 — portrait particle motion hard-fix
+   --------------------------------------------------------------------------
+   Safari on iPhone did not reliably animate the portrait particle spans when
+   the animation name was only overridden in CSS. The JS now assigns explicit
+   portrait animation names, and the particles use transform-based motion.
+   ========================================================================== */
+
+@keyframes ng-flow-down-portrait-v3 {
+  0%   { transform: translateY(-12px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(14px); opacity: 0; }
+}
+
+@keyframes ng-flow-up-portrait-v3 {
+  0%   { transform: translateY(14px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-12px); opacity: 0; }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .flowline .particle,
+  .flowline .particle:nth-child(n) {
+    left: 1px !important;
+    top: 6px !important;
+    width: 4px !important;
+    height: 9px !important;
+    margin: 0 !important;
+    transform: translateY(-12px) !important;
+    transform-origin: center !important;
+    opacity: 0;
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--flow-color), white 14%) 50%, transparent 100%) !important;
+    box-shadow:
+      0 0 10px color-mix(in srgb, var(--flow-color), transparent 10%),
+      0 0 2px rgba(255,255,255,.68) !important;
+    will-change: transform, opacity !important;
+  }
+}
