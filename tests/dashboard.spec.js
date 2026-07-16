@@ -22,7 +22,7 @@ test.beforeEach(async ({ page }) => {
     const FIXED = new Date('2026-05-17T10:00:00Z').getTime();
     const _Date = Date;
     class MockDate extends _Date {
-      constructor(...args) { super(args.length ? args[0] : FIXED); }
+      constructor(...args) { super(...(args.length ? args : [FIXED])); }
       static now() { return FIXED; }
     }
     window.Date = MockDate;

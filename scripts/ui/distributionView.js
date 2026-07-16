@@ -12,6 +12,7 @@ import { setLowerPrice, renderLimitBadge } from './cards.js';
 import { renderGridTodayBreakdown }  from './gridCard.js';
 import { t }                         from '../i18n.js';
 
+
 /**
  * Renders all distribution-related DOM elements from a data snapshot.
  *
@@ -48,6 +49,20 @@ export function renderDistribution(d) {
   $('#localSolarW').textContent = t('on-site-prefix') + fmt.w(localSolarW);
   $('#solarNode').classList.toggle('is-off', solarW <= 5);
 
+
+  const gridFlowCaption = $('#gridFlowCaption');
+  const solarFlowCaption = $('#solarFlowCaption');
+  if (gridFlowCaption) {
+    gridFlowCaption.textContent = isImporting
+      ? `${t('flow-grid-short')} → ${t('flow-house-short')}`
+      : `${t('flow-grid-short')} ← ${t('flow-house-short')}`;
+  }
+  if (solarFlowCaption) {
+    solarFlowCaption.textContent = localSolarW > 5
+      ? `${t('flow-house-short')} ← ${t('flow-solar-short')}`
+      : `${t('flow-house-short')} ↔ ${t('flow-solar-short')}`;
+  }
+
   setIconIntensity($('#gridNode'),  Math.abs(gridNet), isImporting ? 1 : -1);
   setIconIntensity($('#houseNode'), houseW, 0);
   setIconIntensity($('#solarNode'), solarW, -1);
@@ -69,7 +84,7 @@ export function renderDistribution(d) {
   }
 
   // ---- Stat cards ----
-  const gridPriceColor = d.netToday > 0 ? 'var(--orange)' : (d.netToday < 0 ? 'var(--green)' : '#9fdcff');
+  const gridPriceColor = d.netToday > 0 ? 'var(--orange)' : (d.netToday < 0 ? 'var(--green)' : 'var(--blue-light)');
   renderGridTodayBreakdown($('#gridToday'), d.importToday, d.exportToday);
   $('#gridNet').textContent = t('net-prefix') + (d.netToday < 0 ? '↑' : '↓') + ' ' + fmt.kwh(Math.abs(d.netToday));
 
@@ -94,7 +109,7 @@ export function renderDistribution(d) {
   $('#gasToday').textContent = d.gasToday !== null ? fmt.m3(d.gasToday) : '--';
   setLowerPrice($('#gasPrice'), 'gas',
     d.gasPrice !== null && d.gasPrice !== undefined ? fmt.eur(d.gasPrice) : '--',
-    '#43b7ff');
+    'var(--blue-light)');
 }
 
 /**

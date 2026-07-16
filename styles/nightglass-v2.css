@@ -1,0 +1,4553 @@
+/* ========================================================================== 
+   NIGHTGLASS ENERGY DASHBOARD V2
+   --------------------------------------------------------------------------
+   One adaptive layout. No fixed 1920x1080 canvas, no transform scaling and no
+   absolute section heights. Desktop/landscape fills the viewport; portrait
+   layouts become a readable scrolling dashboard.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  --bg: #1b1d25;
+  --bg-deep: #14161d;
+  --bg-soft: #1e2029;
+  --surface: rgba(var(--surface-rgb), .88);
+  --surface-high: rgba(var(--surface-high-rgb), .94);
+  --surface-low: rgba(var(--page-rgb), .72);
+  --surface-solid: #23252f;
+  --surface-solid-high: #2a2b35;
+
+  --line: rgba(var(--muted-rgb), .17);
+  --line-strong: rgba(var(--muted-rgb), .28);
+  --line-soft: rgba(255, 255, 255, .065);
+
+  --text: #e2e4ed;
+  --text-strong: #f5f6fb;
+  --muted: rgba(var(--text-rgb), .68);
+  --soft: rgba(var(--text-rgb), .46);
+
+  --blue: #4e9af1;
+  --blue-light: #6db3f8;
+  --green: #4caf7d;
+  --lime: #6fcf97;
+  --solar: #f0a832;
+  --orange: #f0a832;
+  --red: #e05555;
+
+  /* RGB channels are updated at runtime from Nightglass/Domoticz settings. */
+  --page-rgb: 27, 29, 37;
+  --page-deep-rgb: 20, 22, 29;
+  --surface-rgb: 35, 37, 47;
+  --surface-high-rgb: 42, 43, 53;
+  --border-rgb: 51, 53, 74;
+  --muted-rgb: 176, 179, 198;
+  --text-rgb: 226, 228, 237;
+  --accent-rgb: 78, 154, 241;
+  --accent-light-rgb: 109, 179, 248;
+  --success-rgb: 76, 175, 125;
+  --warning-rgb: 240, 168, 50;
+  --danger-rgb: 224, 85, 85;
+
+  --radius-panel: 22px;
+  --radius-card: 16px;
+  --radius-inner: 14px;
+  --radius-pill: 999px;
+  --gap: 10px;
+
+  --shadow-panel:
+    0 18px 48px rgba(0, 0, 0, .27),
+    inset 0 1px 0 rgba(255, 255, 255, .065);
+  --shadow-card:
+    0 10px 24px rgba(0, 0, 0, .18),
+    inset 0 1px 0 rgba(255, 255, 255, .052);
+
+  --dashboard-total-scale: 1;
+  --dashboard-fit-scale: 1;
+  --zoom-scale: 1;
+  --panel-padding: 0;
+  --card-height: auto;
+  --chart-height: auto;
+
+  --z-chart-dayline: 6;
+  --z-chart-day-label: 7;
+  --z-hoverline: 100;
+  --z-tooltip: 110;
+  --z-modal: 1000;
+  --z-kiosk-overlay: 2000;
+  --z-kiosk-controls: 2010;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #eef1f6;
+  --bg-deep: #e5e9f0;
+  --bg-soft: #f6f7fa;
+  --surface: rgba(255, 255, 255, .88);
+  --surface-high: rgba(255, 255, 255, .96);
+  --surface-low: rgba(244, 246, 250, .84);
+  --surface-solid: #ffffff;
+  --surface-solid-high: #f5f6fa;
+  --line: rgba(var(--border-rgb), .16);
+  --line-strong: rgba(var(--border-rgb), .26);
+  --line-soft: rgba(var(--accent-rgb), .065);
+  --text: #1a1c24;
+  --text-strong: #101219;
+  --muted: rgba(var(--page-deep-rgb), .66);
+  --soft: rgba(var(--page-deep-rgb), .45);
+  --blue: #2a7de1;
+  --blue-light: #4e9af1;
+  --green: #2e8c58;
+  --lime: #4caf7d;
+  --solar: #c07818;
+  --orange: #c07818;
+  --red: #d63b3b;
+  --shadow-panel:
+    0 14px 34px rgba(var(--accent-rgb), .12),
+    inset 0 1px 0 rgba(255, 255, 255, .9);
+  --shadow-card:
+    0 8px 20px rgba(var(--accent-rgb), .10),
+    inset 0 1px 0 rgba(255, 255, 255, .95);
+}
+
+/* --------------------------------------------------------------------------
+   Canvas and base
+   -------------------------------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  display: block;
+  color: var(--text);
+  background:
+    radial-gradient(70vw 56vh at 5% -8%, rgba(var(--accent-rgb), .14), transparent 62%),
+    radial-gradient(56vw 48vh at 96% 8%, rgba(var(--success-rgb), .08), transparent 66%),
+    linear-gradient(145deg, var(--bg) 0%, var(--bg-deep) 72%);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, Arial, sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, .018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .014) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 0, #000 0%, transparent 80%);
+  opacity: .62;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(42vw 26vh at 50% -10%, rgba(255, 255, 255, .08), transparent 72%);
+}
+
+button,
+input,
+select,
+textarea { font: inherit; }
+
+button { color: inherit; }
+
+svg { display: block; }
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.dashboard {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 10px 16px 14px !important;
+  display: grid !important;
+  grid-template-rows: 40px minmax(0, 1fr);
+  gap: var(--gap);
+  overflow: hidden !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.dashboard-content {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows:
+    clamp(148px, 20vh, 208px)
+    clamp(58px, 7.1vh, 76px)
+    clamp(258px, 31.5vh, 344px)
+    minmax(168px, 1fr);
+  gap: var(--gap);
+}
+
+.panel {
+  position: relative !important;
+  min-width: 0;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius-panel) !important;
+  background:
+    radial-gradient(760px 260px at 10% -18%, rgba(var(--accent-rgb), .09), transparent 66%),
+    linear-gradient(145deg, rgba(var(--surface-high-rgb), .93), rgba(var(--surface-rgb), .91) 50%, rgba(var(--page-rgb), .95)) !important;
+  box-shadow: var(--shadow-panel) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.12);
+  backdrop-filter: blur(24px) saturate(1.12);
+  transform: none !important;
+}
+
+.panel::before {
+  content: "" !important;
+  position: absolute;
+  inset: 0;
+  display: block !important;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .04), transparent 34%),
+    radial-gradient(60% 80% at 100% 0, rgba(255, 255, 255, .025), transparent 70%) !important;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.panel::after { display: none !important; }
+.panel > * { position: relative; z-index: 1; }
+.panel:hover { transform: none !important; }
+
+[data-theme="light"] .panel {
+  background:
+    radial-gradient(760px 260px at 10% -18%, rgba(var(--accent-rgb), .08), transparent 66%),
+    linear-gradient(145deg, rgba(255, 255, 255, .96), rgba(246, 247, 250, .92)) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Top bar
+   -------------------------------------------------------------------------- */
+
+.topbar {
+  min-width: 0;
+  min-height: 0 !important;
+  height: 40px;
+  margin: 0 !important;
+  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  color: var(--muted);
+}
+
+.topbar-left,
+.brand-lockup,
+.topbar-controls,
+.status {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.topbar-left { gap: 14px; }
+.brand-lockup { gap: 10px; }
+
+.brand-orb {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow:
+    0 0 0 5px rgba(var(--accent-rgb), .09),
+    0 0 18px rgba(var(--accent-rgb), .74);
+}
+
+h1.brand,
+.brand {
+  margin: 0 !important;
+  color: var(--text-strong);
+  font-size: 12px !important;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: .22em;
+  white-space: nowrap;
+  text-shadow: none;
+}
+
+.brand span {
+  color: var(--blue-light) !important;
+  text-shadow: 0 0 18px rgba(var(--accent-rgb), .55) !important;
+}
+
+.topbar-controls { gap: 7px; }
+
+.control-button,
+.theme-toggle,
+.lang-toggle,
+.weather-provider-toggle {
+  appearance: none;
+  min-width: 34px;
+  width: auto;
+  height: 34px;
+  margin: 0;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(var(--surface-high-rgb), .74) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055) !important;
+  color: var(--muted) !important;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, color .18s ease, transform .18s ease;
+}
+
+.theme-toggle {
+  width: 34px;
+  padding: 0;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+.control-button:hover,
+.theme-toggle:hover,
+.lang-toggle:hover,
+.weather-provider-toggle:hover {
+  transform: translateY(-1px) !important;
+  color: var(--text-strong) !important;
+  border-color: rgba(var(--accent-rgb), .42) !important;
+  background: rgba(var(--surface-high-rgb), .92) !important;
+}
+
+.control-button:focus-visible,
+.theme-toggle:focus-visible,
+.lang-toggle:focus-visible,
+.weather-provider-toggle:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.weather-provider-toggle[aria-pressed="true"] {
+  color: var(--green) !important;
+  border-color: rgba(var(--success-rgb), .38) !important;
+}
+
+.status {
+  max-width: min(42vw, 520px);
+  height: 34px;
+  padding: 0 13px;
+  gap: 9px;
+  flex: 0 1 auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: rgba(var(--surface-high-rgb), .72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#statusText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--solar);
+  box-shadow: 0 0 0 5px rgba(var(--warning-rgb), .08), 0 0 14px rgba(var(--warning-rgb), .62);
+}
+
+.status.is-live .status-dot {
+  background: var(--green);
+  box-shadow: 0 0 0 5px rgba(var(--success-rgb), .09), 0 0 15px rgba(var(--success-rgb), .72);
+}
+
+/* --------------------------------------------------------------------------
+   Unified weather / astronomy row
+   -------------------------------------------------------------------------- */
+
+.weather-hero {
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, .86fr)
+    minmax(0, .86fr)
+    minmax(0, 1.42fr)
+    minmax(0, 1.25fr);
+  gap: 9px;
+  padding: 9px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+.command-zone--celestial { display: contents !important; }
+
+.command-zone,
+.celestial-module {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  margin: 0 !important;
+  padding: clamp(11px, 1.1vw, 16px) !important;
+  overflow: hidden;
+  border: 1px solid rgba(var(--muted-rgb), .13) !important;
+  border-radius: var(--radius-card) !important;
+  background:
+    radial-gradient(120% 90% at 0 0, rgba(var(--accent-rgb), .055), transparent 58%),
+    rgba(var(--page-rgb), .50) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .038);
+}
+
+.command-zone::before,
+.command-zone::after,
+.celestial-module::before,
+.celestial-module::after { display: none !important; }
+
+.zone-accent {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, rgba(var(--accent-rgb), .84), transparent);
+  opacity: .58;
+}
+
+.zone-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.zone-kicker,
+.weather-section-label,
+.section-kicker {
+  min-width: 0;
+  color: var(--blue-light) !important;
+  font-size: clamp(8px, .58vw, 10px) !important;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zone-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--soft);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.zone-state i,
+.weather-live-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px rgba(var(--success-rgb), .72);
+}
+
+/* Clock */
+.command-zone--time {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.weather-time {
+  display: block;
+  max-width: 100%;
+  margin: 2px 0 0;
+  color: var(--text-strong) !important;
+  font-size: clamp(30px, 3.05vw, 50px) !important;
+  font-weight: 780;
+  line-height: .96 !important;
+  letter-spacing: -.045em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  text-shadow: none !important;
+}
+
+.weather-date {
+  max-width: 100%;
+  color: var(--muted) !important;
+  font-size: clamp(10px, .83vw, 13px) !important;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clock-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--soft);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.clock-footer > span:not(.clock-separator) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clock-separator {
+  width: 3px;
+  height: 3px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+/* Sun */
+.celestial-module--sun {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
+.sun-layout {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: clamp(36px, 3.2vw, 52px) minmax(0, 1fr);
+  gap: clamp(8px, .9vw, 14px);
+  align-items: center;
+}
+
+.weather-section-icon--sun {
+  width: clamp(36px, 3.2vw, 52px) !important;
+  height: clamp(36px, 3.2vw, 52px) !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center;
+  border: 1px solid rgba(var(--warning-rgb), .24) !important;
+  border-radius: 50%;
+  background: rgba(var(--warning-rgb), .075) !important;
+  color: var(--solar) !important;
+  box-shadow: 0 0 20px rgba(var(--warning-rgb), .09), inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+
+.weather-section-icon--sun svg {
+  width: 56% !important;
+  height: 56% !important;
+  fill: currentColor;
+  stroke: currentColor;
+  overflow: visible;
+}
+
+.weather-section-icon--sun .stroke {
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.weather-sun {
+  min-width: 0;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sun-stat {
+  min-width: 0;
+  padding-left: 9px;
+  border-left: 1px solid var(--line-soft);
+}
+
+.sun-label {
+  max-width: 100%;
+  color: var(--soft) !important;
+  font-size: clamp(8px, .58vw, 10px) !important;
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sun-time {
+  margin-top: 4px;
+  color: var(--text-strong) !important;
+  font-size: clamp(18px, 1.55vw, 25px) !important;
+  font-weight: 780;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.day-length {
+  min-width: 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted) !important;
+  font-size: clamp(9px, .63vw, 11px) !important;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Moon — intentionally prominent */
+.celestial-module--moon {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 5px;
+  border-color: rgba(var(--accent-rgb), .26) !important;
+  background:
+    radial-gradient(circle at 22% 54%, rgba(var(--accent-rgb), .16), transparent 34%),
+    radial-gradient(circle at 98% 0, rgba(var(--accent-light-rgb), .07), transparent 40%),
+    rgba(var(--page-rgb), .62) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .045),
+    0 0 28px rgba(var(--accent-rgb), .055);
+}
+
+.moon-orbit {
+  position: absolute;
+  width: min(14vw, 196px);
+  aspect-ratio: 1;
+  left: clamp(8px, 1vw, 16px);
+  top: 50%;
+  transform: translateY(-45%);
+  border: 1px solid rgba(var(--accent-light-rgb), .11);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.moon-orbit::before,
+.moon-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border: 1px solid rgba(var(--accent-light-rgb), .07);
+  border-radius: 50%;
+}
+
+.moon-orbit::after { inset: 24%; }
+
+.moon-priority {
+  color: rgba(var(--accent-light-rgb), .55);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
+
+.moon-body {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: grid !important;
+  grid-template-columns: clamp(82px, 8.2vw, 122px) minmax(0, 1fr);
+  gap: clamp(10px, 1.1vw, 16px);
+  align-items: center;
+}
+
+.big-moon {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: clamp(82px, 8.2vw, 122px) !important;
+  height: clamp(82px, 8.2vw, 122px) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center;
+  filter: drop-shadow(0 0 20px rgba(var(--accent-light-rgb), .24));
+  transform: none !important;
+}
+
+.moon-canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.moon-info {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+}
+
+.moon-phase {
+  max-width: 100%;
+  color: var(--text-strong) !important;
+  font-size: clamp(15px, 1.22vw, 21px) !important;
+  font-weight: 760 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moon-illum {
+  color: var(--blue-light) !important;
+  font-size: clamp(11px, .88vw, 15px) !important;
+  font-weight: 760 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap;
+}
+
+.moon-details {
+  min-width: 0;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px 10px !important;
+  margin: 3px 0 0 !important;
+}
+
+.moon-detail {
+  min-width: 0;
+  display: flex !important;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 7px;
+  padding-top: 3px !important;
+  border-top: 1px solid var(--line-soft) !important;
+  color: var(--muted);
+  font-size: clamp(8.5px, .59vw, 10.5px) !important;
+  line-height: 1.15;
+}
+
+.moon-detail span {
+  min-width: 0;
+  color: var(--soft) !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moon-detail strong {
+  flex: 0 0 auto;
+  color: var(--text) !important;
+  font-weight: 720 !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.moon-events {
+  min-width: 0;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+  margin: 4px 0 0 !important;
+  color: var(--muted) !important;
+  font-size: clamp(8px, .56vw, 10px) !important;
+  line-height: 1.2 !important;
+}
+
+.moon-events > div {
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .022);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Weather */
+.command-zone--weather {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 4px;
+}
+
+.weather-source-badge {
+  margin-left: 5px;
+  color: var(--soft) !important;
+  font-size: .78em !important;
+  letter-spacing: .1em !important;
+}
+
+.weather-now {
+  min-width: 0;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) clamp(76px, 8vw, 116px);
+  gap: clamp(8px, .9vw, 14px);
+  align-items: center;
+}
+
+.weather-now-copy {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+.weather-temp {
+  max-width: 100%;
+  margin: 0 !important;
+  color: var(--text-strong) !important;
+  font-size: clamp(31px, 3.05vw, 50px) !important;
+  font-weight: 780 !important;
+  line-height: .96 !important;
+  letter-spacing: -.045em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  text-shadow: none !important;
+}
+
+.weather-desc {
+  max-width: 100%;
+  color: var(--text) !important;
+  font-size: clamp(11px, .86vw, 14px) !important;
+  font-weight: 650 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weather-meta {
+  min-width: 0;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 4px !important;
+  margin: 0 !important;
+}
+
+.weather-meta span {
+  min-width: 0;
+  max-width: 100%;
+  padding: 3px 6px !important;
+  border: 1px solid var(--line-soft) !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(255, 255, 255, .028) !important;
+  color: var(--muted) !important;
+  font-size: clamp(8px, .56vw, 10px) !important;
+  font-weight: 650 !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weather-art {
+  position: relative !important;
+  inset: auto !important;
+  width: clamp(76px, 8vw, 116px) !important;
+  height: clamp(70px, 7.2vw, 104px) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  justify-self: end;
+  align-self: center;
+  transform: none !important;
+  overflow: visible !important;
+}
+
+/* --------------------------------------------------------------------------
+   Smart insight
+   -------------------------------------------------------------------------- */
+
+.smart-insight {
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: clamp(9px, .9vw, 13px) clamp(13px, 1.2vw, 18px) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+}
+
+.smart-insight::before {
+  background:
+    radial-gradient(520px 120px at 8% -20%, rgba(var(--accent-rgb), .11), transparent 68%),
+    linear-gradient(180deg, rgba(255, 255, 255, .03), transparent 50%) !important;
+}
+
+.smart-insight-main {
+  min-width: 0;
+  display: flex !important;
+  align-items: center;
+  gap: 12px !important;
+}
+
+.smart-insight-icon {
+  width: clamp(34px, 2.7vw, 42px) !important;
+  height: clamp(34px, 2.7vw, 42px) !important;
+  min-width: clamp(34px, 2.7vw, 42px) !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center;
+  border: 1px solid rgba(var(--accent-rgb), .24) !important;
+  border-radius: 50% !important;
+  background: rgba(var(--accent-rgb), .09) !important;
+  color: var(--blue-light) !important;
+  font-size: 15px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055);
+}
+
+.smart-insight-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.smart-insight-title {
+  margin: 0 !important;
+  color: var(--soft) !important;
+  font-size: clamp(8px, .58vw, 10px) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: .15em !important;
+  text-transform: uppercase;
+}
+
+.smart-insight-text {
+  min-width: 0;
+  max-width: 100%;
+  color: var(--text-strong) !important;
+  font-size: clamp(12px, 1.05vw, 16px) !important;
+  font-weight: 720 !important;
+  line-height: 1.18 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.smart-insight-context {
+  min-width: 0;
+  max-width: 100%;
+  color: var(--muted) !important;
+  font-size: clamp(8.5px, .62vw, 10.5px) !important;
+  line-height: 1.15 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.smart-insight-meta {
+  min-width: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 7px !important;
+}
+
+.smart-pill {
+  min-width: 0 !important;
+  height: clamp(30px, 2.6vw, 36px) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 clamp(9px, .8vw, 13px) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(var(--page-rgb), .58) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+  color: var(--muted) !important;
+  font-size: clamp(9px, .66vw, 11px) !important;
+  font-weight: 760 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.smart-pill--primary {
+  color: var(--blue-light) !important;
+  border-color: rgba(var(--accent-rgb), .29) !important;
+}
+
+.smart-pill.is-hot { color: var(--orange) !important; border-color: rgba(var(--warning-rgb), .34) !important; }
+.smart-pill.is-cool { color: var(--green) !important; border-color: rgba(var(--success-rgb), .34) !important; }
+.smart-pill.is-best,
+.smart-pill.is-action-wait { color: var(--blue-light) !important; border-color: rgba(var(--accent-rgb), .36) !important; }
+.smart-pill.is-negative { color: var(--blue-light) !important; border-color: rgba(var(--accent-rgb), .40) !important; }
+.smart-pill.is-action-now { color: var(--green) !important; border-color: rgba(var(--success-rgb), .38) !important; }
+.smart-pill.is-action-export { color: var(--solar) !important; border-color: rgba(var(--warning-rgb), .38) !important; }
+.smart-pill.is-action-hold { color: var(--orange) !important; border-color: rgba(var(--warning-rgb), .38) !important; }
+
+/* Preserve semantic state accents without changing the measured layout. */
+.smart-insight.is-use { border-color: rgba(var(--success-rgb), .34) !important; }
+.smart-insight.is-wait { border-color: rgba(var(--accent-rgb), .36) !important; }
+.smart-insight.is-export,
+.smart-insight.is-hold { border-color: rgba(var(--warning-rgb), .36) !important; }
+
+/* --------------------------------------------------------------------------
+   Energy flow and stat cards
+   -------------------------------------------------------------------------- */
+
+.energy-panel {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 9px !important;
+  display: grid !important;
+  grid-template-rows: 30px minmax(0, 1.22fr) minmax(84px, .78fr);
+  gap: 8px;
+  overflow: hidden !important;
+}
+
+.section-heading {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 5px;
+}
+
+.section-heading > div:first-child {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: clamp(13px, 1vw, 16px);
+  font-weight: 780;
+  line-height: 1;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+
+.energy-legend {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1vw, 16px);
+  color: var(--soft);
+  font-size: clamp(8px, .58vw, 10px);
+  font-weight: 720;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.energy-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.legend-dot--grid { background: var(--blue); box-shadow: 0 0 8px rgba(var(--accent-rgb), .7); }
+.legend-dot--house { background: var(--text); box-shadow: 0 0 8px rgba(var(--text-rgb), .42); }
+.legend-dot--solar { background: var(--solar); box-shadow: 0 0 8px rgba(var(--warning-rgb), .65); }
+
+.flow {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(58px, .64fr)
+    minmax(0, 1fr)
+    minmax(58px, .64fr)
+    minmax(0, 1fr);
+  align-items: stretch !important;
+  gap: 9px !important;
+}
+
+.flow .node,
+.node {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: clamp(9px, .9vw, 14px) !important;
+  display: grid !important;
+  grid-template-columns: clamp(46px, 4.2vw, 64px) minmax(0, 1fr);
+  align-items: center !important;
+  gap: clamp(9px, 1vw, 15px) !important;
+  border: 1px solid rgba(var(--muted-rgb), .14) !important;
+  border-radius: var(--radius-card) !important;
+  background:
+    radial-gradient(120% 90% at 0 0, rgba(var(--accent-rgb), .06), transparent 58%),
+    linear-gradient(145deg, rgba(var(--surface-high-rgb), .91), rgba(var(--surface-rgb), .86)) !important;
+  box-shadow: var(--shadow-card) !important;
+  transform: none !important;
+  overflow: hidden;
+}
+
+.flow .node::before,
+.flow .node::after,
+.node::before,
+.node::after { display: none !important; }
+
+.flow .node:hover,
+.node:hover { transform: none !important; border-color: rgba(var(--accent-rgb), .28) !important; }
+
+.node-icon,
+.node .icon,
+.flow .icon {
+  position: relative !important;
+  inset: auto !important;
+  width: clamp(46px, 4.2vw, 64px) !important;
+  height: clamp(46px, 4.2vw, 64px) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center;
+  border: 1px solid rgba(var(--accent-rgb), .22) !important;
+  border-radius: 50% !important;
+  background: rgba(var(--accent-rgb), .09) !important;
+  color: var(--blue-light) !important;
+  box-shadow:
+    0 0 calc(10px + 18px * var(--icon-intensity, .15)) rgba(var(--accent-rgb), .14),
+    inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+  transform: none !important;
+}
+
+.node.solar .node-icon,
+.node.solar .icon {
+  color: var(--solar) !important;
+  border-color: rgba(var(--warning-rgb), .23) !important;
+  background: rgba(var(--warning-rgb), .08) !important;
+}
+
+.node.house .node-icon,
+.node.house .icon {
+  color: var(--text-strong) !important;
+  border-color: rgba(var(--text-rgb), .18) !important;
+  background: rgba(var(--text-rgb), .055) !important;
+}
+
+.node-icon svg,
+.node .icon svg,
+.flow .icon svg {
+  width: 48% !important;
+  height: 48% !important;
+  fill: currentColor;
+  stroke: currentColor;
+  overflow: visible;
+}
+
+.node-icon svg .stroke,
+.node .icon svg .stroke,
+.flow .icon svg .stroke {
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.node-text {
+  min-width: 0;
+  display: grid !important;
+  align-content: center;
+  justify-items: start !important;
+  gap: 2px;
+  text-align: left !important;
+}
+
+.node .label {
+  max-width: 100%;
+  color: var(--soft) !important;
+  font-size: clamp(8px, .58vw, 10px) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node .value {
+  max-width: 100%;
+  margin: 2px 0 0 !important;
+  color: var(--text-strong);
+  font-size: clamp(21px, 2vw, 32px) !important;
+  font-weight: 820 !important;
+  line-height: 1 !important;
+  letter-spacing: -.035em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node .sub {
+  max-width: 100%;
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: clamp(9px, .66vw, 11px) !important;
+  font-weight: 650 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orange { color: var(--orange) !important; }
+.green { color: var(--green) !important; }
+.solarText { color: var(--solar) !important; }
+.muted { color: var(--muted) !important; }
+
+.limitBadge {
+  max-width: 100%;
+  margin-top: 3px !important;
+  padding: 3px 6px !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 8px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flowbox {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 7px;
+  overflow: visible !important;
+}
+
+.flow-caption {
+  max-width: 100%;
+  color: var(--soft);
+  font-size: clamp(7px, .48vw, 9px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .11em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flowline {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: 7px !important;
+  min-height: 7px !important;
+  margin: 0 !important;
+  border: 1px solid rgba(var(--muted-rgb), .12) !important;
+  border-radius: var(--radius-pill) !important;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, .025), color-mix(in srgb, var(--flow-color, var(--blue)) 18%, transparent), rgba(255, 255, 255, .025)) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35) !important;
+  overflow: hidden !important;
+}
+
+.flowline.is-active {
+  border-color: color-mix(in srgb, var(--flow-color, var(--blue)) 26%, transparent) !important;
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--flow-color, var(--blue)) 16%, transparent),
+    inset 0 1px 2px rgba(0, 0, 0, .35) !important;
+}
+
+.flowline.is-off { opacity: .42 !important; }
+
+.flowline .particle {
+  width: 22px !important;
+  height: 3px !important;
+  top: 1px !important;
+  border-radius: var(--radius-pill) !important;
+  background: var(--flow-color, var(--blue)) !important;
+  box-shadow: 0 0 9px var(--flow-color, var(--blue)) !important;
+}
+
+.arrow {
+  position: relative !important;
+  inset: auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  height: 16px !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center;
+  color: var(--blue-light);
+  font-size: 18px !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 12px currentColor;
+  transform: none !important;
+}
+
+.arrow .ico {
+  position: static !important;
+  display: block;
+  transform: none !important;
+}
+
+.cards {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  overflow: hidden;
+}
+
+.card {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: clamp(7px, .65vw, 10px) clamp(8px, .75vw, 11px) !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto minmax(16px, 1fr) auto !important;
+  align-content: stretch !important;
+  justify-items: stretch !important;
+  gap: 2px !important;
+  border: 1px solid rgba(var(--muted-rgb), .13) !important;
+  border-radius: var(--radius-inner) !important;
+  background:
+    radial-gradient(160px 80px at 50% -22px, rgba(255, 255, 255, .055), transparent 68%),
+    linear-gradient(145deg, rgba(var(--surface-high-rgb), .87), rgba(var(--surface-rgb), .79)) !important;
+  box-shadow: var(--shadow-card) !important;
+  transform: none !important;
+  color: var(--text);
+  overflow: hidden !important;
+}
+
+.card::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .035), transparent 46%) !important;
+  opacity: 1 !important;
+  pointer-events: none;
+  z-index: 0 !important;
+}
+
+.card::after,
+.card-glow { display: none !important; }
+.card > * { position: relative; z-index: 1; }
+.card:hover { transform: none !important; border-color: rgba(var(--accent-rgb), .26) !important; }
+
+.card-topline {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-icon {
+  width: clamp(17px, 1.35vw, 22px);
+  height: clamp(17px, 1.35vw, 22px);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+}
+
+.card-icon svg {
+  width: 58%;
+  height: 58%;
+  fill: currentColor;
+  stroke: currentColor;
+  overflow: visible;
+}
+
+.card-icon .stroke {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.card h3 {
+  grid-row: auto !important;
+  align-self: auto !important;
+  min-width: 0;
+  min-height: 0 !important;
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: clamp(7.8px, .54vw, 9.5px) !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: .11em !important;
+  text-transform: uppercase;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  opacity: 1 !important;
+}
+
+.card strong,
+.card .value {
+  grid-row: auto !important;
+  align-self: auto !important;
+  max-width: 100%;
+  margin: 1px 0 0 !important;
+  padding: 0 !important;
+  color: var(--text-strong);
+  font-size: clamp(15px, 1.35vw, 22px) !important;
+  font-weight: 800 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.025em;
+  font-variant-numeric: tabular-nums;
+  text-align: left !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  opacity: 1 !important;
+}
+
+.card-grid strong {
+  font-size: clamp(12px, 1.12vw, 18px) !important;
+  line-height: 1.08 !important;
+  white-space: nowrap !important;
+  word-break: normal !important;
+}
+
+.card > small:not(.price-line):not(.solar-price):not(.gas-price) {
+  grid-row: auto !important;
+  align-self: auto !important;
+  min-width: 0;
+  min-height: 0 !important;
+  max-width: 100%;
+  margin: 0 !important;
+  color: var(--soft) !important;
+  font-size: clamp(7.8px, .55vw, 9.5px) !important;
+  font-weight: 600 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  opacity: 1 !important;
+}
+
+.card-sparkline {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 16px;
+  max-height: 28px;
+  margin-top: 1px;
+  overflow: visible;
+  color: inherit;
+}
+
+.sparkline-line,
+.sparkline-area {
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.sparkline-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .72;
+  filter: drop-shadow(0 0 2px currentColor);
+}
+
+.sparkline-area {
+  fill: currentColor;
+  opacity: .055;
+  stroke: none;
+}
+
+.price-line,
+.solar-price,
+.gas-price {
+  grid-row: auto !important;
+  align-self: end !important;
+  min-width: 0;
+  width: 100% !important;
+  min-height: 0 !important;
+  height: 20px;
+  margin: 0 !important;
+  padding: 4px 0 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 5px !important;
+  border-top: 1px solid var(--line-soft) !important;
+  color: inherit;
+  font-size: clamp(7.8px, .55vw, 9.5px) !important;
+  font-weight: 720 !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.price-line .price-text,
+.solar-price .price-text,
+.gas-price .price-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-placeholder { opacity: 0 !important; }
+
+.mini-price-icon,
+.price-line .mini-price-icon,
+.solar-price .mini-price-icon,
+.gas-price .mini-price-icon {
+  width: 13px !important;
+  height: 13px !important;
+  min-width: 13px !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.mini-price-icon svg { width: 100% !important; height: 100% !important; fill: currentColor; stroke: currentColor; }
+.mini-price-icon svg .stroke { fill: none; stroke-width: 1.7; }
+
+.card-grid { color: var(--orange) !important; }
+.card-house { color: var(--text) !important; }
+.card-solar,
+.card-self-cons { color: var(--solar) !important; }
+.card-self-suff { color: var(--green) !important; }
+.card-gas { color: var(--blue-light) !important; }
+
+/* --------------------------------------------------------------------------
+   Prices panel and chart
+   -------------------------------------------------------------------------- */
+
+.prices-panel {
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 9px 10px 10px !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 7px;
+  overflow: hidden !important;
+}
+
+.pricesHeader {
+  min-width: 0;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0 2px 8px !important;
+  display: grid !important;
+  grid-template-columns: minmax(350px, 1fr) auto minmax(210px, 1fr) !important;
+  align-items: center !important;
+  gap: 14px !important;
+  border-bottom: 1px solid var(--line-soft) !important;
+}
+
+.pricesTitleBlock {
+  min-width: 0;
+  display: grid !important;
+  justify-items: center;
+  gap: 2px !important;
+}
+
+.pricesHeader .title,
+h2.title {
+  max-width: 100%;
+  margin: 0 !important;
+  color: var(--text-strong) !important;
+  font-size: clamp(11px, .85vw, 14px) !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: .15em !important;
+  text-align: center !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.updated {
+  max-width: 100%;
+  margin: 0 !important;
+  color: var(--soft) !important;
+  font-size: clamp(7.8px, .54vw, 9.5px) !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 1 !important;
+}
+
+.usage-window-selector {
+  min-width: 0;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+  gap: 5px !important;
+  overflow: hidden;
+}
+
+.usage-window-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0 3px 0 0 !important;
+  color: var(--muted) !important;
+  font-size: clamp(7.5px, .52vw, 9px) !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: none !important;
+}
+
+.usage-window-selector button {
+  appearance: none;
+  min-width: 31px !important;
+  width: auto;
+  height: 29px !important;
+  margin: 0 !important;
+  padding: 0 clamp(7px, .55vw, 10px) !important;
+  flex: 0 0 auto;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(var(--page-rgb), .58) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+  color: var(--muted) !important;
+  font-size: clamp(8px, .56vw, 10px) !important;
+  font-weight: 780 !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  cursor: pointer;
+  transition: border-color .16s ease, color .16s ease, background .16s ease;
+}
+
+.usage-window-selector button:hover {
+  transform: none !important;
+  color: var(--text) !important;
+  border-color: rgba(var(--accent-rgb), .34) !important;
+  filter: none !important;
+}
+
+.usage-window-selector button.active,
+.usage-window-selector button[aria-pressed="true"] {
+  color: var(--text-strong) !important;
+  border-color: rgba(var(--accent-rgb), .62) !important;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), .72), rgba(42, 125, 225, .76)) !important;
+  box-shadow: 0 0 14px rgba(var(--accent-rgb), .22), inset 0 1px 0 rgba(255, 255, 255, .12) !important;
+}
+
+.badges {
+  min-width: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+}
+
+.badge {
+  min-width: 0;
+  width: auto !important;
+  height: 32px !important;
+  margin: 0 !important;
+  padding: 0 clamp(9px, .75vw, 13px) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(var(--page-rgb), .58) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+  color: var(--muted);
+  font-size: clamp(9px, .66vw, 11px) !important;
+  font-weight: 780 !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  transform: none !important;
+}
+
+.badge:hover { transform: none !important; }
+.badge.syncGlow { color: var(--sync-color, var(--green)) !important; border-color: color-mix(in srgb, var(--sync-color, var(--green)) 36%, transparent) !important; }
+#gasBadge { color: var(--blue-light) !important; border-color: rgba(var(--accent-rgb), .28) !important; }
+
+.badge .price-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart {
+  position: relative !important;
+  inset: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 1px solid rgba(var(--muted-rgb), .08);
+  border-radius: var(--radius-card);
+  background: rgba(var(--page-deep-rgb), .38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+  --bar-fill-scale: 72;
+}
+
+.gridlines {
+  position: absolute !important;
+  inset: 44px 8px 30px !important;
+  display: grid !important;
+  grid-template-rows: repeat(4, 1fr) !important;
+  mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent) !important;
+  pointer-events: none;
+}
+
+.gridlines span { border-top: 1px solid rgba(var(--muted-rgb), .075) !important; }
+
+.bars {
+  position: absolute !important;
+  inset: 22px 8px 29px !important;
+  min-width: 0;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: repeat(var(--bar-count, 39), minmax(0, 1fr)) !important;
+  align-items: end !important;
+  gap: clamp(2px, .38vw, 7px) !important;
+  overflow: visible !important;
+}
+
+.barwrap {
+  position: relative !important;
+  min-width: 0;
+  height: 100% !important;
+  margin: 0 !important;
+}
+
+.bar {
+  left: 0 !important;
+  right: 0 !important;
+  min-width: 0;
+  min-height: 5px !important;
+  border-radius: clamp(5px, .55vw, 10px) clamp(5px, .55vw, 10px) 2px 2px !important;
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--glow, var(--c2)) 34%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, .18),
+    inset 0 -6px 11px rgba(0, 0, 0, .17) !important;
+}
+
+.bar.negative { border-radius: 2px 2px clamp(5px, .55vw, 10px) clamp(5px, .55vw, 10px) !important; }
+.bar::after { opacity: .22 !important; }
+
+.time {
+  bottom: -22px !important;
+  max-width: 52px;
+  color: var(--muted) !important;
+  font-size: clamp(7.5px, .52vw, 9.5px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap;
+}
+
+.flag {
+  max-width: 120px;
+  padding: clamp(4px, .45vw, 7px) clamp(7px, .7vw, 12px) !important;
+  border: 1px solid color-mix(in srgb, var(--sync-color, #fff) 28%, transparent) !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(var(--surface-rgb), .90) !important;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--sync-color, currentColor) 22%, transparent) !important;
+  font-size: clamp(8px, .58vw, 10.5px) !important;
+  font-weight: 800 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flag::after { height: 34px !important; opacity: .62; }
+.flag.is-positive::before { bottom: calc(-34px - 3px) !important; }
+.flag.is-negative::before { top: calc(100% + 31px) !important; }
+.flag.is-positive { bottom: calc(var(--zero, 0%) + var(--h, 10%) + 18px) !important; }
+.flag.is-negative { bottom: calc(var(--zero, 0%) + 16px) !important; }
+.flag.is-negative::after { height: 34px !important; }
+
+.dayline {
+  left: -3px !important;
+  top: 16px !important;
+  bottom: 24px !important;
+  width: 1px !important;
+  opacity: .56 !important;
+}
+
+.day-label {
+  top: 5px !important;
+  left: 5px !important;
+  max-width: 90px;
+  padding: 3px 6px !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(var(--surface-rgb), .88) !important;
+  color: var(--muted) !important;
+  font-size: clamp(7px, .48vw, 8.5px) !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barwrap.day-label-has-flag .day-label { top: 36px !important; }
+
+.tooltip {
+  max-width: min(260px, calc(100vw - 28px));
+  padding: 9px 12px !important;
+  border-color: color-mix(in srgb, var(--tip-color, var(--blue)) 30%, transparent) !important;
+  background: rgba(var(--page-rgb), .96) !important;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, .34) !important;
+  font-size: 11px !important;
+}
+
+/* --------------------------------------------------------------------------
+   History modal and kiosk layers
+   -------------------------------------------------------------------------- */
+
+.history-modal,
+.card-history-modal,
+[role="dialog"] {
+  color: var(--text);
+}
+
+.kiosk-dim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-kiosk-overlay);
+  pointer-events: none;
+  background: #000;
+  opacity: var(--kiosk-dim, 0);
+  transition: opacity .8s ease;
+}
+
+.kiosk-status {
+  position: fixed;
+  right: 14px;
+  bottom: 12px;
+  z-index: var(--z-kiosk-controls);
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: rgba(var(--page-rgb), .88);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  opacity: .22;
+}
+
+.kiosk-status:hover { opacity: .9; }
+body.kiosk-night .dashboard { filter: brightness(.84) saturate(.90); }
+
+/* --------------------------------------------------------------------------
+   Height-based density: still one viewport, but with smaller internal rhythm.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 900px) and (max-height: 820px) {
+  .dashboard {
+    padding: 7px 10px 9px !important;
+    grid-template-rows: 34px minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  .dashboard-content {
+    grid-template-rows:
+      clamp(132px, 18.2vh, 152px)
+      52px
+      clamp(214px, 29vh, 242px)
+      minmax(142px, 1fr);
+    gap: 7px;
+  }
+
+  .topbar { height: 34px; }
+  .control-button, .theme-toggle, .lang-toggle, .weather-provider-toggle, .status { height: 30px; min-height: 30px; }
+  .theme-toggle { width: 30px; }
+
+  .weather-hero { padding: 7px !important; gap: 7px; }
+  .command-zone, .celestial-module { padding: 9px 10px !important; border-radius: 13px !important; }
+  .weather-time { font-size: clamp(27px, 2.8vw, 39px) !important; }
+  .weather-date { font-size: 9.5px !important; }
+  .clock-footer { display: none; }
+  .sun-layout { grid-template-columns: 34px minmax(0, 1fr); gap: 7px; }
+  .weather-section-icon--sun { width: 34px !important; height: 34px !important; }
+  .sun-time { font-size: clamp(15px, 1.4vw, 20px) !important; }
+  .moon-body { grid-template-columns: clamp(68px, 7.3vw, 92px) minmax(0, 1fr); gap: 9px; }
+  .big-moon { width: clamp(68px, 7.3vw, 92px) !important; height: clamp(68px, 7.3vw, 92px) !important; }
+  .moon-events { margin-top: 2px !important; }
+  .moon-events > div { padding: 2px 4px; }
+  .weather-now { grid-template-columns: minmax(0, 1fr) clamp(62px, 7vw, 82px); }
+  .weather-art { width: clamp(62px, 7vw, 82px) !important; height: clamp(58px, 6.4vw, 74px) !important; }
+  .weather-temp { font-size: clamp(27px, 2.7vw, 40px) !important; }
+
+  .smart-insight { padding: 7px 10px !important; gap: 9px; }
+  .smart-insight-icon { width: 30px !important; height: 30px !important; min-width: 30px !important; }
+  .smart-pill { height: 28px !important; padding-inline: 8px !important; }
+  .smart-insight-context { display: none; }
+
+  .energy-panel { padding: 7px !important; grid-template-rows: 24px minmax(0, 1.18fr) minmax(72px, .82fr); gap: 6px; }
+  .flow { gap: 6px !important; }
+  .flow .node, .node { padding: 7px 9px !important; grid-template-columns: 39px minmax(0, 1fr); gap: 8px !important; border-radius: 13px !important; }
+  .node-icon, .node .icon, .flow .icon { width: 39px !important; height: 39px !important; }
+  .node .value { font-size: clamp(18px, 1.7vw, 25px) !important; }
+  .flow-caption { display: none; }
+  .flowbox { gap: 4px; padding-inline: 2px !important; }
+  .flowline { height: 6px !important; min-height: 6px !important; }
+  .arrow { height: 13px !important; font-size: 15px !important; }
+
+  .cards { gap: 6px !important; }
+  .card { padding: 5px 7px !important; border-radius: 11px !important; gap: 1px !important; }
+  .card-icon { width: 16px; height: 16px; border-radius: 5px; }
+  .card strong, .card .value { font-size: clamp(13px, 1.18vw, 18px) !important; }
+  .card-grid strong { font-size: clamp(10.5px, 1vw, 15px) !important; }
+  .card-sparkline { min-height: 12px; max-height: 20px; }
+  .price-line, .solar-price, .gas-price { height: 16px; padding-top: 2px !important; }
+
+  .prices-panel { padding: 7px 8px 8px !important; gap: 4px; }
+  .pricesHeader { padding-bottom: 5px !important; gap: 8px !important; grid-template-columns: minmax(300px, 1fr) auto minmax(170px, 1fr) !important; }
+  .usage-window-selector button { height: 25px !important; min-width: 26px !important; padding-inline: 6px !important; }
+  .badge { height: 27px !important; padding-inline: 8px !important; }
+  .chart { --bar-fill-scale: 66; }
+  .gridlines { inset: 34px 6px 25px !important; }
+  .bars { inset: 16px 6px 24px !important; gap: clamp(2px, .32vw, 5px) !important; }
+  .time { bottom: -18px !important; }
+  .flag { padding: 3px 6px !important; }
+}
+
+/* --------------------------------------------------------------------------
+   Width refinements for smaller landscape screens.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 900px) and (max-width: 1180px) {
+  .dashboard { padding-inline: 9px !important; }
+  .weather-hero {
+    grid-template-columns: minmax(0, .72fr) minmax(0, .76fr) minmax(0, 1.42fr) minmax(0, 1.1fr);
+  }
+  .zone-state { display: none; }
+  .weather-meta span { padding-inline: 4px !important; }
+  .smart-insight-meta { gap: 4px !important; }
+  .smart-pill { padding-inline: 7px !important; }
+  .energy-legend { display: none; }
+  .flow { grid-template-columns: minmax(0, 1fr) minmax(42px, .45fr) minmax(0, 1fr) minmax(42px, .45fr) minmax(0, 1fr); }
+  .flow-caption { display: none; }
+  .pricesHeader { grid-template-columns: minmax(290px, 1fr) auto minmax(170px, 1fr) !important; gap: 8px !important; }
+  .usage-window-label { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Portrait/tablet/mobile: readable, no clipping. Full-width panels and scroll.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 899px), (orientation: portrait) and (max-width: 1180px) {
+  html, body {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .dashboard {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    padding: 10px !important;
+    display: grid !important;
+    grid-template-rows: auto auto;
+    gap: 9px;
+    overflow: visible !important;
+  }
+
+  .dashboard-content {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    gap: 9px;
+    overflow: visible;
+  }
+
+  .topbar {
+    min-height: 40px !important;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .topbar-left { flex: 1 1 auto; flex-wrap: wrap; }
+  .status { max-width: 100%; flex: 0 1 auto; }
+
+  .weather-hero {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(150px, auto) minmax(190px, auto);
+    height: auto !important;
+  }
+
+  .command-zone--time,
+  .celestial-module--sun,
+  .celestial-module--moon,
+  .command-zone--weather { min-height: 0; }
+
+  .celestial-module--moon { grid-column: 1 / -1; }
+  .command-zone--weather { grid-column: 1 / -1; min-height: 174px; }
+  .moon-body { grid-template-columns: minmax(100px, 150px) minmax(0, 1fr); }
+  .big-moon { width: min(26vw, 150px) !important; height: min(26vw, 150px) !important; justify-self: center; }
+  .weather-now { grid-template-columns: minmax(0, 1fr) minmax(90px, 150px); }
+  .weather-art { width: min(24vw, 140px) !important; height: min(22vw, 120px) !important; }
+
+  .smart-insight {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 13px !important;
+  }
+  .smart-insight-text,
+  .smart-insight-context { white-space: normal; }
+  .smart-insight-meta { justify-content: flex-start; flex-wrap: wrap; }
+
+  .energy-panel {
+    height: auto !important;
+    grid-template-rows: auto auto auto;
+    gap: 9px;
+    padding: 9px !important;
+  }
+
+  .flow {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(5, auto);
+    gap: 7px !important;
+  }
+
+  .flow .node,
+  .node {
+    min-height: 104px !important;
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .flowbox {
+    min-height: 32px !important;
+    transform: rotate(90deg);
+    width: 100px !important;
+    justify-self: center;
+  }
+
+  .flow-caption { display: none; }
+
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    overflow: visible;
+  }
+
+  .card { min-height: 118px !important; }
+  .card strong, .card .value { font-size: clamp(18px, 4.8vw, 24px) !important; }
+  .card-grid strong { font-size: clamp(15px, 4vw, 21px) !important; }
+
+  .prices-panel {
+    min-height: 390px !important;
+    height: auto !important;
+    overflow: hidden !important;
+  }
+
+  .pricesHeader {
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "title badges"
+      "selector selector";
+    gap: 9px !important;
+  }
+
+  .pricesTitleBlock { grid-area: title; justify-items: start; }
+  .pricesHeader .title, .updated { text-align: left !important; }
+  .badges { grid-area: badges; }
+  .usage-window-selector { grid-area: selector; overflow-x: auto; padding-bottom: 2px; }
+  .usage-window-label { display: block; }
+  .chart { min-height: 280px !important; }
+  .bars { gap: 3px !important; }
+}
+
+@media (max-width: 560px) {
+  .dashboard { padding: 7px !important; gap: 7px; }
+  .dashboard-content { gap: 7px; }
+  .brand { font-size: 10px !important; letter-spacing: .16em; }
+  .brand-orb { width: 8px; height: 8px; }
+  .topbar-left { gap: 8px; }
+  .topbar-controls { gap: 5px; }
+  .status { order: 2; width: 100%; max-width: 100%; }
+
+  .weather-hero {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    padding: 7px !important;
+    gap: 7px;
+  }
+  .celestial-module--moon,
+  .command-zone--weather { grid-column: auto; }
+  .command-zone,
+  .celestial-module { min-height: 148px; padding: 13px !important; }
+  .celestial-module--moon { min-height: 210px; }
+  .moon-body { grid-template-columns: 96px minmax(0, 1fr); }
+  .big-moon { width: 96px !important; height: 96px !important; }
+  .moon-events { grid-template-columns: 1fr; gap: 4px !important; }
+  .command-zone--weather { min-height: 170px; }
+
+  .cards { grid-template-columns: 1fr !important; }
+  .card { min-height: 126px !important; }
+  .energy-legend { display: none; }
+
+  .pricesHeader {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "title"
+      "badges"
+      "selector";
+  }
+  .badges { justify-content: flex-start !important; }
+  .prices-panel { min-height: 420px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+/* ========================================================================== 
+   V2.1 layout hardening
+   These rules deliberately come last. They remove the final dense-screen
+   collisions without reintroducing fixed-canvas scaling.
+   ========================================================================== */
+
+/* Large numerals need a little more line box than the first design pass. */
+.weather-time,
+.weather-temp,
+.node .value {
+  line-height: 1.08 !important;
+  overflow: visible !important;
+}
+
+/* Reserve a predictable, equal-height strip for all six statistic cards. */
+.energy-panel {
+  grid-template-rows: 30px minmax(0, 1fr) 94px !important;
+}
+
+.card {
+  grid-template-rows: auto minmax(0, 1fr) 23px !important;
+  align-content: stretch !important;
+  gap: 4px !important;
+  padding: 8px 10px !important;
+}
+
+.card-topline {
+  min-height: 17px;
+}
+
+.card-metric {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 1px;
+  margin-top: 6px;
+  overflow: visible;
+}
+
+.card-metric > strong {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0 !important;
+  line-height: 1.04 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.card-metric > small {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0 !important;
+  color: var(--soft) !important;
+  font-size: clamp(7.5px, .52vw, 9px) !important;
+  font-weight: 620 !important;
+  line-height: 1.12 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Grid import + export is the only intentionally two-line metric on narrow
+   screens. It remains fully visible instead of being cut off with an ellipsis. */
+.card-grid .card-metric > strong {
+  font-size: clamp(10px, .92vw, 15px) !important;
+  line-height: 1.08 !important;
+  white-space: normal !important;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.card-trend {
+  min-width: 0;
+  min-height: 23px;
+  display: grid;
+  grid-template-columns: minmax(36px, 1fr) auto;
+  align-items: end;
+  gap: 7px;
+  overflow: hidden;
+}
+
+.card-trend:has(> .card-sparkline:only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.card-trend .card-sparkline {
+  width: 100%;
+  height: 21px;
+  min-height: 21px;
+  max-height: 21px;
+  margin: 0;
+  align-self: end;
+}
+
+.card-trend .price-line,
+.card-trend .solar-price,
+.card-trend .gas-price {
+  width: auto !important;
+  max-width: 76px;
+  height: 19px;
+  min-height: 19px !important;
+  margin: 0 !important;
+  padding: 0 0 1px !important;
+  align-self: end !important;
+  border-top: 0 !important;
+  font-size: clamp(7.3px, .5vw, 8.8px) !important;
+}
+
+.card-trend .price-text {
+  min-width: 0;
+  max-width: 58px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keep full sun labels readable on 1024–1180px kiosk screens. */
+@media (min-width: 900px) and (max-width: 1180px) {
+  .sun-layout {
+    grid-template-columns: 31px minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .weather-section-icon--sun {
+    width: 31px !important;
+    height: 31px !important;
+  }
+
+  .weather-sun {
+    gap: 4px;
+  }
+
+  .sun-stat {
+    padding-left: 5px;
+  }
+
+  .sun-label {
+    font-size: 6.3px !important;
+    letter-spacing: .035em !important;
+    text-overflow: clip;
+  }
+
+  .sun-time {
+    margin-top: 3px;
+    font-size: clamp(14px, 1.55vw, 18px) !important;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 820px) {
+  .energy-panel {
+    grid-template-rows: 24px minmax(0, 1fr) 82px !important;
+  }
+
+  .card {
+    padding: 5px 7px !important;
+    gap: 2px !important;
+    grid-template-rows: 16px minmax(0, 1fr) 18px !important;
+  }
+
+  .card-topline {
+    min-height: 16px;
+    gap: 4px;
+  }
+
+  .card h3 {
+    font-size: clamp(6.6px, .5vw, 8px) !important;
+    letter-spacing: .075em !important;
+  }
+
+  .card-metric > strong,
+  .card strong,
+  .card .value {
+    font-size: clamp(12px, 1.08vw, 16px) !important;
+  }
+
+  .card-grid .card-metric > strong {
+    font-size: clamp(8.3px, .78vw, 11px) !important;
+    line-height: 1.04 !important;
+  }
+
+  .card-metric > small {
+    font-size: clamp(6.2px, .46vw, 7.5px) !important;
+  }
+
+  .card-trend {
+    min-height: 18px;
+    height: 18px;
+    gap: 4px;
+  }
+
+  .card-trend .card-sparkline {
+    height: 17px;
+    min-height: 17px;
+    max-height: 17px;
+  }
+
+  .card-trend .price-line,
+  .card-trend .solar-price,
+  .card-trend .gas-price {
+    height: 17px;
+    min-height: 17px !important;
+    max-width: 55px;
+    font-size: 6.5px !important;
+  }
+
+  .mini-price-icon,
+  .price-line .mini-price-icon,
+  .solar-price .mini-price-icon,
+  .gas-price .mini-price-icon {
+    width: 10px !important;
+    height: 10px !important;
+    min-width: 10px !important;
+  }
+}
+
+@media (max-width: 899px), (orientation: portrait) and (max-width: 1180px) {
+  .energy-panel {
+    grid-template-rows: auto auto auto !important;
+  }
+
+  .card {
+    min-height: 118px !important;
+    grid-template-rows: auto minmax(0, 1fr) 26px !important;
+    padding: 10px !important;
+    gap: 5px !important;
+  }
+
+  .card-metric > strong,
+  .card strong,
+  .card .value {
+    font-size: clamp(18px, 4.2vw, 24px) !important;
+  }
+
+  .card-grid .card-metric > strong {
+    font-size: clamp(13px, 3.25vw, 19px) !important;
+  }
+
+  .card-metric > small {
+    font-size: clamp(8px, 2vw, 10px) !important;
+  }
+
+  .card-trend,
+  .card-trend .card-sparkline {
+    min-height: 24px;
+    height: 24px;
+    max-height: 24px;
+  }
+}
+
+/* Final edge guards: markers and labels stay inside the chart canvas. */
+.prices-panel,
+.pricesHeader,
+.chart,
+.bars {
+  max-width: 100% !important;
+}
+
+.chart {
+  overflow: hidden !important;
+}
+
+.barwrap:first-child .time {
+  left: 0 !important;
+  transform: none !important;
+}
+
+.barwrap:last-child .time {
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+.barwrap.is-day-after-tomorrow .day-label {
+  right: 3px !important;
+  left: auto !important;
+}
+
+.barwrap:nth-last-child(-n + 3) .flag {
+  right: -2px !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+@media (min-width: 900px) and (max-height: 820px) {
+  .card-grid .card-trend .price-line {
+    max-width: 75px !important;
+  }
+
+  .card-grid .card-trend .price-text {
+    max-width: 72px !important;
+  }
+
+  .card-grid .card-trend .mini-price-icon {
+    display: none !important;
+  }
+}
+
+/* ========================================================================== 
+   V2.2 visual-viewport fit
+   --------------------------------------------------------------------------
+   Safari/Retina screenshots can be 2048px wide while exposing only a
+   1024x500-ish CSS viewport. The micro layout below is a genuine fourth
+   composition; it does not crop or overlap the normal desktop composition.
+   ========================================================================== */
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dashboard {
+    --ng-pad-top: 10px;
+    --ng-pad-right: 16px;
+    --ng-pad-bottom: 14px;
+    --ng-pad-left: 16px;
+    height: var(--viewport-height, 100dvh) !important;
+    padding:
+      calc(var(--ng-pad-top) + env(safe-area-inset-top, 0px) + var(--safe-top-extra, 0px))
+      calc(var(--ng-pad-right) + env(safe-area-inset-right, 0px) + var(--safe-right-extra, 0px))
+      calc(var(--ng-pad-bottom) + env(safe-area-inset-bottom, 0px) + var(--safe-bottom-extra, 0px))
+      calc(var(--ng-pad-left) + env(safe-area-inset-left, 0px) + var(--safe-left-extra, 0px)) !important;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 820px) and (orientation: landscape) {
+  .dashboard {
+    --ng-pad-top: 7px;
+    --ng-pad-right: 10px;
+    --ng-pad-bottom: 9px;
+    --ng-pad-left: 10px;
+  }
+}
+
+/* Remove two remaining intrinsic-height leaks from the compact layout. */
+.celestial-module--moon,
+.flow .node,
+.node {
+  contain: layout paint;
+}
+
+.celestial-module--moon .moon-body,
+.flow .node .node-text {
+  min-height: 0 !important;
+}
+
+.flow .node .limitBadge[hidden] {
+  display: none !important;
+}
+
+/* A chart flag has a decorative leader line. Its scroll height is intentionally
+   larger than its pill, but it must never make the chart grid itself grow. */
+.flag { contain: layout paint style; }
+
+body.dashboard-fit-micro .dashboard {
+  --ng-pad-top: 4px;
+  --ng-pad-right: 7px;
+  --ng-pad-bottom: 5px;
+  --ng-pad-left: 7px;
+  grid-template-rows: 27px minmax(0, 1fr) !important;
+  gap: 4px !important;
+}
+
+body.dashboard-fit-micro .topbar {
+  height: 27px !important;
+  min-height: 27px !important;
+  padding: 0 1px !important;
+  gap: 8px !important;
+}
+
+body.dashboard-fit-micro .topbar-left,
+body.dashboard-fit-micro .brand-lockup,
+body.dashboard-fit-micro .topbar-controls {
+  gap: 6px !important;
+}
+
+body.dashboard-fit-micro .brand {
+  font-size: 8px !important;
+  letter-spacing: .18em !important;
+}
+
+body.dashboard-fit-micro .brand-orb {
+  width: 7px !important;
+  height: 7px !important;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb),.07), 0 0 10px rgba(var(--accent-rgb),.55) !important;
+}
+
+body.dashboard-fit-micro .control-button,
+body.dashboard-fit-micro .theme-toggle,
+body.dashboard-fit-micro .lang-toggle,
+body.dashboard-fit-micro .weather-provider-toggle,
+body.dashboard-fit-micro .status {
+  height: 23px !important;
+  min-height: 23px !important;
+  font-size: 8px !important;
+}
+
+body.dashboard-fit-micro .control-button,
+body.dashboard-fit-micro .theme-toggle,
+body.dashboard-fit-micro .lang-toggle,
+body.dashboard-fit-micro .weather-provider-toggle {
+  min-width: 23px !important;
+  width: auto !important;
+  padding-inline: 7px !important;
+}
+
+body.dashboard-fit-micro .theme-toggle {
+  width: 23px !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+}
+
+body.dashboard-fit-micro .status {
+  max-width: 260px !important;
+  padding-inline: 8px !important;
+  gap: 5px !important;
+}
+
+body.dashboard-fit-micro .status-dot {
+  width: 5px !important;
+  height: 5px !important;
+}
+
+body.dashboard-fit-micro .dashboard-content {
+  grid-template-rows: 94px 36px 164px minmax(132px, 1fr) !important;
+  gap: 5px !important;
+}
+
+body.dashboard-fit-micro .panel {
+  border-radius: 14px !important;
+}
+
+/* --- Compact command deck ------------------------------------------------ */
+body.dashboard-fit-micro .weather-hero {
+  height: 94px !important;
+  min-height: 94px !important;
+  padding: 4px !important;
+  gap: 4px !important;
+  grid-template-columns:
+    minmax(0, .78fr)
+    minmax(0, .84fr)
+    minmax(0, 1.44fr)
+    minmax(0, 1.12fr) !important;
+}
+
+body.dashboard-fit-micro .command-zone,
+body.dashboard-fit-micro .celestial-module {
+  height: 84px !important;
+  min-height: 0 !important;
+  padding: 6px 7px !important;
+  border-radius: 10px !important;
+}
+
+body.dashboard-fit-micro .zone-heading {
+  min-height: 7px !important;
+  gap: 5px !important;
+}
+
+body.dashboard-fit-micro .zone-kicker,
+body.dashboard-fit-micro .weather-section-label,
+body.dashboard-fit-micro .section-kicker {
+  font-size: 6.2px !important;
+  letter-spacing: .14em !important;
+}
+
+body.dashboard-fit-micro .zone-state,
+body.dashboard-fit-micro .moon-priority {
+  display: none !important;
+}
+
+body.dashboard-fit-micro .command-zone--time {
+  justify-content: space-between !important;
+}
+
+body.dashboard-fit-micro .weather-time {
+  margin: 0 !important;
+  font-size: clamp(22px, 2.7vw, 28px) !important;
+  line-height: 1 !important;
+  letter-spacing: -.05em !important;
+}
+
+body.dashboard-fit-micro .weather-date {
+  font-size: 7.2px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .clock-footer {
+  display: none !important;
+}
+
+body.dashboard-fit-micro .celestial-module--sun {
+  grid-template-rows: 8px minmax(0, 1fr) 18px !important;
+  gap: 2px !important;
+}
+
+body.dashboard-fit-micro .sun-layout {
+  grid-template-columns: 25px minmax(0, 1fr) !important;
+  gap: 4px !important;
+}
+
+body.dashboard-fit-micro .weather-section-icon--sun {
+  width: 25px !important;
+  height: 25px !important;
+}
+
+body.dashboard-fit-micro .weather-sun {
+  gap: 3px !important;
+}
+
+body.dashboard-fit-micro .sun-stat {
+  padding-left: 4px !important;
+}
+
+body.dashboard-fit-micro .sun-label {
+  font-size: 5px !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  text-overflow: clip !important;
+}
+
+body.dashboard-fit-micro .sun-time {
+  margin-top: 2px !important;
+  font-size: clamp(12px, 1.45vw, 15px) !important;
+}
+
+body.dashboard-fit-micro .day-length {
+  padding-top: 2px !important;
+  font-size: 6.3px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .celestial-module--moon {
+  grid-template-rows: 8px minmax(0, 1fr) !important;
+  gap: 1px !important;
+}
+
+body.dashboard-fit-micro .moon-orbit {
+  width: 78px !important;
+  left: 1px !important;
+  opacity: .62 !important;
+}
+
+body.dashboard-fit-micro .moon-body {
+  height: 67px !important;
+  grid-template-columns: 56px minmax(0, 1fr) !important;
+  gap: 6px !important;
+}
+
+body.dashboard-fit-micro .big-moon {
+  width: 56px !important;
+  height: 56px !important;
+}
+
+body.dashboard-fit-micro .moon-info {
+  gap: 1px !important;
+  align-content: center !important;
+}
+
+body.dashboard-fit-micro .moon-phase {
+  font-size: clamp(10px, 1.24vw, 13px) !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .moon-illum {
+  font-size: 7.5px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .moon-details {
+  margin-top: 1px !important;
+  gap: 1px 6px !important;
+}
+
+body.dashboard-fit-micro .moon-detail {
+  min-height: 9px !important;
+  padding-top: 1px !important;
+  gap: 4px !important;
+  font-size: 6.2px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .moon-events {
+  margin-top: 1px !important;
+  gap: 4px !important;
+  font-size: 5.8px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .moon-events > div {
+  height: 11px !important;
+  padding: 2px 4px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.dashboard-fit-micro .command-zone--weather {
+  grid-template-rows: 8px minmax(0, 1fr) !important;
+  gap: 1px !important;
+}
+
+body.dashboard-fit-micro .weather-now {
+  height: 67px !important;
+  grid-template-columns: minmax(0, 1fr) 50px !important;
+  gap: 4px !important;
+  align-items: center !important;
+}
+
+body.dashboard-fit-micro .weather-now-copy {
+  gap: 1px !important;
+}
+
+body.dashboard-fit-micro .weather-temp {
+  font-size: clamp(22px, 2.85vw, 30px) !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .weather-desc {
+  font-size: 7.5px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .weather-meta {
+  gap: 2px !important;
+  margin-top: 1px !important;
+}
+
+body.dashboard-fit-micro .weather-meta span {
+  min-height: 11px !important;
+  padding: 0 3px !important;
+  font-size: 5.8px !important;
+  line-height: 11px !important;
+}
+
+body.dashboard-fit-micro .weather-art {
+  width: 50px !important;
+  height: 50px !important;
+  transform: none !important;
+}
+
+/* --- Insight strip ------------------------------------------------------- */
+body.dashboard-fit-micro .smart-insight {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 4px 7px !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 7px !important;
+}
+
+body.dashboard-fit-micro .smart-insight-main {
+  gap: 7px !important;
+}
+
+body.dashboard-fit-micro .smart-insight-icon {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  font-size: 11px !important;
+}
+
+body.dashboard-fit-micro .smart-insight-title {
+  font-size: 5.8px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .smart-insight-text {
+  font-size: clamp(8.5px, .95vw, 10.5px) !important;
+  line-height: 1.05 !important;
+}
+
+body.dashboard-fit-micro .smart-insight-context {
+  display: none !important;
+}
+
+body.dashboard-fit-micro .smart-insight-meta {
+  gap: 3px !important;
+}
+
+body.dashboard-fit-micro .smart-pill {
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 6px !important;
+  font-size: 6.3px !important;
+}
+
+/* --- Energy area -------------------------------------------------------- */
+body.dashboard-fit-micro .energy-panel {
+  height: 164px !important;
+  min-height: 164px !important;
+  padding: 5px !important;
+  grid-template-rows: 18px 70px 61px !important;
+  gap: 3px !important;
+}
+
+body.dashboard-fit-micro .section-heading {
+  min-height: 18px !important;
+}
+
+body.dashboard-fit-micro .section-heading h2 {
+  font-size: 10px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .energy-heading > div:first-child {
+  gap: 5px !important;
+}
+
+body.dashboard-fit-micro .energy-legend {
+  gap: 6px !important;
+  font-size: 5.5px !important;
+}
+
+body.dashboard-fit-micro .legend-dot {
+  width: 4px !important;
+  height: 4px !important;
+}
+
+body.dashboard-fit-micro .flow {
+  height: 70px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(34px, .48fr) minmax(0, 1fr) minmax(34px, .48fr) minmax(0, 1fr) !important;
+  gap: 4px !important;
+}
+
+body.dashboard-fit-micro .flow .node,
+body.dashboard-fit-micro .node {
+  height: 70px !important;
+  min-height: 0 !important;
+  padding: 5px 7px !important;
+  grid-template-columns: 31px minmax(0, 1fr) !important;
+  gap: 6px !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
+
+body.dashboard-fit-micro .node-icon,
+body.dashboard-fit-micro .node .icon,
+body.dashboard-fit-micro .flow .icon {
+  width: 31px !important;
+  height: 31px !important;
+}
+
+body.dashboard-fit-micro .node-text {
+  gap: 1px !important;
+}
+
+body.dashboard-fit-micro .node .label {
+  font-size: 5.8px !important;
+  letter-spacing: .1em !important;
+}
+
+body.dashboard-fit-micro .node .value {
+  margin-top: 1px !important;
+  font-size: clamp(14px, 1.75vw, 19px) !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .node .sub {
+  font-size: 6.4px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .limitBadge {
+  margin-top: 1px !important;
+  padding: 1px 3px !important;
+  font-size: 5.5px !important;
+}
+
+body.dashboard-fit-micro .flowbox {
+  height: 70px !important;
+  padding: 0 1px !important;
+  gap: 3px !important;
+}
+
+body.dashboard-fit-micro .flow-caption {
+  display: none !important;
+}
+
+body.dashboard-fit-micro .flowline {
+  height: 5px !important;
+  min-height: 5px !important;
+}
+
+body.dashboard-fit-micro .flowline .particle {
+  top: 0 !important;
+  height: 3px !important;
+}
+
+body.dashboard-fit-micro .arrow {
+  height: 10px !important;
+  font-size: 12px !important;
+}
+
+body.dashboard-fit-micro .cards {
+  height: 61px !important;
+  gap: 4px !important;
+}
+
+body.dashboard-fit-micro .card {
+  height: 61px !important;
+  min-height: 61px !important;
+  padding: 4px 6px !important;
+  grid-template-rows: 12px minmax(0, 1fr) 12px !important;
+  gap: 1px !important;
+  border-radius: 9px !important;
+  overflow: hidden !important;
+}
+
+body.dashboard-fit-micro .card-topline {
+  min-height: 12px !important;
+  gap: 3px !important;
+}
+
+body.dashboard-fit-micro .card-icon {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 4px !important;
+}
+
+body.dashboard-fit-micro .card h3 {
+  font-size: 5.5px !important;
+  letter-spacing: .075em !important;
+}
+
+body.dashboard-fit-micro .card-metric {
+  gap: 0 !important;
+  margin-top: 2px !important;
+}
+
+body.dashboard-fit-micro .card-metric > strong,
+body.dashboard-fit-micro .card strong,
+body.dashboard-fit-micro .card .value {
+  font-size: clamp(10px, 1.07vw, 13px) !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .card-grid .card-metric > strong {
+  font-size: clamp(7.4px, .78vw, 9.5px) !important;
+  white-space: nowrap !important;
+}
+
+body.dashboard-fit-micro .card-metric > small {
+  font-size: 5.2px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .card-trend,
+body.dashboard-fit-micro .card-trend .card-sparkline {
+  height: 12px !important;
+  min-height: 12px !important;
+  max-height: 12px !important;
+}
+
+body.dashboard-fit-micro .card-trend {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 3px !important;
+}
+
+body.dashboard-fit-micro .card-trend .price-line,
+body.dashboard-fit-micro .card-trend .solar-price,
+body.dashboard-fit-micro .card-trend .gas-price {
+  height: 11px !important;
+  min-height: 11px !important;
+  max-width: 44px !important;
+  padding: 0 !important;
+  font-size: 5px !important;
+}
+
+body.dashboard-fit-micro .mini-price-icon,
+body.dashboard-fit-micro .price-line .mini-price-icon,
+body.dashboard-fit-micro .solar-price .mini-price-icon,
+body.dashboard-fit-micro .gas-price .mini-price-icon {
+  display: none !important;
+}
+
+/* --- Price chart -------------------------------------------------------- */
+body.dashboard-fit-micro .prices-panel {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 4px 5px 5px !important;
+  grid-template-rows: 27px minmax(0, 1fr) !important;
+  gap: 3px !important;
+}
+
+body.dashboard-fit-micro .pricesHeader {
+  height: 27px !important;
+  min-height: 27px !important;
+  padding: 0 1px 3px !important;
+  grid-template-columns: minmax(250px, 1fr) auto minmax(135px, 1fr) !important;
+  gap: 5px !important;
+}
+
+body.dashboard-fit-micro .usage-window-selector {
+  gap: 2px !important;
+}
+
+body.dashboard-fit-micro .usage-window-label {
+  display: none !important;
+}
+
+body.dashboard-fit-micro .usage-window-selector button {
+  min-width: 21px !important;
+  height: 20px !important;
+  padding: 0 4px !important;
+  font-size: 5.8px !important;
+}
+
+body.dashboard-fit-micro .pricesTitleBlock {
+  gap: 0 !important;
+}
+
+body.dashboard-fit-micro .pricesHeader .title,
+body.dashboard-fit-micro h2.title {
+  font-size: 7.8px !important;
+  letter-spacing: .13em !important;
+}
+
+body.dashboard-fit-micro .updated {
+  font-size: 5.1px !important;
+}
+
+body.dashboard-fit-micro .badges {
+  gap: 3px !important;
+}
+
+body.dashboard-fit-micro .badge {
+  height: 20px !important;
+  padding: 0 5px !important;
+  gap: 3px !important;
+  font-size: 5.8px !important;
+}
+
+body.dashboard-fit-micro .badge .mini-price-icon {
+  display: block !important;
+  width: 8px !important;
+  height: 8px !important;
+  min-width: 8px !important;
+}
+
+body.dashboard-fit-micro .chart {
+  min-height: 0 !important;
+  border-radius: 9px !important;
+  --bar-fill-scale: 58;
+}
+
+body.dashboard-fit-micro .gridlines {
+  inset: 23px 4px 16px !important;
+}
+
+body.dashboard-fit-micro .bars {
+  inset: 10px 4px 16px !important;
+  gap: clamp(1px, .22vw, 3px) !important;
+}
+
+body.dashboard-fit-micro .bar {
+  min-height: 3px !important;
+  border-radius: 4px 4px 1px 1px !important;
+}
+
+body.dashboard-fit-micro .time {
+  bottom: -12px !important;
+  max-width: 30px !important;
+  font-size: 4.9px !important;
+}
+
+body.dashboard-fit-micro .flag {
+  max-width: 58px !important;
+  padding: 2px 4px !important;
+  font-size: 5.4px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .flag::after {
+  height: 18px !important;
+}
+
+body.dashboard-fit-micro .flag.is-positive {
+  bottom: calc(var(--zero, 0%) + var(--h, 10%) + 8px) !important;
+}
+
+body.dashboard-fit-micro .flag.is-positive::before {
+  bottom: calc(-18px - 2px) !important;
+}
+
+body.dashboard-fit-micro .dayline {
+  top: 8px !important;
+  bottom: 13px !important;
+}
+
+body.dashboard-fit-micro .day-label {
+  top: 1px !important;
+  left: 3px !important;
+  max-width: 54px !important;
+  padding: 2px 4px !important;
+  font-size: 4.8px !important;
+}
+
+body.dashboard-fit-micro .barwrap.day-label-has-flag .day-label {
+  top: 17px !important;
+}
+
+body.dashboard-fit-micro .tooltip {
+  padding: 5px 7px !important;
+  font-size: 7px !important;
+}
+
+/* V2.2.1 micro-grid arithmetic: every row now fits inside the panel content
+   box exactly, including borders, padding and gaps. */
+body.dashboard-fit-micro .energy-panel {
+  padding: 4px !important;
+  grid-template-rows: 16px 66px 66px !important;
+  gap: 2px !important;
+}
+
+body.dashboard-fit-micro .section-heading {
+  min-height: 16px !important;
+}
+
+body.dashboard-fit-micro .flow,
+body.dashboard-fit-micro .flow .node,
+body.dashboard-fit-micro .node,
+body.dashboard-fit-micro .flowbox {
+  height: 66px !important;
+}
+
+body.dashboard-fit-micro .cards,
+body.dashboard-fit-micro .card {
+  height: 66px !important;
+  min-height: 66px !important;
+}
+
+body.dashboard-fit-micro .card {
+  grid-template-rows: 13px minmax(0, 1fr) 12px !important;
+}
+
+body.dashboard-fit-micro .card-topline {
+  min-height: 13px !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+
+body.dashboard-fit-micro .card h3 {
+  line-height: 1.18 !important;
+  overflow: visible !important;
+}
+
+/* ========================================================================== 
+   V2.3 space-efficient flow, consistent lunar events and live Nightglass skin
+   --------------------------------------------------------------------------
+   The normal landscape composition intentionally keeps the live flow compact.
+   Daily totals fill the third column of each source card instead of leaving a
+   large unused surface. Extra vertical room is handed to the price chart.
+   ========================================================================== */
+
+/* The light composition must use the active Nightglass surface palette too;
+   fixed white cards would otherwise ignore manually selected colours. */
+[data-theme="light"] .panel {
+  background:
+    radial-gradient(760px 260px at 10% -18%, rgba(var(--accent-rgb), .08), transparent 66%),
+    linear-gradient(145deg,
+      rgba(var(--surface-high-rgb), .97),
+      rgba(var(--surface-rgb), .94) 54%,
+      rgba(var(--page-rgb), .92)) !important;
+}
+
+/* Structured event cards keep both lunar events typographically identical. */
+.moon-events > .moon-event {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 2px;
+  padding: 4px 7px;
+  overflow: hidden;
+}
+
+.moon-event > span {
+  min-width: 0;
+  color: var(--soft);
+  font-size: .82em;
+  font-weight: 780;
+  line-height: 1;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moon-event > strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 1em;
+  font-weight: 720;
+  line-height: 1.12;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Daily context inside live nodes. Hidden where there is not enough horizontal
+   room; the six detail cards directly below remain the complete fallback. */
+.node-side {
+  display: none;
+  min-width: 0;
+}
+
+@media (min-width: 1240px) and (orientation: landscape) {
+  body:not(.dashboard-fit-micro) .flow .node,
+  body:not(.dashboard-fit-micro) .node {
+    grid-template-columns:
+      clamp(44px, 3.65vw, 58px)
+      minmax(92px, 1fr)
+      minmax(104px, .82fr) !important;
+    gap: clamp(9px, .75vw, 13px) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .node-side {
+    min-width: 0;
+    min-height: 48px;
+    padding-left: clamp(9px, .75vw, 13px);
+    display: grid;
+    align-content: center;
+    justify-items: end;
+    gap: 5px;
+    border-left: 1px solid var(--line-soft);
+    text-align: right;
+  }
+
+  body:not(.dashboard-fit-micro) .node-side > span {
+    max-width: 100%;
+    color: var(--soft);
+    font-size: clamp(7px, .48vw, 8.5px);
+    font-weight: 840;
+    line-height: 1;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body:not(.dashboard-fit-micro) .node-side > strong {
+    max-width: 100%;
+    color: var(--text);
+    font-size: clamp(9px, .68vw, 12px);
+    font-weight: 730;
+    line-height: 1.22;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+
+  body:not(.dashboard-fit-micro) .node.grid .node-side > strong { color: var(--green); }
+  body:not(.dashboard-fit-micro) .node.solar .node-side > strong { color: var(--solar); }
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  body:not(.dashboard-fit-micro) .dashboard-content {
+    grid-template-rows:
+      clamp(148px, 19.1vh, 208px)
+      clamp(56px, 6.65vh, 72px)
+      clamp(224px, 24.2vh, 274px)
+      minmax(184px, 1fr) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .energy-panel {
+    padding: 8px !important;
+    grid-template-rows: 27px minmax(98px, 1fr) 82px !important;
+    gap: 7px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .flow {
+    grid-template-columns:
+      minmax(205px, 405px)
+      minmax(48px, 1fr)
+      minmax(205px, 405px)
+      minmax(48px, 1fr)
+      minmax(205px, 405px) !important;
+    gap: clamp(6px, .52vw, 10px) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .flow .node,
+  body:not(.dashboard-fit-micro) .node {
+    padding: clamp(8px, .72vw, 12px) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .node-icon,
+  body:not(.dashboard-fit-micro) .node .icon,
+  body:not(.dashboard-fit-micro) .flow .icon {
+    width: clamp(44px, 3.65vw, 58px) !important;
+    height: clamp(44px, 3.65vw, 58px) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .node .value {
+    font-size: clamp(20px, 1.72vw, 29px) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .flowbox {
+    gap: 6px;
+    padding-inline: clamp(1px, .28vw, 5px) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .flow-caption {
+    color: var(--muted);
+    font-size: clamp(7px, .5vw, 9px);
+    letter-spacing: .105em;
+  }
+
+  body:not(.dashboard-fit-micro) .cards {
+    height: 82px !important;
+    gap: 7px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card {
+    height: 82px !important;
+    min-height: 82px !important;
+    padding: 6px 8px !important;
+    grid-template-rows: 16px minmax(0, 1fr) 18px !important;
+    gap: 2px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card-topline { min-height: 16px; }
+
+  body:not(.dashboard-fit-micro) .card-trend,
+  body:not(.dashboard-fit-micro) .card-trend .card-sparkline {
+    height: 18px;
+    min-height: 18px;
+    max-height: 18px;
+  }
+}
+
+/* A normal but short landscape (e.g. 1366×768) keeps the same information
+   hierarchy at a smaller rhythm. Micro mode below 620px still has priority. */
+@media (min-width: 900px) and (max-height: 820px) and (orientation: landscape) {
+  body:not(.dashboard-fit-micro) .dashboard-content {
+    grid-template-rows:
+      clamp(126px, 18.3vh, 150px)
+      50px
+      clamp(194px, 26.5vh, 218px)
+      minmax(150px, 1fr) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .energy-panel {
+    grid-template-rows: 22px minmax(82px, 1fr) 72px !important;
+    gap: 5px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .cards,
+  body:not(.dashboard-fit-micro) .card {
+    height: 72px !important;
+    min-height: 72px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card {
+    grid-template-rows: 15px minmax(0, 1fr) 16px !important;
+    padding: 5px 7px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card-trend,
+  body:not(.dashboard-fit-micro) .card-trend .card-sparkline {
+    height: 16px;
+    min-height: 16px;
+    max-height: 16px;
+  }
+}
+
+/* Width guard: below the three-column summary threshold the source cards use
+   the full two-column layout without reserving an invisible third column. */
+@media (min-width: 900px) and (max-width: 1239px) and (orientation: landscape) {
+  body:not(.dashboard-fit-micro) .flow .node,
+  body:not(.dashboard-fit-micro) .node {
+    grid-template-columns: clamp(39px, 4.2vw, 52px) minmax(0, 1fr) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .node-icon,
+  body:not(.dashboard-fit-micro) .node .icon,
+  body:not(.dashboard-fit-micro) .flow .icon {
+    width: clamp(39px, 4.2vw, 52px) !important;
+    height: clamp(39px, 4.2vw, 52px) !important;
+  }
+}
+
+/* The micro layout cannot spare a third live-node column. */
+body.dashboard-fit-micro .node-side { display: none !important; }
+
+body.dashboard-fit-micro .moon-events > .moon-event {
+  height: 15px !important;
+  padding: 1px 4px !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  grid-template-rows: 1fr !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+body.dashboard-fit-micro .moon-event > span {
+  font-size: 5.1px !important;
+  letter-spacing: .04em !important;
+}
+
+body.dashboard-fit-micro .moon-event > strong {
+  font-size: 5.6px !important;
+  text-align: right;
+}
+
+/* Theme changes can arrive while the page is open. Avoid animating every card
+   through stale default colours when the runtime variables are replaced. */
+html[data-nightglass-theme-source] *,
+html[data-nightglass-theme-source] *::before,
+html[data-nightglass-theme-source] *::after {
+  transition-property: opacity, transform, border-color, box-shadow, filter !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   V2.3 viewport-fit corrections
+
+   The compact density is selected from the real Visual Viewport. Its rows must
+   also account for panel padding; otherwise a nominal 224px energy band can
+   still have 237px of intrinsic content. These rules make every declared row
+   fit mathematically and keep the insight strip inside its own panel.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 900px) and (orientation: landscape) {
+  body:not(.dashboard-fit-micro) .smart-insight {
+    padding-block: 6px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .smart-insight-main,
+  body:not(.dashboard-fit-micro) .smart-insight-copy,
+  body:not(.dashboard-fit-micro) .smart-insight-meta {
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  body:not(.dashboard-fit-micro) .smart-insight-main,
+  body:not(.dashboard-fit-micro) .smart-insight-copy {
+    overflow: hidden;
+  }
+
+  body:not(.dashboard-fit-micro) .smart-insight-icon {
+    width: clamp(30px, 2.35vw, 38px) !important;
+    height: clamp(30px, 2.35vw, 38px) !important;
+    min-width: clamp(30px, 2.35vw, 38px) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .smart-insight-context:empty {
+    display: none !important;
+  }
+
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .energy-panel {
+    grid-template-rows: 24px minmax(80px, 1fr) 72px !important;
+    gap: 5px !important;
+  }
+
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .cards,
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .card {
+    height: 72px !important;
+    min-height: 72px !important;
+  }
+
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .card {
+    grid-template-rows: 15px minmax(0, 1fr) 16px !important;
+    padding: 5px 7px !important;
+  }
+
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .card-trend,
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .card-trend .card-sparkline {
+    height: 16px;
+    min-height: 16px;
+    max-height: 16px;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 980px) and (orientation: landscape) {
+  body:not(.dashboard-fit-micro) .smart-insight-context {
+    display: none !important;
+  }
+}
+
+/* ========================================================================== 
+   V2.4 — flow alignment and card rhythm
+   --------------------------------------------------------------------------
+   This final layer resets a few inherited rules from the original flow.css:
+   the old label margin, the old 28px inverter badge, and the particle's
+   negative vertical margin. It also reserves distinct title, metric and trend
+   bands in every desktop density.
+   ========================================================================== */
+
+.node .label {
+  margin: 0 !important;
+}
+
+.limitBadge {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  min-height: 16px !important;
+  height: 16px !important;
+  max-height: 16px !important;
+  margin: 2px 0 0 !important;
+  padding: 0 6px !important;
+  gap: 3px !important;
+  align-self: start !important;
+  justify-self: start !important;
+  flex: 0 0 auto !important;
+  font-size: clamp(7px, .46vw, 8px) !important;
+  line-height: 14px !important;
+}
+
+.limitBadge.is-limited::before,
+.limitBadge.is-blocked::before {
+  margin-right: 3px !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+}
+
+.flowline .particle,
+.flowline .particle:nth-child(n) {
+  top: 50% !important;
+  margin: 0 !important;
+  transform: translateY(-50%) !important;
+  height: 3px !important;
+  max-height: 3px !important;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  body:not(.dashboard-fit-micro) .flowbox {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 11px 8px 16px !important;
+    align-content: center !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    justify-items: stretch !important;
+    row-gap: 6px !important;
+    padding-block: 0 !important;
+  }
+
+  body:not(.dashboard-fit-micro) .flow-caption {
+    min-height: 11px !important;
+    display: grid !important;
+    place-items: center;
+    align-self: center !important;
+    line-height: 1 !important;
+  }
+
+  body:not(.dashboard-fit-micro) .flowline {
+    height: 8px !important;
+    min-height: 8px !important;
+    align-self: center !important;
+    contain: layout paint style;
+    overflow: hidden !important;
+  }
+
+  body:not(.dashboard-fit-micro) .arrow {
+    height: 16px !important;
+    min-height: 16px !important;
+    margin: 0 !important;
+    align-self: center !important;
+    line-height: 16px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card-metric {
+    min-height: 0 !important;
+    align-content: center !important;
+    row-gap: 3px !important;
+    margin-top: 6px !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card-metric > strong {
+    line-height: 1.08 !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card-metric > small {
+    min-height: 10px;
+    line-height: 1.2 !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card-trend {
+    box-sizing: border-box !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    padding-top: 3px !important;
+    align-items: center !important;
+    align-self: end !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card-trend .card-sparkline {
+    height: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    align-self: center !important;
+  }
+
+  body:not(.dashboard-fit-micro) .card-trend .price-line,
+  body:not(.dashboard-fit-micro) .card-trend .solar-price,
+  body:not(.dashboard-fit-micro) .card-trend .gas-price {
+    height: 17px !important;
+    min-height: 17px !important;
+    max-height: 17px !important;
+    padding: 0 !important;
+    align-self: center !important;
+    line-height: 1 !important;
+  }
+
+  /* At ordinary laptop widths the previous flexible columns could shrink a
+     connector to a very short stub. Reserve enough rail width for a centred
+     caption, track and arrow while keeping the three source cards equal. */
+  @media (max-width: 1599px) {
+    body:not(.dashboard-fit-micro) .flow {
+      grid-template-columns:
+        minmax(190px, 1fr)
+        minmax(72px, .62fr)
+        minmax(190px, 1fr)
+        minmax(72px, .62fr)
+        minmax(190px, 1fr) !important;
+    }
+  }
+
+  /* Cozy: monitors and televisions with more than 980 CSS pixels height. */
+  body.dashboard-fit-cozy:not(.dashboard-fit-micro) .dashboard-content {
+    grid-template-rows:
+      clamp(148px, 19.1vh, 208px)
+      clamp(56px, 6.65vh, 72px)
+      clamp(260px, 25.5vh, 286px)
+      minmax(184px, 1fr) !important;
+  }
+
+  body.dashboard-fit-cozy:not(.dashboard-fit-micro) .energy-panel {
+    /* 260px is the smallest cozy panel. Fixed tracks stay below the usable
+       content height, so neither the flow row nor the KPI row can overflow. */
+    grid-template-rows: 27px minmax(96px, 1fr) 96px !important;
+    gap: 7px !important;
+  }
+
+  body.dashboard-fit-cozy:not(.dashboard-fit-micro) .cards,
+  body.dashboard-fit-cozy:not(.dashboard-fit-micro) .card {
+    height: 96px !important;
+    min-height: 96px !important;
+  }
+
+  body.dashboard-fit-cozy:not(.dashboard-fit-micro) .card {
+    grid-template-rows: 17px minmax(34px, 1fr) 22px !important;
+    padding: 7px 9px !important;
+    gap: 3px !important;
+  }
+
+  body.dashboard-fit-cozy:not(.dashboard-fit-micro) .card-topline {
+    height: 17px !important;
+    min-height: 17px !important;
+  }
+
+  /* Compact: ordinary laptop/browser viewports, including 2048x944. */
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .dashboard-content {
+    grid-template-rows:
+      clamp(148px, 19.1vh, 188px)
+      clamp(56px, 6.65vh, 70px)
+      clamp(258px, 28vh, 272px)
+      minmax(170px, 1fr) !important;
+  }
+
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .energy-panel {
+    grid-template-rows: 24px minmax(104px, 1fr) 96px !important;
+    gap: 6px !important;
+  }
+
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .cards,
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .card {
+    height: 96px !important;
+    min-height: 96px !important;
+  }
+
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .card {
+    grid-template-rows: 16px minmax(38px, 1fr) 22px !important;
+    padding: 6px 8px !important;
+    gap: 3px !important;
+  }
+
+  body.dashboard-fit-compact:not(.dashboard-fit-micro) .card-topline {
+    height: 16px !important;
+    min-height: 16px !important;
+  }
+
+  /* Dense: shorter 720/768/800px landscape panels. */
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .dashboard-content {
+    grid-template-rows:
+      clamp(126px, 18.3vh, 150px)
+      50px
+      clamp(228px, 30vh, 242px)
+      minmax(138px, 1fr) !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .energy-panel {
+    grid-template-rows: 22px minmax(92px, 1fr) 88px !important;
+    gap: 5px !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .cards,
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .card {
+    height: 88px !important;
+    min-height: 88px !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .card {
+    grid-template-rows: 15px minmax(35px, 1fr) 20px !important;
+    padding: 5px 7px !important;
+    gap: 2px !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .card-topline {
+    height: 15px !important;
+    min-height: 15px !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .card-metric {
+    row-gap: 2px !important;
+    margin-top: 3px !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .card-trend,
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .card-trend .card-sparkline {
+    height: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+  }
+}
+
+/* The 1024x500 micro composition has its own dimensions, but needs the same
+   inherited-margin resets. */
+body.dashboard-fit-micro .node .label {
+  margin: 0 !important;
+}
+
+body.dashboard-fit-micro .limitBadge {
+  min-height: 10px !important;
+  height: 10px !important;
+  max-height: 10px !important;
+  margin: 1px 0 0 !important;
+  padding: 0 3px !important;
+  gap: 2px !important;
+  font-size: 5.2px !important;
+  line-height: 8px !important;
+}
+
+body.dashboard-fit-micro .limitBadge.is-limited::before,
+body.dashboard-fit-micro .limitBadge.is-blocked::before {
+  margin-right: 2px !important;
+  font-size: 5.5px !important;
+}
+
+body.dashboard-fit-micro .flowline .particle,
+body.dashboard-fit-micro .flowline .particle:nth-child(n) {
+  top: 50% !important;
+  margin: 0 !important;
+  transform: translateY(-50%) !important;
+}
+
+/* ========================================================================== 
+   Nightglass Energy 2.6 — daylight timeline, meaningful source states and informative sparklines
+   ========================================================================== */
+
+/* Data-source indicators: the colour now represents actual freshness. */
+.zone-state i,
+.weather-live-dot,
+.status-dot {
+  transition: background .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+
+.zone-state[data-state="loading"] i,
+.weather-live-dot[data-state="loading"],
+.status[data-state="loading"] .status-dot {
+  background: var(--blue) !important;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .08), 0 0 12px rgba(var(--accent-rgb), .52) !important;
+  animation: ng-source-pulse 1.35s ease-in-out infinite;
+}
+
+.zone-state[data-state="live"] i,
+.weather-live-dot[data-state="live"],
+.status[data-state="live"] .status-dot {
+  background: var(--green) !important;
+  box-shadow: 0 0 0 4px rgba(var(--success-rgb), .08), 0 0 12px rgba(var(--success-rgb), .66) !important;
+  animation: none;
+}
+
+.zone-state[data-state="stale"] i,
+.weather-live-dot[data-state="stale"],
+.status[data-state="stale"] .status-dot {
+  background: var(--solar) !important;
+  box-shadow: 0 0 0 4px rgba(var(--warning-rgb), .08), 0 0 12px rgba(var(--warning-rgb), .58) !important;
+  animation: ng-source-pulse 1.8s ease-in-out infinite;
+}
+
+.zone-state[data-state="error"] i,
+.weather-live-dot[data-state="error"],
+.status[data-state="error"] .status-dot {
+  background: var(--red) !important;
+  box-shadow: 0 0 0 4px rgba(var(--danger-rgb), .08), 0 0 12px rgba(var(--danger-rgb), .62) !important;
+  animation: none;
+}
+
+.zone-state[data-state="disabled"] i,
+.weather-live-dot[data-state="disabled"],
+.status[data-state="disabled"] .status-dot {
+  background: var(--soft) !important;
+  box-shadow: none !important;
+  opacity: .68;
+  animation: none;
+}
+
+@keyframes ng-source-pulse {
+  0%, 100% { opacity: .58; transform: scale(.88); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* Sun-cycle footer: a full-width daylight timeline replaces the former
+   decorative/progress dot. The track position is meaningful at a glance and
+   the adjacent text states both progress and remaining time. */
+.sun-cycle-footer {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.daylight-progress {
+  --sun-progress: 0%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 7px;
+}
+
+.daylight-time {
+  min-width: 0;
+  color: var(--muted);
+  font-size: clamp(7px, .50vw, 9px);
+  font-weight: 760;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.daylight-time--end { text-align: right; }
+
+.daylight-track {
+  position: relative;
+  min-width: 0;
+  height: 4px;
+  border: 1px solid rgba(var(--warning-rgb), .18);
+  border-radius: var(--radius-pill);
+  background: rgba(var(--warning-rgb), .075);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28);
+}
+
+.daylight-track-fill {
+  position: absolute;
+  inset: -1px auto -1px -1px;
+  width: var(--sun-progress);
+  max-width: calc(100% + 2px);
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(var(--warning-rgb), .44), var(--solar));
+  box-shadow: 0 0 9px rgba(var(--warning-rgb), .30);
+  transition: width .45s ease, opacity .25s ease, background .25s ease;
+}
+
+.daylight-marker {
+  position: absolute;
+  top: 50%;
+  left: clamp(4px, var(--sun-progress), calc(100% - 4px));
+  width: 9px;
+  height: 9px;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(var(--surface-high-rgb), .96);
+  border-radius: 50%;
+  background: var(--solar);
+  box-shadow: 0 0 0 1px rgba(var(--warning-rgb), .32), 0 0 11px rgba(var(--warning-rgb), .62);
+  transition: left .45s ease, background .25s ease, opacity .25s ease;
+}
+
+.daylight-meta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.daylight-meta .day-length,
+.daylight-status-text {
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: clamp(7.5px, .54vw, 9.5px) !important;
+  font-weight: 680;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.daylight-meta .day-length {
+  flex: 0 1 auto;
+  color: var(--muted) !important;
+}
+
+.daylight-status-text {
+  flex: 1 1 auto;
+  color: var(--solar);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.daylight-progress[data-state="night"] .daylight-track {
+  border-color: rgba(var(--accent-rgb), .16);
+  background: rgba(var(--accent-rgb), .055);
+}
+
+.daylight-progress[data-state="night"] .daylight-track-fill {
+  background: var(--blue-light);
+  box-shadow: 0 0 7px rgba(var(--accent-rgb), .20);
+  opacity: .30;
+}
+
+.daylight-progress[data-state="night"] .daylight-marker {
+  background: var(--blue-light);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .24), 0 0 9px rgba(var(--accent-rgb), .36);
+}
+
+.daylight-progress[data-state="night"] + .daylight-meta .daylight-status-text {
+  color: var(--blue-light);
+}
+
+.daylight-progress[data-state="unknown"] { opacity: .62; }
+.daylight-progress[data-state="unknown"] .daylight-track {
+  border-color: var(--line);
+  background: rgba(var(--surface-high-rgb), .36);
+}
+.daylight-progress[data-state="unknown"] .daylight-track-fill,
+.daylight-progress[data-state="unknown"] .daylight-marker {
+  opacity: 0;
+}
+.daylight-progress[data-state="unknown"] + .daylight-meta .daylight-status-text {
+  color: var(--soft);
+}
+
+/* Explicit units/period: the line is no longer an unlabeled decoration. */
+.card-topline h3 {
+  flex: 1 1 auto;
+}
+
+.sparkline-period {
+  min-width: 0;
+  margin-left: auto;
+  padding: 2px 5px;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, currentColor 17%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, currentColor 5%, transparent);
+  color: var(--soft);
+  font-size: clamp(5.8px, .42vw, 7.4px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card-sparkline {
+  overflow: hidden !important;
+  cursor: crosshair;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.sparkline-line,
+.sparkline-area,
+.sparkline-baseline,
+.sparkline-zero,
+.sparkline-latest,
+.sparkline-guide,
+.sparkline-hover-point {
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.sparkline-baseline,
+.sparkline-zero {
+  stroke: var(--line-strong);
+  stroke-width: .55;
+  opacity: .58;
+}
+
+.sparkline-zero {
+  display: none;
+  stroke-dasharray: 2 2;
+  opacity: .74;
+}
+
+.card-sparkline.is-signed .sparkline-baseline {
+  display: none;
+}
+
+.card-sparkline.is-signed .sparkline-zero {
+  display: block;
+}
+
+.sparkline-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .78;
+  filter: drop-shadow(0 0 1.8px currentColor);
+}
+
+.sparkline-area {
+  fill: currentColor;
+  stroke: none;
+  opacity: .052;
+}
+
+.sparkline-line--positive,
+.sparkline-line--negative,
+.sparkline-area--positive,
+.sparkline-area--negative {
+  display: none;
+}
+
+.card-grid .sparkline-line--main,
+.card-grid .sparkline-area--main {
+  display: none;
+}
+
+.card-grid .sparkline-line--positive,
+.card-grid .sparkline-line--negative,
+.card-grid .sparkline-area--positive,
+.card-grid .sparkline-area--negative {
+  display: block;
+}
+
+.card-grid .sparkline-line--positive { stroke: var(--orange); }
+.card-grid .sparkline-line--negative { stroke: var(--green); }
+.card-grid .sparkline-area--positive { fill: var(--orange); opacity: .055; }
+.card-grid .sparkline-area--negative { fill: var(--green); opacity: .06; }
+
+.sparkline-latest {
+  fill: currentColor;
+  stroke: var(--surface-high);
+  stroke-width: .75;
+  filter: drop-shadow(0 0 2px currentColor);
+}
+
+.card-grid .sparkline-latest { fill: var(--orange); }
+.card-grid .sparkline-latest.is-negative { fill: var(--green); }
+
+.sparkline-guide {
+  display: none;
+  stroke: var(--text-strong);
+  stroke-width: .55;
+  stroke-dasharray: 1.5 1.5;
+  opacity: .45;
+}
+
+.sparkline-hover-point {
+  display: none;
+  fill: currentColor;
+  stroke: var(--text-strong);
+  stroke-width: .75;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.card-grid .sparkline-hover-point { fill: var(--orange); }
+.card-grid .sparkline-hover-point.is-negative { fill: var(--green); }
+
+.card-sparkline.is-inspecting .sparkline-guide,
+.card-sparkline.is-inspecting .sparkline-hover-point {
+  display: block;
+}
+
+.card-sparkline:not(.has-data) {
+  opacity: .48;
+  cursor: default;
+}
+
+.sparkline-tooltip {
+  position: fixed;
+  z-index: calc(var(--z-tooltip) + 2);
+  min-width: 170px;
+  max-width: min(270px, calc(100vw - 20px));
+  padding: 9px 11px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(var(--accent-rgb), .28);
+  border-radius: 11px;
+  background: rgba(var(--surface-high-rgb), .96);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255, 255, 255, .06);
+  color: var(--text-strong);
+  font-size: 10px;
+  line-height: 1.2;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity .12s ease, transform .12s ease;
+  backdrop-filter: blur(16px);
+}
+
+.sparkline-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sparkline-tooltip strong {
+  color: var(--blue-light);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.sparkline-tooltip span {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.sparkline-tooltip small {
+  color: var(--soft);
+  font-size: 8px;
+  font-weight: 650;
+}
+
+body.dashboard-fit-micro .sun-cycle-footer {
+  gap: 2px !important;
+  padding-top: 2px !important;
+}
+
+body.dashboard-fit-micro .daylight-progress {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0 !important;
+}
+
+body.dashboard-fit-micro .daylight-time {
+  display: none !important;
+}
+
+body.dashboard-fit-micro .daylight-track {
+  height: 3px !important;
+}
+
+body.dashboard-fit-micro .daylight-marker {
+  width: 6px !important;
+  height: 6px !important;
+  border-width: 1px !important;
+  left: clamp(3px, var(--sun-progress), calc(100% - 3px)) !important;
+}
+
+body.dashboard-fit-micro .daylight-meta {
+  gap: 4px !important;
+}
+
+body.dashboard-fit-micro .daylight-meta .day-length,
+body.dashboard-fit-micro .daylight-status-text {
+  font-size: 5.5px !important;
+  line-height: 1 !important;
+}
+
+body.dashboard-fit-micro .sparkline-period {
+  display: none !important;
+}
+
+@media (max-width: 1180px), (max-height: 760px) {
+  body:not(.dashboard-fit-micro) .sparkline-period {
+    padding-inline: 4px;
+    font-size: 5.8px;
+    letter-spacing: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zone-state[data-state="loading"] i,
+  .zone-state[data-state="stale"] i,
+  .weather-live-dot[data-state="loading"],
+  .weather-live-dot[data-state="stale"],
+  .status[data-state="loading"] .status-dot,
+  .status[data-state="stale"] .status-dot {
+    animation: none !important;
+  }
+}
+
+/* ========================================================================== 
+   Nightglass Energy 2.7 — real Domoticz history as card watermarks
+   --------------------------------------------------------------------------
+   The duplicated daily values in the live flow nodes are gone. Statistic-card
+   charts now use Domoticz range=day history, rendered behind the card content
+   in the same watermark style as the Nightglass theme.
+   ========================================================================== */
+
+/* The live flow row now contains live information only. Earlier wide-screen
+   rules reserved a third column for duplicate daily totals; force the clean
+   two-column node layout after every density/media override. */
+.flow .node,
+.node,
+body:not(.dashboard-fit-micro) .flow .node,
+body:not(.dashboard-fit-micro) .node {
+  grid-template-columns: clamp(44px, 3.8vw, 60px) minmax(0, 1fr) !important;
+}
+
+.node-text {
+  align-self: center;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  body:not(.dashboard-fit-micro) .flow {
+    grid-template-columns:
+      minmax(170px, .88fr)
+      minmax(96px, .76fr)
+      minmax(170px, .88fr)
+      minmax(96px, .76fr)
+      minmax(170px, .88fr) !important;
+  }
+}
+
+/* Actual Nightglass-style full-card watermarks. */
+.card[data-history-card] {
+  isolation: isolate;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  align-content: stretch !important;
+  gap: 4px !important;
+}
+
+.card[data-history-card] > *:not(.history-watermark) {
+  position: relative;
+  z-index: 2;
+}
+
+.history-watermark {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  overflow: hidden;
+  border-radius: inherit;
+  color: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 72%, rgba(0, 0, 0, .55) 88%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, #000 72%, rgba(0, 0, 0, .55) 88%, transparent 100%);
+}
+
+.history-watermark.is-visible {
+  opacity: .16;
+}
+
+.card[data-history-source="derived"] .history-watermark.is-visible {
+  opacity: .13;
+}
+
+.history-watermark-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+.history-watermark-line,
+.history-watermark-area,
+.history-watermark-zero {
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.history-watermark-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .9;
+  filter: drop-shadow(0 0 2px currentColor);
+}
+
+.history-watermark-area {
+  fill: currentColor;
+  stroke: none;
+  opacity: .24;
+}
+
+/* Netimport and teruglevering share one zero-centred graph, but keep their
+   semantic Nightglass colours so the direction is readable at a glance. */
+.card-grid .history-watermark-line--positive {
+  stroke: var(--orange);
+}
+
+.card-grid .history-watermark-line--negative {
+  stroke: var(--green);
+}
+
+.card-grid .history-watermark-area--positive {
+  fill: var(--orange);
+}
+
+.card-grid .history-watermark-area--negative {
+  fill: var(--green);
+}
+
+.history-watermark-zero {
+  display: none;
+  stroke: color-mix(in srgb, currentColor 50%, var(--line-strong));
+  stroke-width: .55;
+  stroke-dasharray: 2 2;
+  opacity: .72;
+}
+
+.history-watermark.has-zero .history-watermark-zero {
+  display: block;
+}
+
+.card[data-history-state="loading"] .history-watermark:not(.is-visible) {
+  opacity: .035;
+  background: linear-gradient(105deg, transparent 30%, currentColor 48%, transparent 66%);
+  background-size: 220% 100%;
+  animation: ng-history-loading 1.8s linear infinite;
+}
+
+@keyframes ng-history-loading {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+
+/* Metrics remain the foreground; the graph is a watermark rather than a
+   separate cramped strip. */
+.card[data-history-card] .card-topline {
+  min-height: 17px;
+}
+
+.card[data-history-card] .card-metric {
+  position: relative;
+  z-index: 2;
+  min-height: 0 !important;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center !important;
+  gap: 2px !important;
+  margin-top: 6px !important;
+  padding-bottom: 10px;
+  overflow: visible !important;
+}
+
+.card-house .card-metric,
+.card-self-suff .card-metric,
+.card-self-cons .card-metric {
+  padding-bottom: 0;
+}
+
+.card[data-history-card] .card-metric::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -7px -8px -6px;
+  border-radius: 10px;
+  background: radial-gradient(ellipse at 20% 50%, rgba(var(--surface-high-rgb), .66), rgba(var(--surface-rgb), .16) 58%, transparent 78%);
+  pointer-events: none;
+}
+
+.card-corner-detail,
+.card[data-history-card] > .price-line,
+.card[data-history-card] > .solar-price,
+.card[data-history-card] > .gas-price {
+  position: absolute !important;
+  right: 8px !important;
+  bottom: 6px !important;
+  z-index: 3 !important;
+  width: auto !important;
+  max-width: calc(100% - 16px) !important;
+  height: 17px !important;
+  min-height: 17px !important;
+  margin: 0 !important;
+  padding: 0 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent) !important;
+  border-radius: var(--radius-pill) !important;
+  background: color-mix(in srgb, var(--surface-high) 88%, transparent) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .16) !important;
+  font-size: clamp(6.8px, .48vw, 8.4px) !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.card-corner-detail .mini-price-icon {
+  width: 9px !important;
+  height: 9px !important;
+  flex: 0 0 9px !important;
+}
+
+.card[data-history-card][data-history-state="ready"] {
+  border-color: color-mix(in srgb, currentColor 16%, rgba(var(--muted-rgb), .13)) !important;
+}
+
+.card[data-history-card]:hover .history-watermark.is-visible,
+.card[data-history-card]:focus-visible .history-watermark.is-visible {
+  opacity: .24;
+}
+
+body.dashboard-fit-micro .card[data-history-card] {
+  grid-template-rows: 12px minmax(0, 1fr) !important;
+  gap: 1px !important;
+}
+
+body.dashboard-fit-micro .card[data-history-card] .card-metric {
+  padding-bottom: 0 !important;
+}
+
+body.dashboard-fit-micro .card-corner-detail,
+body.dashboard-fit-micro .card[data-history-card] > .price-line,
+body.dashboard-fit-micro .card[data-history-card] > .solar-price,
+body.dashboard-fit-micro .card[data-history-card] > .gas-price {
+  display: none !important;
+}
+
+body.dashboard-fit-micro .history-watermark.is-visible {
+  opacity: .13;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card[data-history-state="loading"] .history-watermark:not(.is-visible) {
+    animation: none !important;
+  }
+}

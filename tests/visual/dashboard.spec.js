@@ -122,7 +122,7 @@ test.beforeEach(async ({ page }) => {
     const FIXED = new Date('2026-05-17T10:00:00Z').getTime();
     const _Date = Date;
     class MockDate extends _Date {
-      constructor(...args) { super(args.length ? args[0] : FIXED); }
+      constructor(...args) { super(...(args.length ? args : [FIXED])); }
       static now() { return FIXED; }
     }
     window.Date = MockDate;
@@ -143,6 +143,20 @@ test.beforeEach(async ({ page }) => {
       ct,
     }));
     window.__MOCK_CURRENT_PRICE_CT__ = 19;
+
+    const HISTORY_START = FIXED - 12 * H;
+    const history = (fn) => Array.from({ length: 25 }, (_, i) => ({
+      t: HISTORY_START + i * H / 2,
+      v: fn(i),
+    }));
+    window.__MOCK_DEVICE_HISTORY__ = {
+      grid: history(i => 1.6 * Math.sin(i / 2.8) - 0.45),
+      house: history(i => 1.7 + 0.55 * Math.sin(i / 2.2) + (i === 15 ? 1.4 : 0)),
+      solar: history(i => Math.max(0, 3.8 * Math.sin((i - 2) / 22 * Math.PI))),
+      selfSuff: history(i => Math.max(0, Math.min(100, 45 + 35 * Math.sin((i - 3) / 22 * Math.PI)))),
+      selfCons: history(i => Math.max(0, Math.min(100, 76 - 26 * Math.sin((i - 3) / 22 * Math.PI)))),
+      gas: history(i => 0.01 + i * 0.0025),
+    };
   });
 
   await page.goto('/energy-dashboard.html');

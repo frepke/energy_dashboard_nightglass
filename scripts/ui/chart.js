@@ -9,20 +9,67 @@ import { t }             from '../i18n.js';
 
 // ---- Color scale ----
 
-/** Maps a price value to a gradient colour. Negative prices → blue, high → orange. */
+const LEGACY_PRICE_PALETTE = Object.freeze({
+  negative: '#36a8ff',
+  cheapest: '#00e0ba',
+  cheap: '#35e56b',
+  middle: '#b9f020',
+  expensive: '#ffc400',
+  peak: '#ff5f00',
+});
+
+function cssHex(name) {
+  if (typeof document === 'undefined') return null;
+  const getter = globalThis.getComputedStyle || globalThis.window?.getComputedStyle;
+  if (typeof getter !== 'function') return null;
+
+  try {
+    const value = getter(document.documentElement).getPropertyValue(name).trim();
+    return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reads the current semantic palette from CSS. These variables are populated
+ * by nightglassThemeController, so a selected preset or manual colour edit is
+ * also reflected in the price graph. A non-browser caller keeps the historic
+ * fixed palette, which makes the pure utility deterministic in tests.
+ */
+function activePricePalette() {
+  const accent = cssHex('--blue');
+  const accentLight = cssHex('--blue-light');
+  const success = cssHex('--green');
+  const warning = cssHex('--solar');
+  const danger = cssHex('--red');
+  if (!accent || !success || !warning || !danger) return null;
+
+  return {
+    negative: accentLight || accent,
+    cheapest: mixHex(success, accent, .36),
+    cheap: success,
+    middle: mixHex(success, warning, .56),
+    expensive: warning,
+    peak: danger,
+  };
+}
+
+/** Maps a price value to the active Nightglass semantic colour scale. */
 export function colorFor(v, min, max) {
-  if (v < 0) return '#36a8ff';
+  const palette = activePricePalette() || LEGACY_PRICE_PALETTE;
+  if (v < 0) return palette.negative;
   // Scale positive prices against the visible positive range. When all visible
   // prices are above zero, the cheapest hour should get the cheapest colour
   // instead of being pushed toward the middle by a hard zero baseline.
   const posMin = min < 0 ? 0 : min;
   const span   = Math.max(.0001, max - posMin);
   const t      = Math.max(0, Math.min(1, (v - posMin) / span));
-  if (t > .82) return '#ff5f00';
-  if (t > .62) return '#ffc400';
-  if (t > .44) return '#b9f020';
-  if (t > .22) return '#35e56b';
-  return '#00e0ba';
+  if (t > .82) return palette.peak;
+  if (t > .62) return palette.expensive;
+  if (t > .44) return palette.middle;
+  if (t > .22) return palette.cheap;
+  return palette.cheapest;
 }
 
 function relLabel(ts, now) {

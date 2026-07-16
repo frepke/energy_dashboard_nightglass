@@ -5,15 +5,15 @@
 import { $ }                    from '../core/dom.js';
 import { pad2, hhmmFrom, fmtDayLengthTime, formatNumber, formatDate } from '../core/formatters.js';
 import { CFG }                 from '../config/resolveConfig.js';
-import { moonInfo, nextFullMoonDate, prevFullMoonDate, moonLocationLabel, drawLocalMoon } from '../domain/moon.js';
-import { fetchWeatherData as fetchWeatherDataOWM } from '../services/weatherService.js';
-import { fetchWeatherData as fetchWeatherDataVC }  from '../services/visualCrossingService.js';
-import { fetchWeatherData as fetchWeatherDataOM }  from '../services/openMeteoService.js';
-import { fetchWeatherData as fetchWeatherDataVB }  from '../services/vierlingsbeekService.js';
+import { moonInfo, nextFullMoonDate, prevFullMoonDate, nextNewMoonDate, prevNewMoonDate, moonLocationLabel, drawLocalMoon } from '../domain/moon.js';
+import { fetchWeatherData as fetchWeatherDataOWM, WEATHER_TTL as WEATHER_TTL_OWM } from '../services/weatherService.js';
+import { fetchWeatherData as fetchWeatherDataVC, WEATHER_TTL as WEATHER_TTL_VC }  from '../services/visualCrossingService.js';
+import { fetchWeatherData as fetchWeatherDataOM, WEATHER_TTL as WEATHER_TTL_OM }  from '../services/openMeteoService.js';
+import { fetchWeatherData as fetchWeatherDataVB, WEATHER_TTL as WEATHER_TTL_VB }  from '../services/vierlingsbeekService.js';
 import { t, getLang, getLocale } from '../i18n.js';
 import { translateWeatherCondition } from '../domain/weatherConditions.js';
 
-const EXT_CFG = window.DASHBOARD_CONFIG || {};
+const EXT_CFG = typeof window !== 'undefined' ? (window.DASHBOARD_CONFIG || {}) : {};
 
 function fetchWeatherData() {
   const provider = (CFG.weatherProvider || 'visualcrossing').toLowerCase().trim();
@@ -21,6 +21,190 @@ function fetchWeatherData() {
   if (provider === 'openmeteo'      || provider === 'om')         return fetchWeatherDataOM();
   if (provider === 'vierlingsbeek'  || provider === 'vb')         return fetchWeatherDataVB();
   return fetchWeatherDataVC();
+}
+
+function activeWeatherProvider() {
+  const provider = (CFG.weatherProvider || 'visualcrossing').toLowerCase().trim();
+  if (provider === 'owm') return 'openweathermap';
+  if (provider === 'om') return 'openmeteo';
+  if (provider === 'vb') return 'vierlingsbeek';
+  return provider;
+}
+
+function weatherTtlMs() {
+  const provider = activeWeatherProvider();
+  if (provider === 'openweathermap') return WEATHER_TTL_OWM;
+  if (provider === 'openmeteo') return WEATHER_TTL_OM;
+  if (provider === 'vierlingsbeek') return WEATHER_TTL_VB;
+  return WEATHER_TTL_VC;
+}
+
+let weatherSourceState = 'loading';
+let lastWeatherSuccessAt = 0;
+let lastSunCycle = { sunrise: null, sunset: null };
+
+export function resolveFreshnessState(baseState, lastSuccessAt, now, staleAfterMs) {
+  if (baseState !== 'live') return baseState;
+  if (!Number.isFinite(lastSuccessAt) || lastSuccessAt <= 0) return 'loading';
+  return now - lastSuccessAt > staleAfterMs ? 'stale' : 'live';
+}
+
+function statusClock(timestamp) {
+  if (!timestamp) return '--:--';
+  return new Date(timestamp).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
+}
+
+function updateWeatherStatusIndicator(now = Date.now()) {
+  const indicator = $('#weatherLiveStatus');
+  if (!indicator) return;
+
+  const staleAfterMs = Math.max(120_000, weatherTtlMs() * 2.25);
+  const state = resolveFreshnessState(weatherSourceState, lastWeatherSuccessAt, now, staleAfterMs);
+  const lastTime = statusClock(lastWeatherSuccessAt);
+  let label;
+  if (state === 'live') label = `${t('source-weather-live')} · ${lastTime}`;
+  else if (state === 'stale') label = `${t('source-weather-stale')} · ${lastTime}`;
+  else if (state === 'error') label = `${t('source-weather-error')} · ${lastTime}`;
+  else if (state === 'disabled') label = t('source-weather-disabled');
+  else label = t('source-weather-loading');
+
+  indicator.dataset.state = state;
+  indicator.title = label;
+  indicator.setAttribute('aria-label', label);
+}
+
+function parseSunMoment(value, referenceDate) {
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (typeof value === 'number') {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+  const timeOnly = raw.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (timeOnly) {
+    return new Date(
+      referenceDate.getFullYear(),
+      referenceDate.getMonth(),
+      referenceDate.getDate(),
+      Number(timeOnly[1]),
+      Number(timeOnly[2]),
+      Number(timeOnly[3] || 0),
+      0,
+    );
+  }
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue) {
+  const now = nowInput instanceof Date ? nowInput : new Date(nowInput);
+  if (Number.isNaN(now.getTime())) {
+    return {
+      state: 'unknown', phase: 'unknown', progress: 0, sunrise: null, sunset: null,
+      nextEvent: null, nextEventAt: null, remainingMs: null,
+    };
+  }
+
+  const sunrise = parseSunMoment(sunriseValue, now);
+  const sunset = parseSunMoment(sunsetValue, now);
+  if (!sunrise || !sunset || sunset <= sunrise) {
+    return {
+      state: 'unknown', phase: 'unknown', progress: 0, sunrise, sunset,
+      nextEvent: null, nextEventAt: null, remainingMs: null,
+    };
+  }
+
+  if (now >= sunrise && now < sunset) {
+    const progress = Math.max(0, Math.min(1, (now.getTime() - sunrise.getTime()) / (sunset.getTime() - sunrise.getTime())));
+    return {
+      state: 'day', phase: 'day', progress, sunrise, sunset,
+      nextEvent: 'sunset', nextEventAt: sunset, remainingMs: Math.max(0, sunset.getTime() - now.getTime()),
+    };
+  }
+
+  const beforeSunrise = now < sunrise;
+  const nextSunrise = beforeSunrise
+    ? sunrise
+    : new Date(sunrise.getFullYear(), sunrise.getMonth(), sunrise.getDate() + 1, sunrise.getHours(), sunrise.getMinutes(), sunrise.getSeconds(), sunrise.getMilliseconds());
+
+  return {
+    state: 'night',
+    phase: beforeSunrise ? 'before-sunrise' : 'after-sunset',
+    progress: beforeSunrise ? 0 : 1,
+    sunrise,
+    sunset,
+    nextEvent: 'sunrise',
+    nextEventAt: nextSunrise,
+    remainingMs: Math.max(0, nextSunrise.getTime() - now.getTime()),
+  };
+}
+
+export function formatSunDuration(durationMs, lang = getLang()) {
+  if (!Number.isFinite(durationMs) || durationMs < 0) return '--';
+  const totalMinutes = Math.max(0, Math.ceil(durationMs / 60_000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const hourSuffix = lang === 'nl' ? 'u' : 'h';
+  const parts = [];
+  if (hours > 0) parts.push(`${hours}${hourSuffix}`);
+  if (minutes > 0 || hours === 0) parts.push(`${minutes}m`);
+  return parts.join(' ');
+}
+
+function updateSunCycleIndicator(now = new Date()) {
+  const indicator = $('#sunCycleStatus');
+  if (!indicator) return;
+
+  const statusText = $('#daylightStatusText');
+  const trackSunrise = $('#daylightSunrise');
+  const trackSunset = $('#daylightSunset');
+  const snapshot = sunCycleSnapshot(now, lastSunCycle.sunrise, lastSunCycle.sunset);
+  const progressPct = Math.round(snapshot.progress * 100);
+  const sunriseText = hhmmFrom(lastSunCycle.sunrise);
+  const sunsetText = hhmmFrom(lastSunCycle.sunset);
+
+  indicator.dataset.state = snapshot.state;
+  indicator.dataset.phase = snapshot.phase;
+  indicator.dataset.progress = String(progressPct);
+  indicator.style.setProperty('--sun-progress', `${progressPct}%`);
+  if (trackSunrise) trackSunrise.textContent = sunriseText;
+  if (trackSunset) trackSunset.textContent = sunsetText;
+
+  const durationText = formatSunDuration(snapshot.remainingMs);
+  let visibleLabel;
+  let accessibleLabel;
+  if (snapshot.state === 'day') {
+    visibleLabel = `${t('sun-status-daylight')} ${progressPct}% · ${t('sun-status-remaining')} ${durationText}`;
+    accessibleLabel = `${visibleLabel} · ${t('sunset')} ${sunsetText}`;
+  } else if (snapshot.state === 'night') {
+    visibleLabel = `${t('sun-status-night')} · ${t('sun-status-sunrise-in')} ${durationText}`;
+    accessibleLabel = `${visibleLabel} · ${t('sunrise')} ${sunriseText}`;
+  } else {
+    visibleLabel = t('sun-status-unavailable');
+    accessibleLabel = visibleLabel;
+  }
+
+  if (statusText) statusText.textContent = visibleLabel;
+  indicator.title = accessibleLabel;
+  indicator.setAttribute('aria-label', accessibleLabel);
+}
+
+function renderWeatherSourceLabel() {
+  const srcEl = $('#weatherProviderToggle');
+  const activeProvider = srcEl ? srcEl.getAttribute('data-provider') : activeWeatherProvider();
+  const sourceLabels = {
+    visualcrossing: '· VISUAL CROSSING',
+    openweathermap: '· OPENWEATHERMAP',
+    openmeteo:      '· OPEN-METEO (KNMI)',
+    vierlingsbeek:  '· WEERSTATION VIERLINGSBEEK',
+  };
+  const weatherSrcEl = $('#weatherSource');
+  if (weatherSrcEl) {
+    weatherSrcEl.textContent = sourceLabels[activeProvider] || `· ${String(activeProvider || '').toUpperCase()}`;
+  }
 }
 
 
@@ -369,32 +553,38 @@ function localMidnight(date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-function fullMoonWhenLabel(now, locale) {
+function currentOrNextMoonEvent(now, previousDate, nextDate) {
+  const previous = previousDate(now);
+  return isSameLocalDate(previous, now) ? previous : nextDate(now);
+}
+
+export function moonEventLabel(eventDate, now, locale) {
+  if (!(eventDate instanceof Date) || Number.isNaN(eventDate.getTime())) return '--';
+
   const isNl = getLang() === 'nl';
-  const timeFmt = { hour: '2-digit', minute: '2-digit', hour12: false };
-  const previousFull = prevFullMoonDate(now);
-
-  // On the full-moon calendar day itself, keep showing today's exact time,
-  // even after the astronomical peak has already passed.
-  if (isSameLocalDate(previousFull, now)) {
-    const timeStr = previousFull.toLocaleTimeString(locale, timeFmt);
-    return isNl ? `vandaag ${timeStr}` : `today ${timeStr}`;
+  const time = eventDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+  if (isSameLocalDate(eventDate, now)) {
+    return `${isNl ? 'vandaag' : 'today'} · ${time}`;
   }
 
-  const nextFull = nextFullMoonDate(now);
-  const timeStr = nextFull.toLocaleTimeString(locale, timeFmt);
+  const date = eventDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+  const days = Math.max(1, Math.round(
+    (localMidnight(eventDate).getTime() - localMidnight(now).getTime()) / 86400000,
+  ));
+  const relative = isNl
+    ? `over ${days} ${days === 1 ? 'dag' : 'dagen'}`
+    : `in ${days} ${days === 1 ? 'day' : 'days'}`;
+  return `${date} · ${relative}`;
+}
 
-  if (isSameLocalDate(nextFull, now)) {
-    return isNl ? `vandaag ${timeStr}` : `today ${timeStr}`;
-  }
-
-  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  if (isSameLocalDate(nextFull, tomorrow)) {
-    return isNl ? `morgen ${timeStr}` : `tomorrow ${timeStr}`;
-  }
-
-  const days = Math.max(1, Math.round((localMidnight(nextFull).getTime() - localMidnight(now).getTime()) / 86400000));
-  return isNl ? `over ${days} dag${days === 1 ? '' : 'en'}` : `in ${days} day${days === 1 ? '' : 's'}`;
+export function moonAgeLabel(ageDays) {
+  if (!Number.isFinite(ageDays)) return '--';
+  const isNl = getLang() === 'nl';
+  const rounded = Number(ageDays.toFixed(1));
+  const unit = isNl
+    ? (Math.abs(rounded - 1) < 0.05 ? 'dag' : 'dagen')
+    : (Math.abs(rounded - 1) < 0.05 ? 'day' : 'days');
+  return `${formatNumber(ageDays, 1)} ${unit}`;
 }
 
 function renderMoon() {
@@ -412,11 +602,35 @@ function renderMoon() {
   const illum = Number.isFinite(moon.illum) ? formatNumber(moon.illum, 1) : moon.illum;
   $('#moonIllum').textContent = illum + t('illum-suffix');
 
-  // Single full-moon line: only show when the next/full-moon day is.
+  const timeFmt = value => value instanceof Date
+    ? value.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+    : '--:--';
+
+  const moonRise = $('#moonRise');
+  const moonSet = $('#moonSet');
+  const moonAge = $('#moonAge');
+  const moonDistance = $('#moonDistance');
   const fullMoonLabel = $('#moonFullMoonWhen');
-   if (fullMoonLabel) {
-     fullMoonLabel.textContent = `${t('next-full-moon-prefix')} · ${fullMoonWhenLabel(now, locale)}`;
-   }
+  const newMoonLabel = $('#moonNewMoonWhen');
+  if (moonRise) moonRise.textContent = timeFmt(moon.rise);
+  if (moonSet) moonSet.textContent = timeFmt(moon.set);
+  if (moonAge) moonAge.textContent = moonAgeLabel(moon.ageDays);
+  if (moonDistance) {
+    moonDistance.textContent = Number.isFinite(moon.distanceKm)
+      ? `${formatNumber(Math.round(moon.distanceKm), 0)} km`
+      : '--';
+  }
+
+  const fullMoonDate = currentOrNextMoonEvent(now, prevFullMoonDate, nextFullMoonDate);
+  const newMoonDate = currentOrNextMoonEvent(now, prevNewMoonDate, nextNewMoonDate);
+  if (fullMoonLabel) {
+    fullMoonLabel.textContent = moonEventLabel(fullMoonDate, now, locale);
+    fullMoonLabel.title = fullMoonDate.toLocaleString(locale, { dateStyle: 'full', timeStyle: 'short' });
+  }
+  if (newMoonLabel) {
+    newMoonLabel.textContent = moonEventLabel(newMoonDate, now, locale);
+    newMoonLabel.title = newMoonDate.toLocaleString(locale, { dateStyle: 'full', timeStyle: 'short' });
+  }
 
   const phase = document.getElementById('moonPhase');
   if (phase) phase.style.width = '';
@@ -441,6 +655,8 @@ export function updateWeatherClock() {
   const locale = getLocale();
   $('#weatherTime').textContent = pad2(n.getHours()) + ':' + pad2(n.getMinutes()) + ':' + pad2(n.getSeconds());
   $('#weatherDate').textContent = formatDate(n, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }, locale);
+  updateWeatherStatusIndicator(n.getTime());
+  updateSunCycleIndicator(n);
 }
 
 /**
@@ -450,6 +666,9 @@ export function updateWeatherClock() {
 export async function refreshWeather() {
   updateWeatherClock();
   renderMoon();
+  renderWeatherSourceLabel();
+  if (!lastWeatherSuccessAt) weatherSourceState = 'loading';
+  updateWeatherStatusIndicator();
 
   const _p = (CFG.weatherProvider || 'visualcrossing').toLowerCase().trim();
   const hasWeatherKey = (_p === 'openmeteo' || _p === 'om' || _p === 'vierlingsbeek' || _p === 'vb')
@@ -457,14 +676,24 @@ export async function refreshWeather() {
     : (_p === 'openweathermap' || _p === 'owm') ? !!CFG.owmKey : !!CFG.vcKey;
 
   if (!hasWeatherKey) {
+    weatherSourceState = 'disabled';
+    lastSunCycle = { sunrise: null, sunset: null };
     $('#weatherDesc').textContent = t('weather-no-key');
     updateWeatherArt({ conditions: 'cloudy', icon: 'cloudy' }, {});
+    updateWeatherStatusIndicator();
+    updateSunCycleIndicator(new Date());
     return;
   }
 
   try {
     const { currentConditions: cc, day } = await fetchWeatherData();
     lastWeatherData = { cc, day };
+    lastWeatherSuccessAt = Date.now();
+    weatherSourceState = 'live';
+    lastSunCycle = {
+      sunrise: day.sunrise || cc.sunrise || null,
+      sunset: day.sunset || cc.sunset || null,
+    };
     $('#sunriseTime').textContent  = hhmmFrom(day.sunrise || cc.sunrise);
     $('#sunsetTime').textContent   = hhmmFrom(day.sunset  || cc.sunset);
     $('#dayLength').textContent    = t('day-length-prefix') + fmtDayLengthTime(day.sunrise || cc.sunrise, day.sunset || cc.sunset);
@@ -508,23 +737,14 @@ export async function refreshWeather() {
     $('#weatherDesc').textContent = translateWeatherCondition(conditionStr, getLang());
     updateWeatherArt(cc, day);
   } catch {
+    weatherSourceState = 'error';
     $('#weatherDesc').textContent = t('weather-error');
     updateWeatherArt({ conditions: 'cloudy', icon: 'cloudy' }, {});
   }
 
-  // Always update the source label — even when the fetch failed
-  const srcEl = $('#weatherProviderToggle');
-  const activeProvider = srcEl ? srcEl.getAttribute('data-provider') : (CFG.weatherProvider || '').toLowerCase();
-  const SOURCE_LABELS = {
-    visualcrossing: '· VISUAL CROSSING',
-    openweathermap: '· OPENWEATHERMAP',
-    openmeteo:      '· OPEN-METEO (KNMI)',
-    vierlingsbeek:  '· WEERSTATION VIERLINGSBEEK',
-  };
-  const weatherSrcEl = $('#weatherSource');
-  if (weatherSrcEl) {
-    weatherSrcEl.textContent = SOURCE_LABELS[activeProvider] || `· ${activeProvider.toUpperCase()}`;
-  }
+  renderWeatherSourceLabel();
+  updateWeatherStatusIndicator();
+  updateSunCycleIndicator(new Date());
 }
 
 /**
@@ -538,4 +758,7 @@ export async function refreshWeather() {
 export function retranslateWeatherLabels() {
   renderMoon();
   retranslateWeather();
+  renderWeatherSourceLabel();
+  updateWeatherStatusIndicator();
+  updateSunCycleIndicator(new Date());
 }

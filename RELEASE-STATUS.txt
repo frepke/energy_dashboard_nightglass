@@ -1,0 +1,20 @@
+Nightglass Energy Dashboard 2.7.0
+
+Automatische unit-/integratietests: 402 geslaagd
+Testbestanden: 22 geslaagd
+ESLint: 0 fouten, 0 waarschuwingen
+
+Gerichte 2.7-controles:
+- geen dubbele dagtotalen meer in de grote net-, huis- en zontegels
+- geen lokale 60-minuten-sparklineopslag of aparte grafiekstroken meer
+- echte Domoticz range=day-historie wordt als volledig kaartwatermerk gerenderd
+- P1-import en -teruglevering worden als getekende netwaarde geparseerd
+- ontbrekende huis- en KPI-reeksen worden alleen uit echte uitgelijnde historie afgeleid
+- SVG-geometrie gebruikt een relevante nulbasis en vaste 0-100%-schaal voor percentages
+- alle grafiekkleuren volgen de actieve Nightglass-runtime-tokens via currentColor
+- historie wordt maximaal eenmaal per tien minuten opgevraagd
+
+De volledige Playwright-geometriesuite kon in deze uitvoeromgeving niet
+opnieuw navigeren naar de lokale testserver: Chromium werd door het platform
+geblokkeerd met ERR_BLOCKED_BY_ADMINISTRATOR. Unit-/integratietests en ESLint
+zijn wel volledig uitgevoerd.

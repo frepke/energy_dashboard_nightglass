@@ -22,12 +22,13 @@ beforeEach(() => {
 });
 
 describe('themeController', () => {
-  it('reads stored theme from localStorage when no query override is present', () => {
-    globalThis.localStorage.getItem = vi.fn(() => 'light');
+  it('reads stored dashboard theme when Nightglass has no explicit mode', () => {
+    globalThis.localStorage.getItem = vi.fn(key => key === 'ed-theme' ? 'light' : null);
     const btn = addElement(document.body, 'button', { id: 'themeToggle' });
 
     initThemeToggle();
 
+    expect(globalThis.localStorage.getItem).toHaveBeenCalledWith('dz-theme-style');
     expect(globalThis.localStorage.getItem).toHaveBeenCalledWith('ed-theme');
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     expect(btn.textContent).toBe('☀️');

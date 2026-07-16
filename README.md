@@ -1,312 +1,226 @@
-# Energy Dashboard
+# Nightglass Energy Dashboard 2.7
 
-A private, self-hosted energy dashboard for Domoticz with Zonneplan dynamic pricing.
-Shows live grid/solar/house power flow, today's energy counters, the hourly electricity price chart, and a smart insight bar that advises when to run loads.
+Een zelfstandig fullscreen energiedashboard voor **Domoticz**, in de visuele taal van Nightglass. Het dashboard gebruikt alleen HTML, CSS en JavaScript: geen framework en geen buildstap voor productie.
 
-Built with vanilla HTML, CSS, and JavaScript — no framework, no build step.
+Versie 2.7 maakt de energietegels inhoudelijk rustiger en gebruikt de grafiekfunctie van Nightglass zoals bedoeld: als subtiele achtergrondwatermerken op basis van echte Domoticz-daghistorie. De dubbele dagtotalen in de drie grote live-tegels en de lokaal opgebouwde 60-minutenlijntjes zijn verwijderd.
 
-The interface defaults to English. Use the language toggle in the top bar to switch to Dutch; dates, times, numbers, kWh/m³ values, cents and currency formatting follow the active language.
+## Functies
 
----
+- live energiestroom tussen net, woning en zonnepanelen;
+- dagtotalen voor net, woning, zon en gas;
+- zelfvoorziening en zelfconsumptie;
+- Nightglass-achtergrondgrafieken met echte Domoticz-daghistorie;
+- actuele stroom- en gasprijs;
+- Zonneplan-uurgrafiek met voordeligste aaneengesloten reeks;
+- slim verbruiks- en terugleveradvies;
+- tijd, datum, zonsopkomst, zonsondergang en daglengte;
+- prominente maanmodule met fase, verlichting, opkomst, ondergang, leeftijd, afstand en volgende volle/nieuwe maan;
+- meerdere weerbronnen, waaronder Open-Meteo en Weerstation Vierlingsbeek;
+- Nederlands en Engels, donker en licht thema;
+- synchronisatie met de gekozen Nightglass-preset en handmatig ingestelde Nightglass-kleuren;
+- kioskmodus, Visual Viewport-aanpassing en WebSocket-updates.
 
-## What it looks like
+## Bronstatus en zoncyclus
 
-| Section | What it shows |
-|---|---|
-| **Weather header** | Local time, sunrise/sunset, moon phase, current weather (switchable provider) |
-| **Smart insight** | One-line action advice: use now, wait, export surplus, etc. |
-| **Energy flow** | Live grid/house/solar power in watts with animated flow lines |
-| **Stat cards** | Grid, house, solar, self-sufficiency, self-consumption, gas — today's totals |
-| **Price chart** | Hourly electricity prices from Domoticz, with the cheapest window highlighted |
+De bronindicatoren in de klok-, weer- en bovenbalk zijn niet alleen decoratief.
 
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/5e7a0b6d-6b5a-4d81-9060-67552d8978c1" />
+### Domoticz en weer
 
----
+De kleur toont de echte gegevensstatus:
 
-## Files
+- **blauw:** verbinden of laden;
+- **groen:** recent bijgewerkt;
+- **oranje:** laatste goede waarde is verouderd;
+- **rood:** bron niet bereikbaar;
+- **grijs:** bron niet geconfigureerd.
 
-```
-energy-dashboard.html   ← Main entry point — open this in your browser
-config.js               ← Your local configuration (gitignored)
-config.example.js       ← Template — copy to config.js and fill in your values
-moon-texture.png        ← Local moon texture (used for the moon phase canvas)
+De volledige status en het tijdstip van de laatste goede update staan in de tooltip en in het toegankelijke label. De indicator in de bovenbalk gebruikt dezelfde Domoticz-statuslogica.
 
-styles/                 ← Extracted CSS, split by concern and load order
-  README.md             ← CSS split/load-order notes
-  tokens.css            ← Design tokens (colours, radius, shadows)
-  base.css              ← Reset and body/background styles
-  layout.css            ← Dashboard wrapper, topbar, panel
-  weather-core.css      ← Weather header base section
-  weather-command-desktop.css ← Desktop command-header refinements
-  weather-art.css       ← Weather icon/art containment and polish
-  weather-final.css     ← Final weather header alignment overrides
-  weather.css           ← Backwards-compatible weather import manifest
-  flow.css              ← Energy flow nodes, icons, flow lines
-  cards.css             ← Stat cards and price panel badges
-  chart.css             ← Price bars chart and tooltip
-  insights.css          ← Smart insight bar
-  kiosk.css             ← Kiosk/TV mode (enable with ?kiosk=1)
-  responsive-base.css   ← Foundational responsive/reduced-motion rules
-  responsive-layout.css ← Desktop canvas and layout media rules
-  responsive-weather.css ← Weather-header responsive rules
-  responsive-flow.css   ← Mobile/tablet flow layout rules
-  responsive-chart.css  ← Price-chart responsive polish
-  responsive.css        ← Backwards-compatible responsive import manifest
+### Zoncyclus
 
-scripts/                ← Extracted JavaScript (ES modules)
-  main.js               ← Orchestration: init, polling, WebSocket, kiosk
-  config/
-    resolveConfig.js    ← Reads config.js + URL params → exports CFG objects
-  core/
-    dom.js              ← $ and $$ helpers
-    formatters.js       ← parseNum, isNum, fmt (kWh / EUR / ct / m³)
-    state.js            ← Shared mutable state (LIVE_STATE, price history)
-  domain/
-    moon.js             ← Moon astronomy calculations + canvas rendering
-    prices.js           ← Price analysis, dynamic thresholds, smart insight logic
-  services/
-    domoticzService.js  ← Domoticz API client, cache, device-ID resolution
-    weatherService.js   ← OpenWeatherMap weather API (2.5/weather)
-    visualCrossingService.js ← Visual Crossing weather API
-    openMeteoService.js ← Open-Meteo weather API (KNMI HARMONIE-AROME model)
-    vierlingsbeekService.js ← Weerstation Vierlingsbeek via Domoticz plugin devices + Open-Meteo aanvulling
-  ui/
-    weather.js          ← Weather header rendering
-    flow.js             ← Flow animation: setFlow, setIconIntensity
-    cards.js            ← Stat card and badge rendering, updateSmartInsight
-    chart.js            ← Price bars rendering, best-window highlight, tooltip
+De losse ronde indicator is verwijderd. Onder zonsopkomst en zonsondergang staat nu een horizontale daglichttijdlijn:
+
+- het linkereinde is zonsopkomst;
+- het rechtereinde is zonsondergang;
+- de marker staat op het huidige punt van de daglichtperiode;
+- de vulling toont het verstreken deel van het daglicht;
+- de tekst toont bijvoorbeeld `Daglicht 58% · nog 6u 44m`;
+- voor of na de daglichtperiode verschijnt een gedimde nachtstatus met de resterende tijd tot de volgende zonsopkomst.
+
+De gewone waarden voor zonsopkomst, zonsondergang en daglengte blijven zichtbaar.
+
+## Domoticz-daghistorie als Nightglass-watermerk
+
+De zes dagtegels gebruiken geen lokale browsermetingen meer. Iedere tegel vraagt dezelfde Domoticz-grafiekgegevens op die het Nightglass-thema voor apparaatkaarten gebruikt:
+
+```text
+json.htm?type=command&param=graph&sensor=...&idx=...&range=day
 ```
 
----
+De grafiek staat over het volledige tegeloppervlak op de achtergrond. Tekst en bedragen blijven op de voorgrond; er is geen aparte, krappe grafiekstrook meer. De lijn en vulling gebruiken `currentColor` en volgen daardoor automatisch de actieve Nightglass-preset en handmatig ingestelde accent-, succes-, waarschuwing- en foutkleuren.
 
-## Setup
+| Tegel | Historiebron | Gedrag |
+|---|---|---|
+| Net | P1-apparaat | import positief, teruglevering negatief en een echte nullijn |
+| Huis | geconfigureerd verbruiksapparaat | direct; anders berekend uit echte net- en zonhistorie |
+| Zon | zonne-energieapparaat | Domoticz-daghistorie van de productie |
+| Zelfvoorziening | optioneel percentageapparaat | direct; anders berekend uit uitgelijnde huis- en zonhistorie |
+| Zelfconsumptie | optioneel percentageapparaat | direct; anders berekend uit uitgelijnde huis- en zonhistorie |
+| Gas | gasmeter | Domoticz-daghistorie van het huidige dagbereik |
 
-### 1. Put the files on your server
+Er worden geen willekeurige of kunstmatige meetwaarden gemaakt. Alleen ontbrekende afgeleide reeksen worden berekend, en uitsluitend uit echte, op tijd uitgelijnde Domoticz-punten. Bij aanwijzen van een tegel vermeldt de browsertooltip of de reeks rechtstreeks uit Domoticz komt of is afgeleid, hoeveel punten zijn gebruikt en wanneer de historie is opgehaald.
 
-The simplest option is to copy the entire folder to Domoticz's `www` folder:
+Om Domoticz niet onnodig te belasten worden de achtergrondgrafieken maximaal eenmaal per tien minuten ververst. De normale livewaarden blijven onafhankelijk daarvan via polling of WebSocket bijgewerkt worden. Oude lokale opslag uit de 60-minutenimplementatie wordt bij de eerste start opgeruimd.
 
+De drie grote energietegels tonen vanaf 2.7 uitsluitend unieke live-informatie:
+
+- actueel netvermogen en import/terugleverrichting;
+- actuele huisbelasting;
+- actuele zonneproductie en lokaal gebruikt vermogen.
+
+De dagtotalen blijven alleen in de zes kaarten eronder staan, zodat dezelfde gegevens niet tweemaal vlak onder elkaar worden getoond.
+
+## Responsive ontwerp
+
+De pagina gebruikt geen vaste canvasmaat en geen algemene `transform: scale(...)`. Op liggende schermen vult het dashboard de werkelijke **Visual Viewport** met een adaptief grid. Voor zeer lage Safari-vensters is een aparte `micro`-compositie aanwezig. Op tablets en telefoons worden panelen gestapeld zodat informatie leesbaar blijft.
+
+## Installatie of upgrade
+
+1. Bewaar bij een bestaande installatie je eigen `config.js`.
+2. Kopieer de inhoud van deze map naar bijvoorbeeld:
+
+   ```text
+   /home/pi/domoticz/www/energy-dashboard/
+   ```
+
+3. Nieuwe installatie: kopieer `config.example.js` naar `config.js`.
+4. Vul je Domoticz- en weerinstellingen in.
+5. Open:
+
+   ```text
+   http://DOMOTICZ-IP:8080/user/energy-dashboard/energy-dashboard.html
+   ```
+
+Het pakket bevat bewust geen echte `config.js`, zodat wachtwoorden en API-sleutels niet worden overschreven of verspreid.
+
+## Nightglass-thema synchroniseren
+
+Wanneer het dashboard op dezelfde Domoticz-origin wordt geopend, leest het automatisch de Nightglass-instellingen uit `ngThemeSettings`. Op recente Domoticz-versies worden ook opgeslagen waarden uit `ThemeSettings.Nightglass` opgehaald; oudere installaties vallen terug op de gebruikersvariabele `ngTheme_settings`.
+
+Achtergrond, panelen, kaarten, randen, tekst en semantische accent-, succes-, waarschuwing- en foutkleuren volgen daardoor de gekozen preset of handmatige instellingen. Ook de prijsgrafiek, statusindicatoren en Domoticz-historiewatermerken gebruiken deze runtime-tokens.
+
+Handmatig opnieuw synchroniseren kan vanuit de browserconsole met:
+
+```js
+window.refreshNightglassTheme();
 ```
-/home/pi/domoticz/www/energy-dashboard/
-```
 
-Then open `http://your-domoticz-ip:8080/user/energy-dashboard/energy-dashboard.html`.
-
-Or open `energy-dashboard.html` directly from disk for quick testing. In that case, set `domoticz.baseUrl`; empty same-origin mode only works when the dashboard is served by Domoticz or another web server on the same host.
-
-### 2. Create your config.js
-
-```bash
-cp config.example.js config.js
-```
-
-Edit `config.js` with your values:
+## Minimale configuratie
 
 ```js
 window.DASHBOARD_CONFIG = {
-  // Visual Crossing API key (free tier is sufficient)
-  visualCrossingApiKey:   'YOUR_KEY_HERE',
-  visualCrossingLocation: 'Amsterdam,NL',
-  latitude:  52.379,
-  longitude:  4.900,
+  weatherProvider: 'openmeteo',
+  latitude: 51.596,
+  longitude: 5.947,
+  timezone: 'Europe/Amsterdam',
 
   domoticz: {
-    baseUrl:  '',        // same-origin when served by Domoticz itself
-    username: '',        // leave empty when local/same-origin auth is not needed
+    baseUrl: '',
+    username: '',
     password: '',
     auth: 'none',
-    ws: false,  // set true for WebSocket push + 60s heartbeat poll (optional)
+    ws: false,
 
-    // Optional manual overrides if auto-detection picks the wrong devices
     forecastIdx: '',
     usageIdx: '',
     electricityPriceIdx: '',
     gasPriceIdx: '',
-    inverterLimitIdx: '',
-
-    // Optional: Weerstation Vierlingsbeek plugin device idx overrides
-    vierlingsbeek: {
-      thbIdx: '',
-      windIdx: '',
-      rainTodayIdx: '',
-      rainHourIdx: '',
-      rainRateIdx: '',
-      dewPointIdx: '',
-      feelsLikeIdx: '',
-      windAvgIdx: '',
-      windGustMaxIdx: '',
-      tempMaxIdx: '',
-      tempMinIdx: ''
-    }
-  },
-
-  // Optional network timeout for Domoticz/weather calls
-  fetchTimeoutMs: 10000,
-
-  // Optional Zonnebonus cap; the dashboard uses P1 year export when available
-  zonnebonusAnnualExportLimitKwh: 7500
+    inverterLimitIdx: ''
+  }
 };
 ```
 
-> **Note:** `config.js` is intentionally excluded from version control via `.gitignore` so real credentials are never committed.
+Een lege `baseUrl` betekent same-origin en werkt wanneer het dashboard vanuit de `www`-map van Domoticz wordt geladen.
 
-### 3. Open in browser
+## Iconen aanpassen
 
-Navigate to `energy-dashboard.html`. On first load it fetches Domoticz data and weather. The page auto-refreshes every second by default (`?refresh=1`). If the dashboard is served by Domoticz itself, `domoticz.baseUrl: ''` is valid and the API uses `/json.htm` on the same host.
-
----
-
-## URL parameters
-
-All parameters are optional and override config.js values at runtime:
-
-| Parameter | Description |
-|---|---|
-| `?refresh=5` | Poll interval in seconds (default: 1). With `?ws=1`, polling is reduced to a heartbeat of at least 60 seconds. |
-| `?fetchTimeoutMs=15000` / `?timeout=15000` | Network timeout for Domoticz and weather requests in milliseconds (default: 10000). |
-| `?kiosk=1` | Enable TV/kiosk mode (fullscreen, night dimming, auto-scale) |
-| `?theme=light` | Force light theme |
-| `?vcKey=…` | Visual Crossing API key |
-| `?vcLocation=…` | Weather location |
-| `?forecastIdx=…` | Domoticz device idx holding the price forecast JSON |
-| `?ws=1` | Enable WebSocket push and reduce polling to a heartbeat |
-
-Example:
-```
-energy-dashboard.html?kiosk=1&refresh=10
-```
-
----
-
-## Domoticz requirements
-
-The dashboard auto-detects most device IDs from Domoticz. You need:
-
-- A **P1 smart meter** device (grid import/export). The yearly P1 history graph is also used, when available, to stop Zonnebonus advice after the configured annual export cap.
-- A **solar production** device
-- A Domoticz device containing a **Zonneplan price forecast JSON** (stored in `Data` or `sValue`)
-
-Optional but recommended:
-- Gas meter device
-- Separate house consumption device
-- Self-sufficiency / self-consumption % devices (auto-calculated if missing)
-- Live electricity/gas price devices
-- Inverter power-limit device (for the "PV limited" badge)
-
----
-
-## Weather providers
-
-The dashboard supports four weather providers, switchable via the toggle button in the top bar. The active provider is shown on the button (`VC`, `OWM`, `OM`, `VB`). Set the default in `config.js` via `weatherProvider`.
-
-| Provider | Key | Sleutel | Update | Proxy nodig |
-|---|---|---|---|---|
-| `visualcrossing` | VC | Ja (`visualCrossingApiKey`) | 15 min | Nee |
-| `openweathermap` | OWM | Ja (`openWeatherMapApiKey`) | 10 min | Nee |
-| `openmeteo` | OM | Nee | 1 uur (KNMI HARMONIE-AROME) | Nee |
-| `vierlingsbeek` | VB | Nee | ~60 sec (Domoticz plugin) | Nee |
-
-### Visual Crossing
-
-Sign up for a free key at [visualcrossing.com](https://www.visualcrossing.com/).  
-The free tier allows 1,000 records/day which is more than sufficient for personal use.
-
-### OpenWeatherMap
-
-Sign up for a free key at [openweathermap.org](https://openweathermap.org/api).  
-Uses the `/data/2.5/weather` endpoint — no One Call subscription needed.
-
-### Open-Meteo
-
-No registration needed. Uses the KNMI HARMONIE-AROME model (2 km resolution, updated hourly) — the most accurate forecast model available for the Netherlands.
-
-### Weerstation Vierlingsbeek via Domoticz
-
-The `vierlingsbeek` provider reads the devices created by the Domoticz **Weerstation Vierlingsbeek** plugin. The plugin performs the external website fetch server-side and writes normal Domoticz devices, so the browser dashboard does **not** need a CORS proxy for Vierlingsbeek.
-
-The service auto-detects devices whose hardware/name contains `Vierlingsbeek` or `VB`. If auto-detection ever picks the wrong device, add explicit idx overrides in `config.js`:
+Overrides staan in `config.js` en gebruiken lokale SVG-iconen:
 
 ```js
 window.DASHBOARD_CONFIG = {
-  weatherProvider: 'vierlingsbeek',
-
-  domoticz: {
-    baseUrl: '',
-    auth: 'none',
-
-    vierlingsbeek: {
-      thbIdx:         337, // Temp/Hum/Baro VB
-      windIdx:        338, // Wind VB
-      rainTodayIdx:   339, // Regen vandaag VB
-      rainHourIdx:    340, // Regen laatste uur VB
-      rainRateIdx:    341, // Regenintensiteit VB
-      dewPointIdx:    342, // Dauwpunt VB
-      feelsLikeIdx:   343, // Gevoelstemperatuur VB
-      windAvgIdx:     344, // Wind gemiddeld VB
-      windGustMaxIdx: 345, // Vlaag max VB
-      tempMaxIdx:     346, // Temperatuur max VB
-      tempMinIdx:     347, // Temperatuur min VB
+  ui: {
+    iconOverrides: {
+      grid: 'grid',
+      house: 'home',
+      solar: 'panel',
+      'grid-card': 'plug',
+      'house-card': 'home',
+      'solar-card': 'panel',
+      'self-suff-card': 'check',
+      'self-cons-card': 'gauge',
+      'gas-card': 'flame'
     }
   }
 };
 ```
 
-You can also override individual ids through URL parameters such as `?thbIdx=337&windIdx=338` or `?vbThbIdx=337`.
+Beschikbare namen:
 
----
+```text
+bolt, grid, plug, home, solar, panel, flame,
+leaf, gauge, battery, water, wind, check
+```
 
-## Kiosk / TV mode
+## Weerbronnen
 
-Add `?kiosk=1` to the URL to enable:
-- Auto-scaling to fit the screen without scrollbars
-- Night dimming (22:00–06:00 by default)
-- Click anywhere to request fullscreen
+Ondersteund:
 
-The kiosk configuration is in `scripts/main.js` near the bottom (`KIOSK_CFG`).
+- `visualcrossing` — API-sleutel nodig;
+- `openweathermap` — API-sleutel nodig;
+- `openmeteo` — geen sleutel nodig;
+- `vierlingsbeek` — leest de apparaten van de Domoticz-plugin.
 
----
+## URL-opties
 
-## Tests
+```text
+?refresh=5             pollinterval in seconden
+?ws=1                  WebSocket-push inschakelen
+?kiosk=1               kioskmodus
+?theme=light           licht thema forceren
+?fetchTimeoutMs=15000  netwerktime-out
+?safeBottom=80         extra vrije ruimte onderaan
+?safeTop=20            optionele extra bovenmarge
+?safeLeft=0            optionele extra linkermarge
+?safeRight=0           optionele extra rechtermarge
+```
 
-Unit tests cover the core utility functions and domain logic (formatters, price analysis, chart colour utilities).
+## Belangrijke bestanden
 
-**Prerequisites:** [Node.js](https://nodejs.org/) (v20+)
+```text
+energy-dashboard.html          semantische dashboardstructuur
+styles/nightglass-v2.css       adaptieve Nightglass-layout en componentstijlen
+scripts/main.js                initialisatie en gegevensbronstatus
+scripts/ui/weather.js          weer-, zoncyclus- en maanweergave
+scripts/ui/deviceHistoryWatermarks.js  Domoticz-daghistorie en Nightglass-watermerken
+scripts/ui/kiosk.js            Visual Viewport en veilige marges
+scripts/ui/iconOverrides.js    configureerbare lokale SVG-iconen
+config.example.js              configuratievoorbeeld
+```
+
+## Ontwikkelcontrole
+
+Node.js is alleen nodig voor tests en linting:
 
 ```bash
-npm install        # install dev dependencies
-npm test           # run all unit tests once
-npm run test:watch # watch mode
-npm run test:coverage  # with coverage report
+npm ci
+npm test
+npm run lint
 ```
 
-Tests live in `tests/` and use [Vitest](https://vitest.dev/).
-The visual Playwright tests live in `tests/visual/`; install Chromium first with `npx playwright install chromium --with-deps`, then run `npm run test:visual`. Their mock data is deterministic, and Playwright pins the browser locale/timezone so screenshots do not change because of random prices or host machine settings. In minimal Docker images you can point Playwright at a system Chromium with `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:visual`.
+Status van 2.7.0:
 
----
-
-## Security notes
-
-This dashboard is intended for a trusted home/LAN environment. It runs entirely in the browser, so any value in `config.js` is visible to anyone who can open the page or inspect network traffic.
-
-Recommended setup:
-
-- Serve the dashboard from Domoticz itself and use `domoticz.baseUrl: ''` with `auth: 'none'` for same-origin local access.
-- Keep `config.js` in `.gitignore`; never commit real Domoticz credentials or Visual Crossing keys.
-- Do not expose Domoticz or this dashboard directly to the public internet.
-- If you need remote access, put Domoticz behind a trusted VPN or HTTPS reverse proxy with authentication.
-- Avoid Basic Auth over plain HTTP outside a fully trusted LAN. Basic Auth credentials are only encoded, not encrypted.
-- Be extra careful with `ws: true` when credentials are configured: some WebSocket fallbacks may place credentials in a URL, which can be logged by browsers, proxies, or routers.
-- Treat the Visual Crossing API key as a low-privilege browser key and rotate it if the dashboard was accidentally exposed.
-
-`config.js` should remain in your `.gitignore`:
-
+```text
+22 testbestanden geslaagd
+402 tests geslaagd
+ESLint: 0 fouten, 0 waarschuwingen
 ```
-# .gitignore
-config.js
-```
-
----
-
-## License
-
-Private/internal project. No public license is granted. The package metadata marks the project as `UNLICENSED` and `private` to avoid accidentally publishing it as an ISC-licensed package.
-
