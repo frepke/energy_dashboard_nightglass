@@ -5078,3 +5078,110 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     opacity: .14 !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.4 — mobile flow readability + 3x2 landscape cards
+   --------------------------------------------------------------------------
+   - On iPhone portrait, keep the horizontal flow but shrink/rebalance the
+     nodes so all values and subtitles remain visible.
+   - On mobile landscape, use a 2-rows-of-3 stat-card grid to fill the panel
+     more evenly.
+   ========================================================================== */
+
+@media (max-width: 899px) and (orientation: landscape) {
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .card,
+  .card[data-history-card] {
+    min-height: 130px !important;
+    height: 130px !important;
+    max-height: 130px !important;
+  }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .flow {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(16px, .18fr)
+      minmax(0, 1fr)
+      minmax(16px, .18fr)
+      minmax(0, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .flow .node,
+  .node {
+    min-height: 88px !important;
+    height: 88px !important;
+    padding: 8px 6px !important;
+    gap: 6px !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    align-items: center !important;
+  }
+
+  .node-icon,
+  .node .icon,
+  .flow .icon {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .node-text {
+    gap: 1px !important;
+    min-width: 0 !important;
+  }
+
+  .node .label {
+    font-size: 6.5px !important;
+    letter-spacing: .12em !important;
+    text-overflow: clip !important;
+  }
+
+  .node .value {
+    font-size: clamp(14px, 5vw, 20px) !important;
+    margin-top: 1px !important;
+    line-height: 1.02 !important;
+    text-overflow: clip !important;
+  }
+
+  .node .sub {
+    font-size: 7px !important;
+    line-height: 1.1 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    display: block !important;
+  }
+
+  .limitBadge {
+    font-size: 6.5px !important;
+    padding: 2px 4px !important;
+  }
+
+  .flowbox {
+    padding: 0 !important;
+    gap: 3px !important;
+  }
+
+  .flowline {
+    height: 5px !important;
+    min-height: 5px !important;
+  }
+
+  .flowline .particle {
+    left: -24px !important;
+    width: 18px !important;
+    height: 3px !important;
+    top: 1px !important;
+  }
+
+  .arrow {
+    min-height: 10px !important;
+    height: 10px !important;
+    font-size: 10px !important;
+  }
+}
