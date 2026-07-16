@@ -125,7 +125,7 @@ describe('websocketController', () => {
   });
 
   it('calls refreshDistribution instead of refreshAll when pushed device is not the forecast device', async () => {
-    let now = 10_000;
+    const now = 10_000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
 
     const { createWebSocketController } = await loadController();
@@ -152,7 +152,7 @@ describe('websocketController', () => {
   });
 
   it('calls refreshAll when the pushed device is the forecast device', async () => {
-    let now = 10_000;
+    const now = 10_000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
 
     const { createWebSocketController } = await loadController();
@@ -179,7 +179,7 @@ describe('websocketController', () => {
   });
 
   it('falls back to refreshAll when the message payload cannot be parsed', async () => {
-    let now = 10_000;
+    const now = 10_000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
 
     const { createWebSocketController } = await loadController();
