@@ -1,0 +1,652 @@
+/* ============================================================
+   Weather header responsive overrides
+   One block per breakpoint — merged from all previous iterations.
+   Functionally identical to the original; duplicate declarations removed.
+   ============================================================ */
+
+/* ── Desktop baseline (≥ 1101px) ─────────────────────────── */
+@media (min-width: 1101px) {
+  .weather-hero {
+    height: 170px;
+    min-height: 170px;
+    margin: 0 2px 12px;
+    padding: 18px 30px;
+    gap: 0;
+    border-radius: 30px;
+    grid-template-columns: minmax(330px, 1.05fr) minmax(275px, .84fr) minmax(350px, 1.02fr) minmax(405px, 1.18fr);
+  }
+
+  .weather-sun,
+  .weather-moon,
+  .weather-now { padding-top: 0; }
+
+  .weather-section {
+    padding: 10px 28px;
+    gap: 18px;
+  }
+
+  .weather-section:last-child  { padding-right: 4px; }
+  .weather-section:last-of-type { padding-right: 2px; }
+
+  .weather-section-icon {
+    width: 70px;
+    height: 70px;
+    flex-basis: 70px;
+    border-radius: 24px;
+  }
+
+  .weather-section-icon svg { width: 34px; height: 34px; }
+
+  .weather-section-label {
+    margin-bottom: 8px;
+    font-size: 10px;
+    letter-spacing: .18em;
+  }
+
+  .weather-time { font-size: clamp(42px, 3.25vw, 56px); }
+  .weather-date { margin-top: 10px; font-size: 13px; }
+
+  .weather-sun {
+    display: flex;
+    padding-top: 0;
+    gap: 20px;
+    grid-template-columns: repeat(2, minmax(88px, max-content));
+  }
+
+  .sun-label  { margin-top: 0; font-size: 10px; }
+  .sun-time   { font-size: 24px; }
+  .day-length { margin-top: 9px; font-size: 12px; }
+
+  .big-moon   { width: 82px; height: 82px; flex-basis: 82px; }
+  .moon-canvas { width: 82px; height: 82px; }
+  .moon-illum  { font-size: 12px; }
+
+  .moon-phase {
+    margin-top: 0;
+    width: auto !important;
+    font-size: clamp(18px, 1.17vw, 22px);
+  }
+
+
+  .weather-now {
+    padding-top: 0;
+    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) 126px;
+  }
+
+  .weather-temp  { font-size: clamp(42px, 3.35vw, 56px); }
+  .weather-meta  { margin-top: 8px; gap: 6px 10px; font-size: 11px; }
+  .weather-desc  { margin-top: 0; font-size: 14px; }
+
+  .weather-art {
+    width: 126px;
+    height: 94px;
+    transform: scale(.98);
+    transform-origin: center right;
+  }
+
+  /* command-header variant */
+  .weather-hero.weather-hero--command {
+    min-height: 182px !important;
+    margin: 0 2px var(--section-gap);
+    padding: 18px 28px !important;
+    gap: 18px !important;
+    border-radius: 32px;
+    grid-template-columns: minmax(320px, .88fr) minmax(690px, 1.86fr) minmax(420px, 1.06fr) !important;
+  }
+
+  .weather-hero.weather-hero--command .weather-section,
+  .weather-hero.weather-hero--command .weather-sun,
+  .weather-hero.weather-hero--command .weather-now,
+  .weather-hero.weather-hero--command .weather-moon { padding-top: 0; }
+
+  .weather-hero.weather-hero--command .weather-time  { font-size: clamp(42px, 3.1vw, 56px); }
+  .weather-hero.weather-hero--command .weather-temp  { font-size: clamp(42px, 3.25vw, 56px); }
+
+  .weather-hero.weather-hero--command .big-moon    { width: 96px !important; height: 96px !important; flex-basis: 96px !important; }
+  .weather-hero.weather-hero--command .moon-canvas { width: 96px !important; height: 96px !important; }
+  .weather-hero.weather-hero--command .moon-phase  { width: auto !important; margin-top: 0; }
+
+  .weather-hero.weather-hero--command .weather-art {
+    width: 138px !important;
+    height: 104px !important;
+    transform: translateY(-50%) scale(1.05) !important;
+    transform-origin: center right;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--celestial {
+    grid-template-columns: minmax(230px, .82fr) minmax(120px, .42fr) minmax(320px, 1.08fr) !important;
+  }
+
+  /* layout rhythm */
+  .smart-insight { margin: 0 0 var(--section-gap); }
+
+  .dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-gap);
+  }
+
+  .dashboard > .topbar,
+  .dashboard > .weather-hero,
+  .dashboard > .smart-insight,
+  .dashboard > .panel {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .dashboard > .topbar { flex: 0 0 var(--topbar-height); }
+
+  .dashboard > .weather-hero,
+  .dashboard > .smart-insight,
+  .dashboard > .panel { flex-shrink: 0; }
+}
+
+/* ── Narrow desktop (1101–1540px) ─────────────────────────── */
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-hero {
+    height: 166px;
+    min-height: 166px;
+    grid-template-columns: minmax(300px, 1.02fr) minmax(250px, .84fr) minmax(320px, 1fr) minmax(370px, 1.14fr);
+    padding: 18px 24px;
+  }
+
+  .weather-section { padding-inline: 22px; gap: 15px; }
+
+  .weather-section-icon {
+    width: 62px;
+    height: 62px;
+    flex-basis: 62px;
+    border-radius: 22px;
+  }
+
+  .weather-section-icon svg { width: 31px; height: 31px; }
+
+  .weather-time  { font-size: clamp(38px, 3.05vw, 50px); }
+  .weather-temp  { font-size: clamp(38px, 3vw, 50px); }
+  .sun-time      { font-size: 22px; }
+  .weather-sun   { gap: 16px; }
+  .big-moon      { width: 74px; height: 74px; flex-basis: 74px; }
+  .moon-canvas   { width: 74px; height: 74px; }
+
+  .weather-now   { grid-template-columns: minmax(0, 1fr) 110px; }
+  .weather-art   { width: 110px; transform: scale(.88); }
+
+  /* command-header variant */
+  .weather-hero.weather-hero--command {
+    min-height: 178px !important;
+    grid-template-columns: minmax(292px, .86fr) minmax(610px, 1.78fr) minmax(390px, 1.06fr) !important;
+    padding: 17px 22px !important;
+    gap: 14px !important;
+  }
+
+  .weather-hero.weather-hero--command .weather-time  { font-size: clamp(38px, 3.05vw, 50px); }
+  .weather-hero.weather-hero--command .weather-temp  { font-size: clamp(38px, 3vw, 50px); }
+
+  .weather-hero.weather-hero--command .big-moon    { width: 80px !important; height: 80px !important; flex-basis: 80px !important; }
+  .weather-hero.weather-hero--command .moon-canvas { width: 80px !important; height: 80px !important; }
+  .weather-hero.weather-hero--command .weather-art { width: 120px !important; transform: translateY(-50%) scale(.94) !important; }
+
+  .weather-hero.weather-hero--command .command-zone--celestial {
+    grid-template-columns: minmax(205px, .8fr) minmax(92px, .34fr) minmax(285px, 1.08fr) !important;
+    padding: 15px 20px !important;
+    gap: 14px !important;
+  }
+}
+
+/* ── Tablet / small desktop (≤ 1280px, ≥ 1101px) ─────────── */
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-hero {
+    grid-template-columns: 1.08fr .9fr 1.02fr 1.1fr;
+    padding: 22px 26px;
+  }
+
+  .weather-section      { padding: 6px 22px; gap: 14px; }
+  .weather-section-icon { width: 62px; height: 62px; flex-basis: 62px; }
+  .weather-section-icon svg { width: 31px; height: 31px; }
+
+  .weather-time  { font-size: clamp(36px, 3.4vw, 48px); }
+  .weather-temp  { font-size: clamp(34px, 3vw, 44px); }
+  .weather-art   { width: 96px; transform: scale(.82); }
+  .big-moon      { width: 64px; height: 64px; flex-basis: 64px; }
+  .moon-canvas   { width: 64px; height: 64px; }
+
+  /* command-header variant: must match (or beat) the specificity of the
+     ".weather-hero.weather-hero--command .weather-time" rule in the wider
+     1101-1540px bracket above, and stay later in this file, or that wider
+     rule silently wins here too and the clock overflows its narrower
+     column. Sized conservatively for this bracket's actual column width. */
+  .weather-hero.weather-hero--command .weather-time {
+    font-size: clamp(26px, 2.4vw, 34px);
+  }
+  .weather-hero.weather-hero--command .command-zone--time .weather-section-icon,
+  .weather-hero.weather-hero--command .command-zone--weather .weather-section-icon {
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
+  }
+}
+
+/* ── Tablet portrait (≤ 1100px) ───────────────────────────── */
+@media (max-width: 1100px) {
+  .weather-hero {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    height: auto;
+    min-height: auto;
+    padding: var(--space-8) var(--space-9);
+    gap: 0;
+    border-radius: 28px;
+  }
+
+  .weather-section          { padding: 18px 20px; gap: 16px; }
+  .weather-section:first-of-type { padding-left: 0; }
+  .weather-section:last-of-type  { padding-right: 0; }
+  .weather-section:nth-child(odd)  { padding-left: 0; }
+  .weather-section:nth-child(even) { padding-right: 0; }
+
+  .weather-section + .weather-section::before { display: none; }
+
+  .weather-section:nth-child(even)::before,
+  .weather-section:nth-of-type(even)::before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 18px;
+    bottom: 18px;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, var(--hero-line), transparent);
+  }
+
+  .weather-section:nth-child(n+3)::after,
+  .weather-section:nth-of-type(n+3)::after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--hero-line), transparent);
+  }
+
+  /* command-header variant */
+  .weather-hero.weather-hero--command {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding: var(--space-8) var(--space-9);
+    gap: 14px !important;
+    border-radius: 28px;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--celestial {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+
+  .weather-hero.weather-hero--command .celestial-module--sun  { grid-column: 1 !important; }
+  .weather-hero.weather-hero--command .celestial-module--moon { grid-column: 2 !important; }
+  .weather-hero.weather-hero--command .celestial-map          { display: none !important; }
+}
+
+/* ── Mobile landscape / large phone (≤ 720px) ────────────── */
+@media (max-width: 720px) {
+  .weather-hero.weather-hero--command {
+    grid-template-columns: 1fr !important;
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--celestial { grid-template-columns: 1fr !important; }
+  .weather-hero.weather-hero--command .celestial-map           { display: none; }
+
+  .weather-hero.weather-hero--command .celestial-module--sun,
+  .weather-hero.weather-hero--command .celestial-module--moon  { grid-column: auto !important; }
+
+  .weather-hero.weather-hero--command .weather-now-copy { max-width: calc(100% - 110px); }
+}
+
+/* ── Mobile portrait (≤ 700px) ───────────────────────────── */
+@media (max-width: 700px) {
+  .weather-hero {
+    grid-template-columns: 1fr;
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
+
+  .weather-section,
+  .weather-section:first-of-type,
+  .weather-section:last-of-type,
+  .weather-section:nth-child(odd),
+  .weather-section:nth-child(even) { padding: 18px 0; }
+
+  .weather-section:first-child,
+  .weather-section:first-of-type   { padding-top: 4px; }
+
+  .weather-section:last-child,
+  .weather-section:last-of-type    { padding-bottom: 4px; }
+
+  .weather-section:nth-child(even)::before,
+  .weather-section:nth-of-type(even)::before { display: none; }
+
+  .weather-section + .weather-section::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--hero-line), transparent);
+  }
+
+  .weather-section-icon     { width: 58px; height: 58px; flex-basis: 58px; border-radius: 20px; }
+  .weather-section-icon svg { width: 29px; height: 29px; }
+
+  .weather-time { font-size: clamp(36px, 11vw, 48px); }
+  .weather-sun  { gap: 16px; }
+  .weather-now  { grid-template-columns: minmax(0, 1fr) auto; }
+
+  .weather-art {
+    width: 96px;
+    height: 84px;
+    transform: scale(.78);
+    transform-origin: center right;
+  }
+}
+
+/* ── Small phone (≤ 460px) ───────────────────────────────── */
+@media (max-width: 460px) {
+  .weather-section       { gap: 12px; }
+  .weather-section-icon  { display: none; }
+
+  .weather-sun {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .weather-now   { grid-template-columns: 1fr; }
+  .weather-art   { display: none; }
+  .moon-body     { gap: 14px; }
+  .big-moon      { width: 58px; height: 58px; flex-basis: 58px; }
+  .moon-canvas   { width: 58px; height: 58px; }
+}
+
+/* ── Compact phone flow + chart (≤ 560px) ────────────────── */
+@media (max-width: 560px) {
+  .panel[data-i18n-label="section-flow"] { padding: 18px 14px; }
+
+  .flow {
+    grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr) 22px minmax(0, 1fr);
+    gap: 4px;
+    align-items: center;
+    min-height: 118px;
+  }
+
+  .node {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    padding: 0;
+    text-align: center;
+  }
+
+  .node .icon     { width: 48px; height: 48px; }
+  .node .icon svg { width: 23px; height: 23px; }
+  .node-text      { align-items: center; min-width: 0; }
+
+  .label { margin-top: 0; font-size: 10px; letter-spacing: .18em; }
+  .value { font-size: clamp(21px, 6vw, 26px); line-height: 1; white-space: nowrap; }
+  .sub   { font-size: 10px; white-space: nowrap; }
+
+  .flowbox {
+    width: 22px;
+    max-width: 22px;
+    height: 72px;
+    margin: 0;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .flowline          { width: 4px; max-width: 4px; height: 54px; margin: 0; }
+  .flowline .particle { width: 7px; height: 44px; }
+  .arrow             { margin: 4px 0 0; font-size: 13px; line-height: 1; }
+
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .card  { min-height: 118px; height: 118px; }
+
+  .panel[data-i18n-label="section-prices"] { padding: 16px 14px 18px; }
+
+  .pricesHeader          { gap: 9px; padding-bottom: 10px; margin-bottom: 4px; }
+  .usage-window-selector { justify-content: center; }
+  .badges                { justify-self: center; }
+
+  .chart {
+    height: clamp(210px, 48vh, 280px);
+    padding-top: 16px;
+    padding-bottom: 26px;
+    overflow: hidden;
+  }
+
+  .gridlines { top: 34px; bottom: 38px; }
+
+  .bars {
+    min-width: 0;
+    left: 0;
+    right: 0;
+    top: 12px;
+    gap: clamp(2px, .8vw, 4px);
+  }
+
+  .bar          { min-height: 8px; border-radius: 8px 8px 0 0; }
+  .barwrap .time { font-size: 9px; }
+  .dayline      { bottom: 28px; }
+}
+
+/* ── Mobile portrait: gutter fix + reset desktop icon offset ── */
+@media (max-width: 1100px) and (orientation: portrait) {
+  .weather-hero.weather-hero--command .command-zone--time.weather-section {
+    padding-left: clamp(18px, 4vw, 28px) !important;
+    padding-right: clamp(14px, 3vw, 22px) !important;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--time .weather-section-icon {
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    align-self: center !important;
+    transform: none !important;
+  }
+}
+
+/* ── Mobile landscape: reset desktop icon margin, restore padding ── */
+@media (max-width: 1100px) and (orientation: landscape) {
+  .weather-hero.weather-hero--command .command-zone--time .weather-section-icon {
+    margin-top: 0 !important;
+    align-self: center !important;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--time.weather-section {
+    padding-left: clamp(14px, 3vw, 22px) !important;
+  }
+}
+
+/* ── Weather header column balance tweak ─────────────────────
+   Landscape/desktop: make the clock tile slimmer and give that
+   space to the weather tile so the weather meta fits on one line.
+   iPhone portrait: stack the tiles so clock, moon and weather all
+   use the same full-width card width.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    grid-template-columns: minmax(270px, .72fr) minmax(690px, 1.82fr) minmax(500px, 1.28fr) !important;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    grid-template-columns: minmax(245px, .70fr) minmax(610px, 1.70fr) minmax(455px, 1.26fr) !important;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    grid-template-columns: minmax(230px, .68fr) minmax(560px, 1.62fr) minmax(420px, 1.24fr) !important;
+  }
+}
+
+@media (max-width: 1100px) and (orientation: portrait) {
+  .weather-hero.weather-hero--command {
+    grid-template-columns: 1fr !important;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--celestial,
+  .weather-hero.weather-hero--command .command-zone--time,
+  .weather-hero.weather-hero--command .command-zone--weather {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* iPhone portrait: keep the WEATHER card content aligned with the other cards.
+   The generic mobile rule above sets `.weather-section { padding: 18px 0; }`.
+   Because the weather card is also a `.weather-section`, that removed its
+   inner left/right spacing and pushed the data against the card edge. */
+@media (max-width: 700px) {
+  .weather-hero.weather-hero--command .command-zone--weather.weather-section {
+    padding: 18px 22px !important;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--weather > .weather-section-copy {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (max-width: 460px) {
+  .weather-hero.weather-hero--command .command-zone--weather.weather-section {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+}
+
+/* v28 portrait polish: stat cards must keep their bottom price/credit row.
+   The previous compact phone rule forced cards to 118px high; on iPhone
+   portrait that clipped the 4th grid row (e.g. Grid credit / Solar price / Gas price).
+   Keep the two-column layout, but give the internal 4-row card grid enough room. */
+@media (max-width: 560px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .card {
+    min-height: 146px;
+    height: 146px;
+    padding: 13px 10px 10px;
+    grid-template-rows: 17px minmax(38px, auto) 18px 26px;
+    gap: 4px;
+  }
+
+  .card strong {
+    font-size: clamp(18px, 5vw, 21px);
+    line-height: 1.08;
+  }
+
+  .card-grid strong {
+    font-size: clamp(16px, 4.7vw, 19px);
+    line-height: 1.12;
+  }
+
+  .card > small:not(.price-line):not(.solar-price):not(.gas-price) {
+    min-height: 18px;
+    font-size: 11px;
+    line-height: 1.15;
+  }
+
+  .price-line,
+  .solar-price,
+  .gas-price {
+    min-height: 26px;
+    padding-top: 5px;
+    font-size: 11px;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 380px) {
+  .card {
+    min-height: 140px;
+    height: 140px;
+    padding-inline: 8px;
+    grid-template-rows: 16px minmax(36px, auto) 17px 25px;
+  }
+
+  .price-line,
+  .solar-price,
+  .gas-price {
+    gap: 5px;
+    font-size: 10px;
+  }
+}
+
+/* ── Mobile (both orientations): keep the time card's vertical padding
+   consistent. Previously this padding fix was bundled together with a
+   portrait-only `justify-content: center`, which had no landscape
+   counterpart — so the clock card's text alignment silently flipped
+   between centered and left depending on orientation. Alignment is now
+   left in both orientations (matching the rest of the stacked cards),
+   only the padding fix remains, applied unconditionally below 1100px. */
+@media (max-width: 1100px) {
+  .weather-hero.weather-hero--command .command-zone--time {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
+  .weather-hero.weather-hero--command .command-zone--time .weather-section-copy {
+    justify-content: flex-start !important;
+  }
+}
+
+/* Desktop clock tile alignment fix
+   The live clock tile no longer shows its blue clock icon. With that extra
+   column removed, the text starts on the same left edge as the weather tile
+   and the full HH:MM:SS value has enough room at Mac fullscreen sizes such as
+   1680x1050 and above. */
+.weather-hero.weather-hero--command .command-zone--time .weather-section-icon {
+  display: none !important;
+}
+
+.weather-hero.weather-hero--command .command-zone--time {
+  gap: 0 !important;
+}
+
+.weather-hero.weather-hero--command .command-zone--time .weather-section-copy {
+  width: 100%;
+  min-width: 0;
+  align-items: flex-start !important;
+}
+
+.weather-hero.weather-hero--command .weather-time {
+  white-space: nowrap;
+}
+
+@media (min-width: 1101px) {
+  .weather-hero.weather-hero--command .command-zone--time {
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+  }
+
+  .weather-hero.weather-hero--command .weather-time {
+    font-size: clamp(42px, 3.1vw, 56px) !important;
+    letter-spacing: -.06em !important;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command .command-zone--time {
+    padding-left: 32px !important;
+    padding-right: 28px !important;
+  }
+}

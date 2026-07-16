@@ -1,0 +1,668 @@
+/* ============================================================
+   7. PRICE BARS CHART
+   ============================================================ */
+.chart    { height: var(--chart-height); position: relative; padding-top: var(--space-12); padding-bottom: 36px; overflow: visible; }
+.gridlines {
+  position: absolute;
+  left: 0; right: 0; top: 46px; bottom: 52px;
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+.gridlines span { border-top: 1px solid rgba(180,205,255,.085); }
+[data-theme="light"] .gridlines span { border-top-color: rgba(60,100,200,.10); }
+
+.bars {
+  position: absolute;
+  left: 0; right: 0; bottom: 0; top: 24px;
+  display: grid;
+  grid-template-columns: repeat(var(--bar-count, 39), 1fr);
+  gap: 8px;
+  align-items: end;
+  background: none;
+  overflow: visible; /* allow .time labels to render below the bars container */
+  transition: grid-template-columns .72s cubic-bezier(.16,1,.3,1), gap .45s ease;
+}
+
+.barwrap {
+  height: 100%;
+  position: relative;
+  display: block;
+  cursor: pointer;
+  animation: barIn .62s cubic-bezier(.16,1,.3,1) both;
+  --zero: 0%;
+  transform: translateZ(0);
+  will-change: transform, opacity, filter;
+}
+
+.bar {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: var(--zero, 0%);
+  width: 100%;
+  height: var(--h, 10%);
+  min-height: 10px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 68% at 50% 0%, rgba(255,255,255,.28), rgba(255,255,255,.06) 38%, transparent 72%),
+    linear-gradient(180deg, var(--c1), var(--c2) 48%, var(--c3, var(--c2)) 100%);
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--glow, var(--c2)) 58%, transparent),
+    0 12px 24px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.25),
+    inset 0 -7px 13px rgba(0,0,0,.24);
+  filter: saturate(1.18) contrast(1.04);
+  transform: translateZ(0);
+  will-change: height, top, bottom, transform, filter, box-shadow;
+  transition:
+    height .92s cubic-bezier(.16,1,.3,1),
+    bottom .92s cubic-bezier(.16,1,.3,1),
+    top    .92s cubic-bezier(.16,1,.3,1),
+    background .72s cubic-bezier(.16,1,.3,1),
+    filter .34s cubic-bezier(.2,.8,.2,1),
+    box-shadow .34s cubic-bezier(.2,.8,.2,1),
+    transform .34s cubic-bezier(.2,.8,.2,1);
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  left: 14%; right: 14%; top: 8%; height: 28%;
+  z-index: 2;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0));
+  opacity: .34;
+  filter: blur(.2px);
+  pointer-events: none;
+}
+
+.bar.negative {
+  bottom: auto;
+  top: calc(100% - var(--zero, 0%));
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  background:
+    radial-gradient(120% 70% at 50% 100%, rgba(205,238,255,.35), rgba(100,190,255,.08) 42%, transparent 76%),
+    linear-gradient(180deg, var(--c3, var(--c2)), var(--c2) 48%, var(--c1) 100%);
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--glow, #4da3ff) 52%, transparent),
+    0 16px 30px rgba(0,0,0,.26),
+    inset 0 -1px 0 rgba(255,255,255,.28),
+    inset 0 7px 13px rgba(0,0,0,.22);
+}
+.bar.negative::after { top: auto; bottom: 8%; background: linear-gradient(0deg, rgba(255,255,255,.36), rgba(255,255,255,0)); }
+
+.barwrap.now:not(.is-hovered):not(:hover) .bar { filter: brightness(1.04) saturate(1.18); }
+
+.barwrap.is-past:not(.is-hovered):not(:hover) .bar {
+  opacity: .42;
+  filter: saturate(.72) brightness(.88);
+  transition: opacity .72s cubic-bezier(.16,1,.3,1), filter .72s cubic-bezier(.16,1,.3,1), height .92s cubic-bezier(.16,1,.3,1), bottom .92s cubic-bezier(.16,1,.3,1), top .92s cubic-bezier(.16,1,.3,1), transform .34s cubic-bezier(.2,.8,.2,1), box-shadow .34s cubic-bezier(.2,.8,.2,1);
+}
+.barwrap.is-past.old-past:not(.is-hovered):not(:hover) .bar { opacity: .28; filter: saturate(.52) brightness(.80); }
+
+.barwrap.just-became-past .bar { animation: fadeToPast 1.8s ease both; }
+@keyframes fadeToPast {
+  0%   { opacity: 1;   filter: saturate(1.08) brightness(1.05); }
+  100% { opacity: .42; filter: saturate(.72) brightness(.88); }
+}
+
+.placeholder { background: rgba(255,255,255,.025); border: 2px dashed rgba(235,244,255,.34); box-shadow: none; opacity: .82; }
+.placeholder::after { display: none; }
+
+.barwrap.has-zero::before {
+  content: "";
+  position: absolute;
+  left: -3px; right: -3px;
+  bottom: var(--zero, 0%);
+  height: 1px;
+  background: rgba(255,255,255,.22);
+  box-shadow: 0 0 8px rgba(255,255,255,.10);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Current-hour arrow */
+:root { --now-arrow: rgba(255,255,255,.96); }
+[data-theme="light"] { --now-arrow: rgba(20,40,100,.82); }
+
+.barwrap.now::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--zero, 0%) + var(--h, 10%) + 8px);
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid var(--now-arrow);
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--now-arrow), transparent 40%));
+  z-index: 4;
+  pointer-events: none;
+  transition: bottom .75s cubic-bezier(.16,1,.3,1);
+}
+.barwrap.now.negative-now::after {
+  bottom: auto;
+  top: calc(100% - var(--zero, 0%) + var(--h, 10%) + 8px);
+  border-top: 0;
+  border-bottom: 10px solid var(--now-arrow);
+}
+
+/* Time labels */
+.time {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12.5px;
+  color: rgba(229,238,255,.72);
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+.barwrap:hover .time { color: var(--text); text-shadow: 0 0 14px rgba(255,255,255,.22); }
+.barwrap.now    .time { color: var(--text); text-shadow: 0 0 12px rgba(255,255,255,.35); }
+.barwrap.is-past .time { opacity: .55; }
+
+/* Price flags */
+.flag {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(29,40,68,.72);
+  border: 1px solid rgba(255,255,255,.16);
+  font-size: 13px;
+  font-weight: 1000;
+  white-space: nowrap;
+  z-index: 5;
+  color: var(--sync-color, #fff);
+  border-color: color-mix(in srgb, var(--sync-color, #fff), transparent 74%);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--sync-color, currentColor) 35%, transparent),
+    0 14px 32px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter: blur(16px);
+  transition: color .45s, box-shadow .45s, border-color .45s;
+}
+.flag::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 100%;
+  width: 2px; height: 46px;
+  background: rgba(255,255,255,.35);
+  box-shadow: 0 0 10px rgba(255,255,255,.14);
+  transform: translateX(-50%);
+}
+/* Dot at the tip of the flag connector line */
+.flag::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.90);
+  box-shadow: 0 0 8px rgba(255,255,255,.70), 0 0 18px rgba(255,255,255,.30);
+  transform: translateX(-50%);
+  z-index: var(--z-chart-dayline);
+  pointer-events: none;
+}
+.flag.is-positive::before { bottom: calc(-46px - 3px); top: auto; }
+.flag.is-negative::before { top: calc(100% + 43px); bottom: auto; }
+.flag.is-positive { bottom: calc(var(--zero, 0%) + var(--h, 10%) + 25px); top: auto; }
+.flag.is-negative { bottom: calc(var(--zero, 0%) + 22px); top: auto; }
+.flag.is-negative::after { top: 100%; bottom: auto; height: 48px; }
+
+/* When a day-boundary bar also carries a price flag, shift the day label
+   down so it clears the flag pill (flag is ~36px tall + 8px gap = 44px). */
+.barwrap.day-label-has-flag .day-label {
+  top: 50px;
+}
+
+
+/* Day separators */
+.dayline { position: absolute; left: -5px; top: 18px; bottom: 36px; width: 2px; border-radius: var(--radius-pill); background: linear-gradient(to bottom, rgba(255,255,255,.46), rgba(255,255,255,.11)); box-shadow: 0 0 10px rgba(255,255,255,.12); z-index: var(--z-chart-dayline); pointer-events: none; }
+.barwrap.has-zero .dayline { bottom: calc(var(--zero, 0%) + 2px); }
+.dayline[hidden] { display: none; }
+.dayline:not([hidden]) { display: block; }
+.day-label { position: absolute; top: 7px; left: 7px; z-index: var(--z-chart-day-label); padding: 4px 8px; border-radius: var(--radius-pill); background: rgba(15,25,50,.46); border: 1px solid rgba(255,255,255,.10); backdrop-filter: blur(12px); font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; pointer-events: none; }
+.barwrap.is-day-after-tomorrow .dayline { opacity: .62; }
+.barwrap.is-day-after-tomorrow .day-label { opacity: .72; }
+[data-theme="light"] .dayline { background: linear-gradient(to bottom, rgba(30,60,160,.52), rgba(30,60,160,.14)); box-shadow: 0 0 10px rgba(30,60,160,.14); }
+[data-theme="light"] .day-label { background: rgba(230,238,255,.82); border-color: rgba(80,120,220,.22); }
+
+@keyframes barIn {
+  from { opacity: 0; transform: translateY(18px) scale(.985); filter: blur(2px) saturate(.85); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: none; }
+}
+
+/* ============================================================
+   8. TOOLTIP
+   ============================================================ */
+.tooltip {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(22,32,58,.82);
+  border: 1px solid color-mix(in srgb, var(--tip-color, var(--green)), transparent 72%);
+  box-shadow:
+    0 0 24px color-mix(in srgb, var(--tip-color, var(--green)) 30%, transparent),
+    0 20px 48px rgba(0,0,0,.40),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter: blur(20px);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+  box-sizing: border-box;
+  max-width: calc(100vw - 20px);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -10px);
+  transition: opacity .14s ease, transform .14s ease, border-color .45s ease, box-shadow .45s ease;
+}
+.tooltip.is-fading-out {
+  transition: opacity 1s ease, transform 1s ease, border-color .45s ease, box-shadow .45s ease;
+  color: #fff;
+  white-space: nowrap;
+}
+.tooltip.is-visible { opacity: 1; transform: translate(-50%, -18px); }
+.tooltip.align-left { transform: translate(0, -10px); }
+.tooltip.align-right { transform: translate(-100%, -10px); }
+.tooltip.align-left.is-visible { transform: translate(0, -18px); }
+.tooltip.align-right.is-visible { transform: translate(-100%, -18px); }
+.tooltip.is-positioning {
+  opacity: 0;
+  transition: none;
+}
+
+.tooltip .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tip-color, var(--green)); box-shadow: 0 0 15px var(--tip-color, var(--green)); }
+.tip-time  { color: rgba(255,255,255,.62); }
+.tip-note  { color: rgba(255,255,255,.45); font-size: 12px; }
+.tip-price { color: var(--tip-color, var(--green)); font-weight: 1000; }
+
+.hoverline { position: fixed; z-index: var(--z-hoverline); width: 2px; border-radius: 2px; background: rgba(255,255,255,.36); box-shadow: 0 0 11px rgba(255,255,255,.11); pointer-events: none; opacity: 0; transition: opacity .14s; }
+.hoverline.is-visible { opacity: .86; }
+.hoverline.is-fading-out { opacity: 0; transition: opacity 1s ease; }
+.hoverline::after {
+  content: none;
+  display: none;
+}
+
+/* Best window highlight */
+.barwrap.is-best-window::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  right: -5px;
+  top: 74px;
+  bottom: 38px;
+  border-radius: 18px;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg,
+      rgba(0,224,186,.00) 0%,
+      rgba(0,224,186,.10) 20%,
+      rgba(0,224,186,.15) 50%,
+      rgba(0,224,186,.10) 80%,
+      rgba(0,224,186,.00) 100%);
+  border: 1px solid rgba(0,224,186,.26);
+  box-shadow: 0 0 22px rgba(0,224,186,.18), inset 0 0 18px rgba(0,224,186,.06);
+  z-index: 0;
+}
+.barwrap.is-best-window .bar {
+  z-index: 1;
+  outline: none;
+  filter: brightness(1.13) saturate(1.20);
+  box-shadow:
+    0 0 30px rgba(0,224,186,.34),
+    0 0 10px rgba(67,183,255,.24),
+    0 12px 24px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -7px 13px rgba(0,0,0,.24);
+}
+.barwrap.is-best-window .bar::before { content: none; display: none; }
+.barwrap.is-best-window.is-best-edge::before { opacity: .72; }
+.barwrap.is-best-window.is-best-edge .bar {
+  outline: none;
+  filter: brightness(1.09) saturate(1.15);
+  box-shadow:
+    0 0 22px rgba(0,224,186,.26),
+    0 12px 24px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 -7px 13px rgba(0,0,0,.22);
+}
+.barwrap.is-best-window.is-best-edge .bar::before { content: none; display: none; }
+.barwrap.is-best-window .time {
+  color: var(--text);
+  opacity: .98;
+  text-shadow: 0 0 10px rgba(0,224,186,.30);
+}
+.barwrap.is-negative-price .bar {
+  box-shadow:
+    0 0 30px rgba(67,183,255,.34),
+    0 12px 24px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.25),
+    inset 0 -7px 13px rgba(0,0,0,.22);
+}
+[data-theme="light"] .barwrap.is-best-window::before {
+  background: linear-gradient(90deg, rgba(0,150,135,.00), rgba(0,150,135,.11), rgba(0,150,135,.16), rgba(0,150,135,.11), rgba(0,150,135,.00));
+  border-color: rgba(0,150,135,.28);
+  box-shadow: 0 0 20px rgba(0,150,135,.14), inset 0 0 18px rgba(0,150,135,.05);
+}
+[data-theme="light"] .barwrap.is-best-window .bar {
+  outline: none;
+  box-shadow:
+    0 0 22px rgba(0,150,135,.22),
+    0 10px 22px rgba(60,100,200,.10),
+    inset 0 1px 0 rgba(255,255,255,.60),
+    inset 0 -7px 13px rgba(30,60,120,.06);
+}
+[data-theme="light"] .barwrap.is-best-window.is-best-edge .bar {
+  outline: none;
+}
+[data-theme="light"] .barwrap.is-best-window .time {
+  color: #071538;
+  opacity: 1;
+  text-shadow: 0 0 10px rgba(0,120,180,.20);
+}
+
+/* Usage-window selector in the prices header */
+.pricesTitleBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.usage-window-selector {
+  justify-self: start;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+  pointer-events: auto;
+}
+
+.usage-window-label {
+  color: rgba(230, 238, 255, .72);
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: .095em;
+  text-transform: uppercase;
+  margin-right: 4px;
+  white-space: nowrap;
+  text-shadow: 0 0 12px rgba(120, 180, 255, .22);
+}
+
+.usage-window-selector button {
+  appearance: none;
+  min-width: 42px;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(70, 190, 255, .42);
+  background:
+    radial-gradient(120% 140% at 50% 0%, rgba(255,255,255,.16), rgba(255,255,255,0) 48%),
+    linear-gradient(180deg, rgba(35, 52, 84, .74), rgba(12, 20, 42, .88));
+  color: rgba(235, 244, 255, .86);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 1000;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 0 16px rgba(56, 170, 255, .20),
+    0 8px 22px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -9px 16px rgba(0,0,0,.22);
+  text-shadow: 0 0 9px rgba(150, 210, 255, .35);
+  transition:
+    transform .16s ease,
+    color .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease,
+    filter .16s ease;
+}
+
+.usage-window-selector button:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  border-color: rgba(80, 210, 255, .70);
+  filter: brightness(1.10) saturate(1.08);
+  box-shadow:
+    0 0 20px rgba(56, 170, 255, .32),
+    0 10px 24px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -9px 16px rgba(0,0,0,.20);
+}
+
+.usage-window-selector button.active {
+  color: var(--green);
+  background: rgba(0, 229, 190, .06);
+  border-color: rgba(0, 229, 190, .75);
+  box-shadow:
+    0 0 8px  rgba(0, 229, 190, .45),
+    0 0 18px rgba(0, 229, 190, .18);
+  text-shadow: 0 0 8px rgba(0, 229, 190, .50);
+}
+
+[data-theme="light"] .usage-window-label {
+  color: rgba(7, 21, 56, .70);
+  text-shadow: 0 0 10px rgba(0, 120, 180, .16);
+}
+
+[data-theme="light"] .usage-window-selector button {
+  color: rgba(7, 21, 56, .76);
+  background:
+    radial-gradient(120% 140% at 50% 0%, rgba(255,255,255,.72), rgba(255,255,255,0) 48%),
+    linear-gradient(180deg, rgba(240, 248, 255, .92), rgba(215, 228, 245, .92));
+  border-color: rgba(0, 145, 190, .28);
+  box-shadow:
+    0 0 14px rgba(0, 150, 190, .14),
+    0 8px 20px rgba(60,100,200,.10),
+    inset 0 1px 0 rgba(255,255,255,.76);
+}
+
+[data-theme="light"] .usage-window-selector button.active {
+  color: #007a6a;
+  background: rgba(0, 180, 150, .08);
+  border-color: rgba(0, 150, 135, .80);
+  box-shadow:
+    0 0 8px  rgba(0, 150, 135, .35),
+    0 0 16px rgba(0, 150, 135, .15);
+}
+
+@media (max-width: 720px) {
+  .usage-window-selector {
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .usage-window-label {
+    width: 100%;
+    margin-right: 0;
+    text-align: center;
+  }
+
+  .usage-window-selector button {
+    min-width: 30px;
+    padding: 5px 7px;
+  }
+}
+
+/* ============================================================
+   v20: best-window capsules hidden, clean look
+   ============================================================ */
+.barwrap.is-best-window::before { content: none; display: none; }
+.barwrap.is-best-window .bar::before { content: none; display: none; }
+
+/* ============================================================
+   v22: hoverline is line only
+   ============================================================ */
+.tooltip, .hoverline { pointer-events: none; }
+.hoverline::after { content: none; display: none; }
+.hoverline.is-hidden, .hoverline:not(.is-visible) { opacity: 0; height: 0; }
+
+/* ============================================================
+   v25: label readability
+   ============================================================ */
+.pricesHeader .updated, .updated {
+  opacity: .50;
+  color: rgba(229,238,255,.56);
+}
+.usage-window-selector button:not(.active) { opacity: .56; }
+.day-label {
+  opacity: .62;
+  color: rgba(229,238,255,.66);
+  background: rgba(15,25,50,.58);
+  border-color: rgba(255,255,255,.14);
+}
+.dayline { opacity: .58; }
+.time { opacity: .72; color: rgba(229,238,255,.74); }
+.barwrap.is-past .time { opacity: .42; }
+.barwrap.now .time,
+.barwrap.is-best-window .time,
+.barwrap.is-hovered .time,
+.barwrap:hover .time { opacity: 1; color: var(--text); }
+.tooltip .tip-time { color: rgba(255,255,255,.72); }
+.tooltip .tip-note { opacity: .72; color: rgba(255,255,255,.58); }
+
+/* ============================================================
+   BAR STATES — single authoritative block (replaces v17-v25)
+   Volgorde: laag → hoog prioriteit. Hover staat altijd als laatste.
+   ============================================================ */
+
+/* 1. Toekomstige uren: licht gedempt */
+.barwrap.is-future:not(.is-best-window):not(.is-expensive-hour):not(.is-hovered):not(:hover):not(.now) .bar {
+  opacity: .80;
+  filter: saturate(.88) brightness(.86);
+}
+.bars.has-focus-window .barwrap.is-future:not(.is-best-window):not(.is-expensive-hour):not(.is-hovered):not(:hover):not(.now) .bar {
+  opacity: .70;
+  filter: saturate(.76) brightness(.80);
+}
+
+/* 2. Verleden uren: duidelijk gedempt */
+.barwrap.is-past:not(.is-hovered):not(:hover) .bar {
+  opacity: .32;
+  filter: saturate(.26) brightness(.50) contrast(.86);
+  box-shadow:
+    0 6px 14px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -7px 13px rgba(0,0,0,.18);
+}
+.barwrap.is-past.old-past:not(.is-hovered):not(:hover) .bar {
+  opacity: .22;
+  filter: saturate(.20) brightness(.43) contrast(.84);
+}
+.barwrap.is-past .bar::after { opacity: .07; }
+.barwrap.is-past .time { opacity: .42; }
+
+/* Extra dimming in focus-window mode */
+.bars.has-focus-window .barwrap.is-past:not(.is-hovered):not(:hover):not(.now) .bar {
+  opacity: .28;
+  filter: saturate(.22) brightness(.46) contrast(.84);
+}
+
+/* 3. Huidig uur */
+.barwrap.now:not(.is-best-window) .bar {
+  opacity: 1;
+  filter: saturate(.88) brightness(.92) contrast(.96);
+  box-shadow:
+    0 0 10px rgba(255,255,255,.10),
+    0 9px 20px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -7px 13px rgba(0,0,0,.22);
+}
+.barwrap.now:not(.is-best-window) .bar::before { content: none; display: none; }
+.bars.has-focus-window .barwrap.now:not(.is-best-window) .bar {
+  opacity: .92;
+  filter: saturate(.78) brightness(.82) contrast(.94);
+}
+
+/* 4. Duurste uur: helder oranje/rood houden — niet bruin wegdimmen */
+.barwrap.is-expensive-hour:not(.is-past):not(.is-hovered):not(:hover) .bar {
+  opacity: 1;
+  filter: saturate(1.08) brightness(1.02) contrast(1);
+  box-shadow:
+    0 0 18px rgba(255,95,0,.22),
+    0 10px 24px rgba(0,0,0,.20),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -7px 13px rgba(0,0,0,.18);
+}
+
+/* 5. Goedkoopste uur: helder cyaan/groen accent */
+.barwrap.is-cheapest-hour:not(.is-past):not(.is-hovered):not(:hover) .bar {
+  opacity: 1;
+  filter: saturate(1.16) brightness(1.08) contrast(1.02);
+  box-shadow:
+    0 0 18px rgba(0,224,186,.22),
+    0 10px 24px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -7px 13px rgba(0,0,0,.18);
+}
+
+
+
+/* All-mode: show the full visible tariff curve without decision-window/state
+   colour treatments. Flags and the current-hour arrow remain visible, but the
+   bars themselves use one neutral rendering path: only the price-derived
+   gradient may change. This also resets the custom current/cheapest/expensive
+   shadows, because those shadows made equal-colour bars look different. */
+.bars.has-all-window .barwrap:not(.is-past):not(.is-hovered):not(:hover) .bar {
+  opacity: 1 !important;
+  filter: saturate(1.18) contrast(1.04) !important;
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--glow, var(--c2)) 58%, transparent),
+    0 12px 24px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.25),
+    inset 0 -7px 13px rgba(0,0,0,.24) !important;
+}
+.bars.has-all-window .barwrap:not(.is-past):not(.is-hovered):not(:hover) .bar::before {
+  content: none;
+  display: none;
+}
+.bars.has-all-window .barwrap:not(.is-past):not(.is-hovered):not(:hover) .bar::after {
+  opacity: .34;
+}
+
+/* 6. Hover — altijd winnaar, ongeacht andere states.
+   Split by hover capability: real pointer devices (mouse/trackpad) get the
+   native :hover pseudo-class for instant feedback. Touch devices rely only
+   on the JS-driven .is-hovered class — WebKit can otherwise leave :hover
+   "stuck" on the last-touched bar until a tap elsewhere, even after our JS
+   has already cleared .is-hovered (e.g. on tooltip auto-hide), leaving the
+   bar visually lifted with no label. */
+@media (hover: hover) {
+  .barwrap:hover .bar {
+    opacity: 1 !important;
+    transform: translateY(-6px);
+    filter: saturate(1.18) brightness(1.13) !important;
+    box-shadow:
+      0 0 34px color-mix(in srgb, var(--glow, var(--c2)) 62%, transparent),
+      0 18px 34px rgba(0,0,0,.28),
+      inset 0 1px 0 rgba(255,255,255,.26),
+      inset 0 -7px 13px rgba(0,0,0,.22) !important;
+  }
+}
+
+.barwrap.is-hovered .bar {
+  opacity: 1 !important;
+  transform: translateY(-6px);
+  filter: saturate(1.18) brightness(1.13) !important;
+  box-shadow:
+    0 0 34px color-mix(in srgb, var(--glow, var(--c2)) 62%, transparent),
+    0 18px 34px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -7px 13px rgba(0,0,0,.22) !important;
+}

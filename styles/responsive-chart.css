@@ -1,0 +1,283 @@
+/* ============================================================
+   v17 laptop chart label spacing fix
+   Keep the chart compact again, but prevent day labels such as
+   "Tomorrow" from drawing over price balloons when they meet.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .panel[data-i18n-label="section-prices"] .pricesHeader {
+    padding-bottom: 12px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .chart {
+    height: calc(var(--chart-height) - 8px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .bars {
+    top: 18px !important;
+    bottom: 28px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .gridlines {
+    top: 48px !important;
+    bottom: 52px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag {
+    z-index: 12 !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .day-label {
+    z-index: 4 !important;
+    top: 5px !important;
+    background: rgba(15,25,50,.62) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive {
+    bottom: calc(var(--zero, 0%) + var(--h, 10%) + 14px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag::after {
+    height: 38px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive::before {
+    bottom: calc(-38px - 3px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-negative::after {
+    height: 38px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-negative::before {
+    top: calc(100% + 35px) !important;
+  }
+}
+
+
+/* ============================================================
+   v18 chart safe-zone fix
+   Reserve a real top band inside the laptop/desktop chart so the dynamic
+   high-price flag can never collide with the fixed right-side price badges or
+   the Tomorrow day marker. Instead of adding a large empty gap above the chart,
+   the bars use a slightly lower fill scale and positive flags are capped to a
+   safe top row.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .panel[data-i18n-label="section-prices"] .bars {
+    --bar-fill-scale: 72;
+    top: 18px !important;
+    bottom: 28px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive {
+    bottom: min(
+      calc(var(--zero, 0%) + var(--h, 10%) + 14px),
+      calc(100% - 56px)
+    ) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .day-label {
+    top: 5px !important;
+    z-index: 4 !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag {
+    z-index: 14 !important;
+  }
+}
+
+
+/* ============================================================
+   v19 chart label collision fix
+   The previous cap kept the expensive-price flag just a little too high on
+   laptop screens. Keep the compact chart, but move positive price flags into
+   a lower, dedicated row so they cannot collide with the Tomorrow label.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .panel[data-i18n-label="section-prices"] .bars {
+    --bar-fill-scale: 69;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive {
+    bottom: min(
+      calc(var(--zero, 0%) + var(--h, 10%) + 12px),
+      calc(100% - 78px)
+    ) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag::after {
+    height: 32px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive::before {
+    bottom: calc(-32px - 3px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .day-label {
+    top: 4px !important;
+    z-index: 3 !important;
+  }
+}
+
+/* ============================================================
+   v20 chart flag geometry fix
+   Keep price flags connected to their own bar instead of capping them into
+   the plot area. The chart bars are scaled slightly lower on laptop/desktop
+   so even the highest price flag can sit the same distance above its bar as
+   the low-price flag. Day markers stay in the top lane above the price flags.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .panel[data-i18n-label="section-prices"] .bars {
+    --bar-fill-scale: 60;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive {
+    bottom: calc(var(--zero, 0%) + var(--h, 10%) + 22px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag::after {
+    height: 34px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive::before {
+    bottom: calc(-34px - 3px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .day-label {
+    top: 0 !important;
+    z-index: 16 !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .dayline {
+    z-index: 5 !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag {
+    z-index: 14 !important;
+  }
+}
+
+/* ============================================================
+   v21 mobile portrait chart flag containment
+   On iPhone portrait the tallest-price flag was clipped because mobile bars
+   still used the default 88% fill scale inside a short chart. Use the same
+   geometry principle as desktop: scale bars lower and keep every price flag
+   a fixed distance above its own bar, with a short connector.
+   ============================================================ */
+@media (max-width: 1100px) {
+  .panel[data-i18n-label="section-prices"] .bars {
+    --bar-fill-scale: 60;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive {
+    bottom: calc(var(--zero, 0%) + var(--h, 10%) + 22px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag::after {
+    height: 26px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive::before {
+    bottom: calc(-26px - 3px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-negative::after {
+    height: 22px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-negative::before {
+    top: calc(100% + 19px) !important;
+  }
+}
+
+/* ============================================================
+   v22 chart flag dot inset fix
+   The v21 mobile containment shortened the connector so the white anchor dot
+   landed exactly on the bar top. Keep the label distance the same, but let the
+   connector and dot travel slightly into the bar again.
+   ============================================================ */
+.panel[data-i18n-label="section-prices"] .flag.is-positive::after {
+  height: 40px !important;
+}
+
+.panel[data-i18n-label="section-prices"] .flag.is-positive::before {
+  bottom: calc(-40px - 3px) !important;
+}
+
+/* ============================================================
+   v12 tomorrow marker alignment
+   Align the vertical day marker line with the top edge of the
+   Tomorrow pill so the marker reads as one connected element.
+   ============================================================ */
+.panel[data-i18n-label="section-prices"] {
+  --tomorrow-marker-top: 0px;
+}
+
+.panel[data-i18n-label="section-prices"] .day-label {
+  top: var(--tomorrow-marker-top) !important;
+}
+
+.panel[data-i18n-label="section-prices"] .dayline {
+  top: var(--tomorrow-marker-top) !important;
+}
+
+/* ============================================================
+   iPhone touch tooltip lane + landscape header width
+   - Touch tooltip stays in one fixed top lane, away from the finger.
+   - iPhone landscape uses full-width time and weather cards, matching
+     the already full-width sun/moon card.
+   ============================================================ */
+@media (max-width: 1100px) and (pointer: coarse) {
+  .tooltip.is-touch-fixed,
+  .tooltip.is-touch-fixed.is-visible,
+  .tooltip.is-touch-fixed.align-left,
+  .tooltip.is-touch-fixed.align-right,
+  .tooltip.is-touch-fixed.align-left.is-visible,
+  .tooltip.is-touch-fixed.align-right.is-visible {
+    transform: translate(-50%, 0) !important;
+  }
+
+  .tooltip.is-touch-fixed {
+    z-index: calc(var(--z-tooltip) + 2);
+  }
+
+
+  .tooltip.is-touch-no-transition,
+  .tooltip.is-touch-no-transition.is-visible,
+  .tooltip.is-touch-no-transition.is-fading-out {
+    transition: none !important;
+  }
+
+
+  .tooltip.is-touch-positioning,
+  .tooltip.is-touch-fixed.is-touch-positioning,
+  .tooltip.is-touch-fixed.is-positioning {
+    opacity: 0 !important;
+    transition: none !important;
+    transform: translate(-50%, 0) !important;
+  }
+}
+
+@media (max-width: 1100px) and (orientation: landscape) {
+  .weather-hero.weather-hero--command {
+    grid-template-columns: 1fr !important;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--time,
+  .weather-hero.weather-hero--command .command-zone--celestial,
+  .weather-hero.weather-hero--command .command-zone--weather {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--time,
+  .weather-hero.weather-hero--command .command-zone--weather {
+    padding-left: clamp(18px, 4vw, 30px) !important;
+    padding-right: clamp(18px, 4vw, 30px) !important;
+  }
+
+  .weather-hero.weather-hero--command .command-zone--weather .weather-now {
+    grid-template-columns: minmax(0, 1fr) minmax(92px, 132px) !important;
+  }
+}

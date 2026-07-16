@@ -1,0 +1,8 @@
+/* Responsive styles are split by concern for maintainability.
+   energy-dashboard.html loads the split files directly; this file is kept as
+   a backwards-compatible import manifest for custom deployments. */
+@import url('./responsive-base.css');
+@import url('./responsive-layout.css');
+@import url('./responsive-weather.css');
+@import url('./responsive-flow.css');
+@import url('./responsive-chart.css');

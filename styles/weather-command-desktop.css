@@ -1,0 +1,858 @@
+/* ============================================================
+   11/10 HERO COMMAND HEADER - cinematic integrated redesign
+   Keep this block last in weather.css so it wins over earlier variants.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    --hero-blue: #50b7ff;
+    --hero-cyan: #13f7d0;
+    --hero-gold: #ffd24a;
+    --hero-orange: #ff7a1a;
+    --hero-strong: rgba(255,255,255,.99);
+    --hero-soft: rgba(230,241,255,.84);
+    --hero-muted: rgba(220,233,255,.58);
+    min-height: 182px;
+    padding: 18px 28px;
+    gap: 18px;
+    grid-template-columns: minmax(280px,.76fr) minmax(690px,1.86fr) minmax(480px,1.18fr);
+    border-radius: 34px;
+    border-color: rgba(112,190,255,.46);
+    background:
+      radial-gradient(900px 270px at 6% -12%, rgba(34,162,255,.32), transparent 64%),
+      radial-gradient(860px 260px at 50% -42%, rgba(128,148,255,.25), transparent 70%),
+      radial-gradient(540px 250px at 82% 36%, rgba(255,210,74,.12), transparent 70%),
+      radial-gradient(460px 240px at 98% 10%, rgba(19,247,208,.07), transparent 68%),
+      linear-gradient(112deg, rgba(7,44,90,.97), rgba(7,20,56,.90) 48%, rgba(5,13,37,.92));
+    box-shadow:
+      0 34px 88px rgba(0,0,0,.48),
+      0 0 0 1px rgba(19,247,208,.04),
+      inset 0 1px 0 rgba(255,255,255,.20),
+      inset 0 -1px 0 rgba(0,0,0,.32),
+      inset 0 0 58px rgba(80,183,255,.07);
+  }
+
+  .weather-hero.weather-hero--command::before {
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.10), transparent 14%, transparent 86%, rgba(255,255,255,.055)),
+      linear-gradient(180deg, rgba(255,255,255,.12), transparent 50%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, transparent 1px 86px),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 58px);
+    opacity: 1;
+  }
+
+  .weather-hero.weather-hero--command::after {
+    background:
+      linear-gradient(100deg, transparent 0 18%, rgba(255,255,255,.095) 43%, transparent 68%),
+      radial-gradient(660px 130px at 52% 0%, rgba(255,255,255,.145), transparent 74%);
+  }
+
+  .weather-hero-bg::before {
+    left: 23%;
+    right: 19%;
+    top: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,210,74,.34), rgba(19,247,208,.38), rgba(80,183,255,.30), transparent);
+    box-shadow: 0 0 24px rgba(19,247,208,.13);
+  }
+
+  .weather-hero-bg::after {
+    content: "";
+    position: absolute;
+    left: 25%;
+    right: 23%;
+    top: 24px;
+    bottom: 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(130,200,255,.085);
+    border-left-color: rgba(255,210,74,.11);
+    border-right-color: rgba(19,247,208,.11);
+    filter: blur(.1px);
+    opacity: .72;
+  }
+
+  .weather-hero-orbit::before {
+    width: 880px;
+    height: 880px;
+    left: 51%;
+    top: 52%;
+    border-color: rgba(143,196,255,.105);
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.024),
+      0 0 50px rgba(80,183,255,.06);
+  }
+
+  .command-zone {
+    background: linear-gradient(180deg, rgba(255,255,255,.068), rgba(255,255,255,.019));
+    border-color: rgba(223,240,255,.105);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.11),
+      inset 0 -16px 34px rgba(0,0,0,.13),
+      0 14px 36px rgba(0,0,0,.12);
+  }
+
+  .command-zone--time {
+    padding: 20px 28px 20px 42px;
+    gap: 18px;
+  }
+
+  .command-zone--time::after {
+    content: "";
+    position: absolute;
+    right: -26px;
+    top: 18%;
+    bottom: 18%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(80,183,255,.30), transparent);
+    opacity: .75;
+  }
+
+  .command-zone--time .weather-section-icon {
+    width: 70px;
+    height: 70px;
+    flex-basis: 70px;
+    border-radius: 50%;
+  }
+
+  .weather-section-label {
+    margin-bottom: 8px;
+    font-size: 10px;
+    letter-spacing: .19em;
+    color: rgba(223,237,255,.62);
+  }
+
+  .weather-time {
+    font-size: clamp(42px, 3.15vw, 56px);
+    letter-spacing: -.06em;
+    text-shadow: 0 0 24px rgba(255,255,255,.14), 0 0 48px rgba(80,183,255,.16);
+  }
+
+  .weather-status-row { display: none; }
+
+  .command-zone--celestial {
+    display: grid;
+    grid-template-columns: minmax(230px,.82fr) minmax(120px,.42fr) minmax(320px,1.08fr);
+    gap: 20px;
+    padding: 17px 28px;
+    background:
+      radial-gradient(220px 110px at 20% 51%, rgba(255,210,74,.10), transparent 72%),
+      radial-gradient(290px 145px at 76% 49%, rgba(175,205,255,.12), transparent 70%),
+      linear-gradient(180deg, rgba(255,255,255,.067), rgba(255,255,255,.017));
+    overflow: hidden;
+  }
+
+  .command-zone--celestial::before {
+    left: 50%;
+    width: 170px;
+    top: 50%;
+    bottom: auto;
+    height: 1px;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(90deg, transparent, rgba(255,210,74,.30), rgba(19,247,208,.42), rgba(168,205,255,.30), transparent);
+    box-shadow: 0 0 28px rgba(19,247,208,.16);
+  }
+
+  .command-zone--celestial::after {
+    content: "";
+    position: absolute;
+    inset: 12px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(165,205,255,.095);
+    border-top-color: rgba(255,210,74,.16);
+    border-bottom-color: rgba(19,247,208,.10);
+    pointer-events: none;
+  }
+
+  .celestial-map {
+    z-index: 0;
+    opacity: 1;
+  }
+
+  .celestial-map-line {
+    left: 8%;
+    right: 8%;
+    top: 31px;
+    height: 86px;
+    border-top: 1px solid rgba(255,210,74,.24);
+    border-radius: 50% 50% 0 0;
+  }
+
+  .celestial-map-line::before {
+    content: "";
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    top: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,210,74,.23), rgba(19,247,208,.28), rgba(172,208,255,.22), transparent);
+    box-shadow: 0 0 24px rgba(19,247,208,.10);
+  }
+
+  .celestial-map-line::after {
+    left: 13%;
+    right: 13%;
+    background: linear-gradient(90deg, transparent, rgba(255,210,74,.38), rgba(19,247,208,.30), rgba(120,188,255,.30), transparent);
+  }
+
+  .celestial-map-sun {
+    left: 22%;
+    top: 26px;
+    width: 10px;
+    height: 10px;
+    background: #ffd24a;
+    box-shadow: 0 0 20px rgba(255,210,74,.78), 0 0 44px rgba(255,210,74,.24);
+  }
+
+  .celestial-map-moon {
+    right: 24%;
+    top: 104px;
+    width: 8px;
+    height: 8px;
+    background: rgba(202,224,255,.95);
+    box-shadow: 0 0 20px rgba(202,224,255,.52), 0 0 44px rgba(80,183,255,.12);
+  }
+
+  .celestial-module {
+    z-index: 2;
+    min-height: 118px;
+    padding: 12px 14px;
+    border-radius: 24px;
+    background:
+      radial-gradient(160px 90px at 50% 0%, rgba(255,255,255,.055), transparent 72%),
+      linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.014));
+    border: 1px solid rgba(255,255,255,.065);
+  }
+
+  .celestial-module--sun {
+    justify-self: stretch;
+    grid-column: 1;
+  }
+
+  .celestial-module--sun .weather-section-icon {
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
+    border-radius: 50%;
+  }
+
+  .weather-sun {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .sun-stat {
+    min-width: 0;
+    padding: 8px 9px;
+    border-radius: 15px;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.048);
+  }
+
+  .sun-time {
+    font-size: 22px;
+  }
+
+  .day-length {
+    margin-top: 9px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 0 20px rgba(255,210,74,.08);
+  }
+
+  .celestial-module--moon {
+    grid-column: 3;
+    justify-self: stretch;
+    padding-left: 16px;
+  }
+
+  .moon-body {
+    width: 100%;
+    gap: 18px;
+  }
+
+  .big-moon {
+    width: 96px;
+    height: 96px;
+    flex-basis: 96px;
+    filter: drop-shadow(0 0 20px rgba(190,216,255,.38)) drop-shadow(0 0 38px rgba(80,183,255,.12));
+  }
+
+  .big-moon::before {
+    inset: -10px;
+    border-color: rgba(200,224,255,.16);
+  }
+
+  .big-moon::after {
+    inset: -20px;
+    border-color: rgba(200,224,255,.075);
+    border-left-color: rgba(19,247,208,.22);
+    border-top-color: rgba(255,255,255,.10);
+  }
+
+  .moon-canvas {
+    width: 96px;
+    height: 96px;
+  }
+
+  .moon-phase {
+    font-size: clamp(18px, 1.22vw, 23px);
+  }
+
+  .moon-illum { font-size: 11.5px; }
+
+  .command-zone--weather {
+    padding: 18px 22px;
+    background:
+      radial-gradient(260px 155px at 82% 48%, rgba(255,210,74,.13), transparent 66%),
+      radial-gradient(250px 150px at 70% 56%, rgba(80,183,255,.17), transparent 74%),
+      linear-gradient(180deg, rgba(255,255,255,.070), rgba(255,255,255,.018));
+  }
+
+  .command-zone--weather::before {
+    content: "";
+    position: absolute;
+    right: 114px;
+    top: 20%;
+    bottom: 20%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,.14), transparent);
+    z-index: 1;
+  }
+
+  .weather-atmosphere {
+    right: -24px;
+    top: -34px;
+    bottom: -34px;
+    width: 260px;
+    opacity: 1;
+  }
+
+  .weather-now {
+    display: block;
+    min-height: 112px;
+    position: relative;
+  }
+
+  .weather-now-copy {
+    position: relative;
+    z-index: 3;
+    max-width: calc(100% - 128px);
+  }
+
+  .weather-temp {
+    font-size: clamp(44px, 3.4vw, 60px);
+    text-shadow: 0 0 24px rgba(255,255,255,.13), 0 0 48px rgba(80,183,255,.15);
+  }
+
+  .weather-meta {
+    gap: 6px;
+    max-width: 255px;
+  }
+
+  .weather-meta span {
+    padding: 3px 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.045);
+  }
+
+  .weather-art {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    width: 138px;
+    height: 104px;
+    transform: translateY(-50%) scale(1.05);
+    transform-origin: center right;
+    z-index: 2;
+    opacity: .98;
+  }
+
+  .weather-art::before {
+    inset: -4px -16px -10px -20px;
+    background: radial-gradient(circle at 60% 50%, rgba(255,255,255,.14), transparent 68%);
+  }
+
+  .weather-art .sun {
+    width: 82px;
+    height: 82px;
+    right: 1px;
+    top: 0;
+    background: linear-gradient(180deg, #d3ab30, #9f7a22);
+    box-shadow: 0 0 34px rgba(255,210,74,.26), 0 0 62px rgba(255,210,74,.10);
+  }
+
+  .weather-art .cloud {
+    left: -2px;
+    bottom: 4px;
+    width: 124px;
+    height: 62px;
+    background: linear-gradient(180deg, #9dabc0, #6f829d);
+  }
+
+  .weather-art .cloud::before { background: #9dabc0; }
+  .weather-art .cloud::after { background: #9dabc0; }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 178px;
+    grid-template-columns: minmax(255px,.74fr) minmax(610px,1.78fr) minmax(450px,1.18fr);
+    padding: 17px 22px;
+    gap: 14px;
+  }
+  .command-zone--time,
+  .command-zone--weather { padding: 17px 28px 17px 32px; }
+  .command-zone--celestial {
+    grid-template-columns: minmax(205px,.8fr) minmax(92px,.34fr) minmax(285px,1.08fr);
+    padding: 15px 20px;
+    gap: 14px;
+  }
+  .weather-time { font-size: clamp(38px, 3.08vw, 50px); }
+  .weather-temp { font-size: clamp(38px, 3.1vw, 52px); }
+  .weather-date { font-size: 12.5px; }
+  .weather-section-label { font-size: 9.5px; }
+  .weather-section-icon { width: 62px; height: 62px; flex-basis: 62px; border-radius: 50%; }
+  .weather-section-icon svg { width: 30px; height: 30px; }
+  .celestial-module { min-height: 112px; padding: 11px 12px; }
+
+  .sun-time { font-size: 20px; }
+  .day-length { font-size: 11px; padding: 6px 9px; }
+  .big-moon { width: 80px; height: 80px; flex-basis: 80px; }
+  .moon-canvas { width: 80px; height: 80px; }
+  .moon-phase { font-size: clamp(16px, 1.18vw, 20px); }
+  .moon-illum { font-size: 10.5px; }
+  .weather-now-copy { max-width: calc(100% - 112px); }
+  .weather-art { width: 120px; transform: translateY(-50%) scale(.94); }
+}
+
+/* ============================================================
+   11/10 clarity patch - readable premium command header
+   Fixes: no decorative lines through text, larger microcopy,
+   no clipped weather text, calmer celestial details.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 190px;
+    padding: 18px 24px;
+    grid-template-columns: minmax(315px,.9fr) minmax(650px,1.62fr) minmax(430px,1.06fr);
+    gap: 16px;
+  }
+
+  .weather-hero-bg::before,
+  .celestial-map-line::before,
+  .celestial-map-line::after,
+  .command-zone--celestial::before {
+    opacity: .34;
+    z-index: 0;
+  }
+
+  .weather-hero-bg::before {
+    top: 72%;
+    left: 29%;
+    right: 31%;
+  }
+
+  .celestial-map-line {
+    top: 22px;
+    height: 74px;
+    opacity: .42;
+    border-top-color: rgba(255,210,74,.14);
+  }
+
+  .celestial-map-sun { top: 17px; }
+  .celestial-map-moon { top: 88px; opacity: .42; }
+
+  .command-zone,
+  .celestial-module,
+  .weather-section-copy,
+  .weather-now-copy,
+  .moon-info,
+  .sun-stat,
+  .weather-desc-row,
+  .weather-meta {
+    position: relative;
+    z-index: 4;
+  }
+
+  .command-zone--celestial {
+    overflow: hidden;
+    grid-template-columns: minmax(245px,.9fr) minmax(54px,.18fr) minmax(350px,1.12fr);
+    gap: 18px;
+    padding: 18px 24px;
+  }
+
+  .command-zone--celestial::after {
+    inset: 14px 22px;
+    opacity: .45;
+  }
+
+  .celestial-module {
+    min-height: 132px;
+    padding: 14px 16px;
+    background:
+      radial-gradient(170px 92px at 50% 0%, rgba(255,255,255,.07), transparent 72%),
+      linear-gradient(180deg, rgba(255,255,255,.067), rgba(255,255,255,.018));
+    backdrop-filter: blur(2px);
+  }
+
+  .weather-section-label {
+    font-size: 10.5px;
+    line-height: 1.1;
+    margin-bottom: 9px;
+    color: rgba(226,238,255,.70);
+    text-shadow: 0 1px 8px rgba(0,0,0,.35);
+  }
+
+  .weather-time { font-size: clamp(42px, 3.05vw, 54px); }
+  .weather-date { font-size: 13.5px; }
+
+  .sun-label { font-size: 10.5px; color: rgba(225,237,255,.70); }
+  .sun-time { font-size: 23px; }
+  .day-length { font-size: 12px; line-height: 1.15; white-space: nowrap; }
+
+  .big-moon {
+    width: 92px;
+    height: 92px;
+    flex-basis: 92px;
+  }
+  .moon-canvas { width: 92px; height: 92px; }
+  .moon-body { align-items: center; gap: 16px; }
+  .moon-info { min-width: 0; padding-right: 4px; }
+  .moon-phase {
+    font-size: clamp(18px, 1.18vw, 22px);
+    line-height: 1.08;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 8px rgba(0,0,0,.45);
+  }
+  .moon-illum {
+    font-size: 12px;
+    line-height: 1.25;
+    color: rgba(232,241,255,.84);
+    text-shadow: 0 1px 8px rgba(0,0,0,.42);
+  }
+
+  .command-zone--weather {
+    padding: 18px 20px;
+    overflow: hidden;
+  }
+  .command-zone--weather::before {
+    right: 132px;
+    opacity: .38;
+  }
+  .weather-now {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 132px;
+    align-items: center;
+    gap: 12px;
+    min-height: 132px;
+  }
+  .weather-now-copy {
+    max-width: none;
+    min-width: 0;
+  }
+  .weather-temp {
+    font-size: clamp(42px, 3.15vw, 56px);
+    line-height: .92;
+  }
+  .weather-meta {
+    margin-top: 10px;
+    gap: 7px 8px;
+    font-size: 11.5px;
+    line-height: 1.25;
+    max-width: 100%;
+  }
+  .weather-meta span {
+    padding: 3px 6px;
+  }
+  .weather-desc-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-top: 10px;
+    align-items: center;
+  }
+  .weather-desc {
+    font-size: 14.5px;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  .weather-art {
+    position: relative;
+    right: auto;
+    top: auto;
+    width: 132px;
+    height: 104px;
+    transform: scale(.98);
+    opacity: .96;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 194px;
+    grid-template-columns: minmax(285px,.86fr) minmax(600px,1.64fr) minmax(395px,1.04fr);
+    padding: 17px 18px;
+    gap: 12px;
+  }
+  .command-zone--time,
+  .command-zone--weather { padding: 16px 28px; }
+  .command-zone--celestial {
+    grid-template-columns: minmax(205px,.82fr) minmax(34px,.12fr) minmax(320px,1.12fr);
+    gap: 12px;
+    padding: 16px 16px;
+  }
+  .celestial-module {
+    min-height: 136px;
+    padding: 13px 13px;
+  }
+  .weather-section-label { font-size: 10px; margin-bottom: 8px; }
+  .weather-time { font-size: clamp(38px, 3vw, 48px); }
+  .weather-temp { font-size: clamp(38px, 3vw, 50px); }
+  .weather-date { font-size: 12.8px; }
+  .sun-time { font-size: 21px; }
+  .sun-label { font-size: 10px; }
+  .day-length { font-size: 11.5px; padding: 6px 9px; }
+  .big-moon { width: 82px; height: 82px; flex-basis: 82px; }
+  .moon-canvas { width: 82px; height: 82px; }
+  .moon-body { gap: 14px; }
+  .moon-phase { font-size: clamp(16px, 1.12vw, 20px); }
+  .moon-illum { font-size: 11.4px; line-height: 1.24; }
+  .weather-now { grid-template-columns: minmax(0,1fr) 118px; min-height: 136px; gap: 8px; }
+  .weather-art { width: 118px; height: 98px; transform: scale(.9); }
+  .weather-meta { font-size: 10.8px; gap: 6px; }
+  .weather-desc { font-size: 13.5px; }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 204px;
+    grid-template-columns: minmax(260px,.8fr) minmax(570px,1.7fr) minmax(360px,1fr);
+    gap: 10px;
+    padding: 16px 14px;
+  }
+
+  .weather-time { font-size: 40px; }
+  .weather-date { font-size: 12px; }
+  .command-zone--celestial {
+    grid-template-columns: minmax(190px,.82fr) 20px minmax(300px,1.16fr);
+    gap: 10px;
+  }
+  .weather-sun { gap: 8px; }
+  .sun-stat { padding: 7px 7px; }
+  .sun-time { font-size: 19px; }
+  .big-moon { width: 76px; height: 76px; flex-basis: 76px; }
+  .moon-canvas { width: 76px; height: 76px; }
+  .moon-phase { font-size: 16px; }
+  .moon-illum { font-size: 10.8px; }
+  .weather-now { grid-template-columns: minmax(0,1fr) 96px; }
+  .weather-art { width: 102px; transform: scale(.78); transform-origin: center right; }
+  .weather-meta span { padding: 2px 5px; }
+}
+
+
+
+/* ============================================================
+   11/10 readability hotfix - keep premium, restore clarity
+   Fixes the right weather artwork: no clipped/overlapping cloud,
+   no hidden text, and calmer background details behind copy.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 198px;
+  }
+
+  .command-zone--weather {
+    overflow: hidden;
+    padding: 18px 22px 18px 24px;
+  }
+
+  .command-zone--weather::before {
+    right: 96px;
+    top: 18px;
+    bottom: 18px;
+    opacity: .24;
+  }
+
+  .weather-atmosphere {
+    opacity: .52;
+  }
+
+  .weather-section-copy {
+    min-width: 0;
+  }
+
+  .command-zone--weather > .weather-section-copy {
+    height: 100%;
+    justify-content: center;
+  }
+
+  .weather-now {
+    grid-template-columns: minmax(210px, 1fr) 150px;
+    min-height: 132px;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .weather-now-copy {
+    position: relative;
+    z-index: 5;
+    min-width: 0;
+    padding-bottom: 2px;
+  }
+
+  .weather-meta {
+    max-width: 100%;
+    gap: 7px 8px;
+  }
+
+  .weather-meta span {
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .weather-desc-row {
+    margin-top: 10px;
+    min-height: 21px;
+    overflow: visible;
+  }
+
+  .weather-desc {
+    display: inline-flex;
+    align-items: center;
+    min-height: 18px;
+    line-height: 1.2;
+  }
+
+  .weather-art {
+    position: relative;
+    z-index: 2;
+    justify-self: end;
+    align-self: center;
+    width: 150px;
+    height: 112px;
+    transform: translateY(8px) scale(.86);
+    transform-origin: center center;
+    filter: drop-shadow(0 18px 28px rgba(0,0,0,.24));
+  }
+
+  .weather-art::before {
+    inset: 20px 2px 4px 14px;
+    opacity: .66;
+  }
+
+  .weather-art .sun {
+    width: 72px;
+    height: 72px;
+    right: 4px;
+    top: 16px;
+  }
+
+  .weather-art .cloud {
+    left: 4px;
+    bottom: 10px;
+    width: 126px;
+    height: 58px;
+  }
+
+  .weather-art .cloud::before {
+    width: 56px;
+    height: 56px;
+    left: 16px;
+    top: -26px;
+  }
+
+  .weather-art .cloud::after {
+    width: 70px;
+    height: 70px;
+    right: 15px;
+    top: -34px;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 202px;
+    grid-template-columns: minmax(285px,.86fr) minmax(590px,1.58fr) minmax(420px,1.12fr);
+  }
+
+  .command-zone--weather {
+    padding: 16px 18px 16px 20px;
+  }
+
+  .weather-now {
+    grid-template-columns: minmax(205px, 1fr) 126px;
+    min-height: 136px;
+    gap: 12px;
+  }
+
+  .weather-art {
+    width: 126px;
+    height: 106px;
+    transform: translateY(8px) scale(.80);
+  }
+
+  .weather-art .sun {
+    width: 70px;
+    height: 70px;
+    top: 16px;
+    right: 0;
+  }
+
+  .weather-art .cloud {
+    width: 124px;
+    height: 56px;
+    left: 0;
+    bottom: 10px;
+  }
+
+  .weather-art .cloud::before {
+    top: -25px;
+  }
+
+  .weather-art .cloud::after {
+    top: -32px;
+  }
+
+  .weather-meta {
+    font-size: 10.8px;
+    gap: 6px;
+  }
+
+  .weather-desc-row {
+    margin-top: 9px;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 208px;
+    grid-template-columns: minmax(258px,.78fr) minmax(560px,1.62fr) minmax(392px,1.10fr);
+  }
+
+  .weather-now {
+    grid-template-columns: minmax(190px, 1fr) 108px;
+    gap: 8px;
+  }
+
+  .weather-art {
+    width: 108px;
+    height: 98px;
+    transform: translateY(8px) scale(.74);
+  }
+
+  .weather-meta {
+    font-size: 10.5px;
+  }
+
+  .weather-meta span {
+    padding: 2px 5px;
+  }
+
+  .weather-desc {
+    font-size: 13.5px;
+  }
+}

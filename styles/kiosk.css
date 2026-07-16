@@ -1,0 +1,138 @@
+/* ============================================================
+   KIOSK MODE - enable with ?kiosk=1
+   ============================================================ */
+body.kiosk-mode {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  cursor: none;
+}
+body.kiosk-mode:hover { cursor: default; }
+
+body.kiosk-mode .dashboard {
+  transition: filter 1.2s cubic-bezier(.16,1,.3,1);
+}
+body.kiosk-night .dashboard {
+  filter: brightness(.82) saturate(.88);
+}
+.kiosk-dim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-kiosk-overlay);
+  pointer-events: none;
+  background: #000;
+  opacity: var(--kiosk-dim, 0);
+  transition: opacity 1.2s cubic-bezier(.16,1,.3,1);
+}
+.kiosk-status {
+  position: fixed;
+  right: var(--space-7);
+  bottom: var(--space-6);
+  z-index: var(--z-kiosk-controls);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255,255,255,.13);
+  background: rgba(8,16,38,.54);
+  color: rgba(229,238,255,.70);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.08);
+  opacity: .18;
+  transition: opacity .28s ease, transform .28s ease;
+}
+.kiosk-status:hover,
+body:not(.kiosk-mode) .kiosk-status {
+  opacity: .92;
+  transform: translateY(-2px);
+}
+.kiosk-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 14px var(--green);
+}
+@media (prefers-reduced-motion: reduce) {
+  body.kiosk-mode .dashboard { transition: none; }
+}
+
+/* Density is a first-class fullscreen state. It changes the internal
+   information density before the final canvas fit-scale is applied. */
+@media (min-width: 1101px) {
+  body.dashboard-fit-cozy {
+    --dashboard-padding-y: 12px;
+    --dashboard-padding-bottom: 18px;
+    --weather-hero-height: 162px;
+    --insight-height: 74px;
+    --flow-panel-height: 360px;
+    --price-panel-height: 357px;
+    --chart-height: 294px;
+    --card-height: 130px;
+    --panel-padding: 20px;
+  }
+
+  body.dashboard-fit-compact {
+    --dashboard-padding-y: 10px;
+    --dashboard-padding-bottom: 14px;
+    --weather-hero-height: 154px;
+    --insight-height: 68px;
+    --flow-panel-height: 342px;
+    --price-panel-height: 389px;
+    --chart-height: 282px;
+    --card-height: 122px;
+    --panel-padding: 18px;
+    --section-gap: 8px;
+  }
+
+  body.dashboard-fit-dense {
+    --dashboard-padding-y: 8px;
+    --dashboard-padding-bottom: 12px;
+    --weather-hero-height: 144px;
+    --insight-height: 62px;
+    --flow-panel-height: 318px;
+    --price-panel-height: 421px;
+    --chart-height: 260px;
+    --card-height: 112px;
+    --panel-padding: 16px;
+    --section-gap: 7px;
+  }
+
+  body.dashboard-fit-compact .topbar,
+  body.dashboard-fit-dense .topbar { margin-bottom: var(--section-gap); }
+
+  body.dashboard-fit-compact .weather-hero,
+  body.dashboard-fit-dense .weather-hero { padding-top: 8px; padding-bottom: 8px; }
+
+  body.dashboard-fit-compact .flow { min-height: 178px; gap: 18px; }
+  body.dashboard-fit-dense .flow { min-height: 160px; gap: 14px; }
+  body.dashboard-fit-dense .node { min-height: 134px; }
+  body.dashboard-fit-dense .icon { width: 64px; height: 64px; }
+  body.dashboard-fit-dense .value { font-size: 27px; }
+
+  body.dashboard-fit-compact .cards,
+  body.dashboard-fit-dense .cards { margin-top: 8px; gap: 10px; }
+  body.dashboard-fit-dense .card {
+    padding-top: 10px;
+    padding-bottom: 9px;
+    grid-template-rows: 17px 26px 17px 24px;
+    gap: 4px;
+  }
+  body.dashboard-fit-dense .card strong { font-size: 20px; }
+  body.dashboard-fit-dense .card-grid strong { font-size: 17px; }
+  body.dashboard-fit-dense .price-line,
+  body.dashboard-fit-dense .solar-price,
+  body.dashboard-fit-dense .gas-price { min-height: 24px; padding-top: 6px; }
+
+  body.dashboard-fit-dense .pricesHeader { padding-bottom: 8px; margin-bottom: 2px; }
+  body.dashboard-fit-dense .chart { padding-top: 16px; padding-bottom: 30px; }
+  body.dashboard-fit-dense .bars { top: 12px; bottom: 24px; gap: 6px; }
+}

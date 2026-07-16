@@ -1,0 +1,139 @@
+/* ============================================================
+   v13 final fit rules
+   Desktop/laptop: fixed 1920x1080 canvas, scaled by JS.
+   Mobile/tablet: normal document flow and scroll.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .dashboard {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: var(--dashboard-canvas-width);
+    height: var(--dashboard-canvas-height);
+    max-width: none;
+    max-height: var(--dashboard-canvas-height);
+    padding: var(--dashboard-padding-y) 0 var(--dashboard-padding-bottom);
+    overflow: hidden;
+    transform-origin: top center;
+    transform:
+      translate3d(calc(-50% + var(--kiosk-shift-x, 0px)), var(--kiosk-shift-y, 0px), 0)
+      scale(var(--dashboard-total-scale));
+  }
+
+  .weather-hero {
+    min-height: var(--weather-hero-height);
+    margin-bottom: var(--section-gap);
+  }
+
+  .panel[data-i18n-label="section-flow"] {
+    height: var(--flow-panel-height);
+    min-height: var(--flow-panel-height);
+  }
+
+  .panel[data-i18n-label="section-prices"] {
+    height: var(--price-panel-height);
+    min-height: var(--price-panel-height);
+    margin-bottom: 0;
+  }
+
+  .card {
+    height: var(--card-height);
+    min-height: var(--card-height);
+  }
+
+  .chart {
+    height: var(--chart-height);
+  }
+}
+
+/* ============================================================
+   Mobile/tablet fallback
+   The fullscreen 1920x1080 canvas is desktop-only. Smaller screens use a
+   normal scrollable document, even when ?kiosk=1 is present.
+   ============================================================ */
+@media (max-width: 1100px) {
+  html,
+  body,
+  body.kiosk-mode {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+    touch-action: auto;
+    cursor: auto;
+  }
+
+  body {
+    display: block;
+    justify-content: initial;
+    align-items: initial;
+  }
+
+  .dashboard,
+  body.kiosk-mode .dashboard {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    max-height: none;
+    margin: 0 auto;
+    overflow: visible;
+    transform: none;
+  }
+}    margin-bottom: 0;
+  }
+
+  .card {
+    height: var(--card-height);
+    min-height: var(--card-height);
+  }
+
+  .chart {
+    height: var(--chart-height);
+  }
+}
+
+/* ============================================================
+   Mobile/tablet fallback
+   The fullscreen 1920x1080 canvas is desktop-only. Smaller screens use a
+   normal scrollable document, even when ?kiosk=1 is present.
+   ============================================================ */
+@media (max-width: 1100px) {
+  html,
+  body,
+  body.kiosk-mode {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+    touch-action: auto;
+    cursor: auto;
+  }
+
+  body {
+    display: block;
+    justify-content: initial;
+    align-items: initial;
+  }
+
+  .dashboard,
+  body.kiosk-mode .dashboard {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    max-height: none;
+    margin: 0 auto;
+    overflow: visible;
+    transform: none;
+  }
+}
+

@@ -1,0 +1,599 @@
+/* ============================================================
+   4. ENERGY FLOW — desktop 5-col, mobile vertical stack
+   ============================================================ */
+.flow {
+  display: grid;
+  grid-template-columns: minmax(125px,1fr) minmax(180px,245px) minmax(125px,1fr) minmax(180px,245px) minmax(125px,1fr);
+  gap: 26px;
+  align-items: start;
+  min-height: 180px;
+}
+
+.node {
+  text-align: center;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 160px;
+}
+.node::after {
+  content: "";
+  display: block;
+  min-height: 37px;
+  margin-top: 9px;
+}
+
+/* Icon sphere */
+.icon {
+  --icon-glow: rgba(255,255,255,.16);
+  --icon-glow-strong: rgba(255,255,255,.28);
+  --icon-intensity: .2;
+  width: 80px;
+  height: 80px;
+  margin: auto;
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 38% 24%, rgba(255,255,255,.26), rgba(255,255,255,.08) 34%, rgba(255,255,255,.035) 68%),
+    linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.035));
+  border: 2px solid rgba(255,255,255,.23);
+  box-shadow:
+    0 0 calc(22px + var(--icon-intensity)*32px) var(--icon-glow),
+    0 18px 50px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 -16px 30px rgba(0,0,0,.14);
+  overflow: hidden;
+  transition: transform var(--duration-base) cubic-bezier(.2,.8,.2,1), box-shadow var(--duration-base), border-color var(--duration-base), opacity var(--duration-base), filter var(--duration-base);
+}
+.icon::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,.22), transparent 38%, rgba(255,255,255,.055) 72%, transparent);
+  pointer-events: none;
+}
+.icon::after {
+  content: "";
+  position: absolute;
+  left: 18%; right: 18%; top: 12%; height: 28%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,0));
+  filter: blur(.2px);
+  opacity: .75;
+  pointer-events: none;
+}
+.icon svg {
+  position: relative;
+  z-index: 2;
+  width: 37px;
+  height: 37px;
+  display: block;
+  fill: currentColor;
+  stroke: currentColor;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, currentColor, transparent 38%));
+}
+.icon svg .stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Icon accent colors */
+.grid .icon        { color: var(--green); --icon-glow: rgba(0,224,186,.24); --icon-glow-strong: rgba(0,224,186,.42); border-color: rgba(0,224,186,.78); }
+.grid.is-importing .icon { color: var(--orange); --icon-glow: rgba(255,118,26,.26); --icon-glow-strong: rgba(255,118,26,.44); border-color: rgba(255,118,26,.78); }
+.house .icon       { color: #fff; --icon-glow: rgba(220,230,255,.16); --icon-glow-strong: rgba(220,230,255,.30); border-color: rgba(225,235,255,.42); animation: none; }
+.solar .icon       { color: var(--solar); --icon-glow: rgba(255,196,0,.24); --icon-glow-strong: rgba(255,196,0,.44); border-color: rgba(255,196,0,.80); }
+[data-theme="light"] .house .icon { color: #334; }
+
+.node.is-active .icon       { animation: icon-live-pulse 2.4s ease-in-out infinite; }
+.house.is-active .icon      { animation: icon-live-pulse 2.9s ease-in-out infinite; }
+.solar.is-off .icon         { opacity: .45; filter: saturate(.4); animation: none; --icon-glow: rgba(255,255,255,.10); border-color: rgba(255,255,255,.20); }
+
+@keyframes icon-live-pulse {
+  0%, 100% { box-shadow: 0 0 calc(20px + var(--icon-intensity)*26px) var(--icon-glow), 0 18px 50px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.24), inset 0 -16px 30px rgba(0,0,0,.14); }
+  50%       { box-shadow: 0 0 calc(30px + var(--icon-intensity)*42px) var(--icon-glow-strong), 0 20px 58px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.28), inset 0 -16px 30px rgba(0,0,0,.13); }
+}
+@keyframes house-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-1px) scale(1.018); }
+}
+
+/* Icon hover physics */
+.node .icon {
+  transform-origin: center;
+  will-change: transform, box-shadow, filter;
+}
+
+.node:hover .icon {
+  transform:
+    translateY(-5px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg))
+    scale(1.045);
+  box-shadow:
+    0 0 calc(34px + var(--icon-intensity)*48px) var(--icon-glow-strong),
+    0 24px 62px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.30),
+    inset 0 -16px 30px rgba(0,0,0,.12);
+  filter: brightness(1.08) saturate(1.12);
+}
+
+.grid:hover .icon {
+  --icon-glow-strong: rgba(0,224,186,.58);
+}
+.grid.is-importing:hover .icon {
+  --icon-glow-strong: rgba(255,118,26,.62);
+}
+.house:hover .icon,
+.house.is-active:hover .icon {
+  --icon-glow-strong: rgba(220,230,255,.62);
+  border-color: rgba(225,235,255,.72);
+}
+.solar:hover .icon {
+  --icon-glow-strong: rgba(255,196,0,.62);
+}
+
+/* Labels & values */
+.label { margin-top: 13px; color: var(--muted); font-size: 13px; font-weight: 900; letter-spacing: .10em; text-transform: uppercase; }
+.value { font-size: var(--space-12); font-weight: 1000; line-height: 1; margin-top: 6px; font-variant-numeric: tabular-nums; letter-spacing: -.035em; color: var(--text); }
+.sub   { font-weight: 850; font-size: 13px; margin-top: 5px; color: var(--muted); }
+.muted { color: var(--muted); }
+
+.grid .icon, .grid .label, .grid .value, .grid .sub       { color: var(--green); }
+.grid.is-importing .icon, .grid.is-importing .value, .grid.is-importing .sub { color: var(--orange); }
+.solar .icon, .solar .label, .solar .value, .solar .sub   { color: var(--solar); }
+.house .label { color: var(--muted); }
+.house .value { color: var(--text); text-shadow: 0 0 18px rgba(255,255,255,.18); }
+
+.green,
+.value.green,
+.sub.green,
+.badge.green {
+  color: var(--green);
+  text-shadow: 0 0 18px rgba(0,224,186,.32);
+}
+.orange,
+.value.orange,
+.sub.orange {
+  color: var(--orange);
+  text-shadow: 0 0 18px rgba(255,118,26,.32);
+}
+.solarText,
+.value.solarText,
+.sub.solarText {
+  color: var(--solar);
+  text-shadow: 0 0 18px rgba(255,196,0,.27);
+}
+
+/* PV limit badge */
+.limitBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 9px;
+  min-height: var(--space-10);
+  padding: 0 13px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs, 12px);
+  font-weight: 1000;
+  letter-spacing: .02em;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.065);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 0 22px rgba(255,196,0,.12);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--duration-fast), transform var(--duration-fast), color var(--duration-fast), box-shadow var(--duration-fast);
+}
+.limitBadge.is-visible  { opacity: 1; transform: none; display: inline-flex; visibility: visible; }
+.limitBadge.is-limited  { color: var(--solar); border-color: rgba(255,196,0,.32); box-shadow: 0 0 22px rgba(255,196,0,.20), inset 0 1px 0 rgba(255,255,255,.10); }
+.limitBadge.is-blocked  { color: var(--red);   border-color: rgba(255,79,98,.34);  box-shadow: 0 0 24px rgba(255,79,98,.24), inset 0 1px 0 rgba(255,255,255,.10); }
+.limitBadge.is-limited::before { content: "⚠"; margin-right: 7px; font-size: 11px; }
+.limitBadge.is-blocked::before { content: "⛔"; margin-right: 7px; font-size: 11px; }
+
+/* ---- Flow lines ---- */
+.flowbox {
+  min-width: 0;
+  padding-top: 40px;
+}
+.flowline {
+  height: 15px;
+  border-radius: var(--radius-pill);
+  position: relative;
+  background: rgba(190,210,255,.13);
+  overflow: hidden;
+  --flow-speed: 3.8s;
+  --flow-color: var(--green);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 0 0 1px rgba(255,255,255,.035),
+    0 0 22px color-mix(in srgb, var(--flow-color), transparent 82%);
+}
+[data-theme="light"] .flowline { background: rgba(80,120,220,.12); }
+
+.flowline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent),
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--flow-color), transparent 72%), transparent);
+  opacity: .75;
+}
+.particle {
+  position: absolute;
+  top: 50%;
+  width: 56px;
+  height: 9px;
+  margin-top: -4.5px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, transparent, var(--flow-color) 50%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--flow-color), transparent 22%);
+  opacity: 0;
+  left: -60px;
+}
+.flowline.is-off { opacity: .38; }
+.flowline.is-off .particle { animation: none; opacity: 0; }
+
+@keyframes flow-right {
+  0%   { left: -60px;        opacity: 0; }
+  8%   {                     opacity: 1; }
+  92%  {                     opacity: 1; }
+  100% { left: calc(100% + 60px); opacity: 0; }
+}
+@keyframes flow-left {
+  0%   { left: calc(100% + 60px); opacity: 0; }
+  8%   {                          opacity: 1; }
+  92%  {                          opacity: 1; }
+  100% { left: -60px;             opacity: 0; }
+}
+
+.arrow { text-align: center; margin-top: 12px; font-size: 22px; color: var(--green); filter: drop-shadow(0 0 12px currentColor); transition: var(--duration-fast); }
+.solarArrow { color: var(--solar); }
+
+/* ============================================================
+   v17 ULTRA POLISH: calm orange/yellow glow + ambient breathing
+   ============================================================ */
+.grid.is-importing .icon {
+  --icon-glow: rgba(255,118,26,.18);
+  --icon-glow-strong: rgba(255,118,26,.30);
+}
+
+.solar .icon {
+  --icon-glow: rgba(255,196,0,.18);
+  --icon-glow-strong: rgba(255,196,0,.30);
+}
+
+.label,
+.sub {
+  opacity: var(--secondary-label-opacity);
+}
+
+.icon {
+  animation-duration: var(--ambient-duration);
+}
+
+
+/* ============================================================
+   v23 FINAL POLISH: calmer flow hierarchy + subtle active motion
+   ============================================================ */
+.label,
+.sub {
+  opacity: var(--tertiary-label-opacity, .34);
+}
+
+.value {
+  text-shadow: 0 0 14px color-mix(in srgb, currentColor, transparent 76%);
+}
+
+.flowline {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 0 0 1px rgba(255,255,255,.03),
+    0 0 16px color-mix(in srgb, var(--flow-color), transparent 88%);
+}
+
+.flowline.is-active::before {
+  animation: flowAmbient var(--ambient-duration, 9200ms) var(--ease-soft, ease) infinite;
+}
+
+@keyframes flowAmbient {
+  0%, 100% { opacity: .46; transform: translateX(-2%); }
+  50% { opacity: .72; transform: translateX(2%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flowline.is-active::before { animation: none; }
+}
+
+/* ============================================================
+   v25: restore readability for operational flow labels
+   ============================================================ */
+.flow .label,
+.flow .sub,
+.label,
+.sub {
+  opacity: var(--secondary-label-opacity, .64);
+}
+
+.house .label,
+.card .label {
+  opacity: var(--secondary-label-opacity, .64);
+}
+
+.flowline {
+  opacity: .86;
+}
+
+.flowline.is-off {
+  opacity: .48;
+}
+
+/* ============================================================
+   PRIORITY 1 — micro-animations + live flow dynamics
+   Adds layered rails, staggered energy particles and active arrows.
+   ============================================================ */
+.flowline {
+  height: 18px;
+  overflow: visible;
+  --flow-intensity: .28;
+  --flow-lane-spread: 7px;
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--flow-color), transparent 74%), transparent 58%),
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--flow-color), transparent 82%), transparent),
+    rgba(190,210,255,.10);
+  filter: saturate(calc(1 + var(--flow-intensity) * .55));
+  transition:
+    opacity var(--duration-fast),
+    filter var(--duration-fast),
+    box-shadow var(--duration-fast),
+    background var(--duration-fast);
+}
+
+.flowline::before,
+.flowline::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.flowline::before {
+  inset: -13px -6px;
+  border-radius: var(--radius-pill);
+  background:
+    linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--flow-color), transparent 90%) 18%, color-mix(in srgb, var(--flow-color), transparent 62%) 50%, color-mix(in srgb, var(--flow-color), transparent 90%) 82%, transparent 100%),
+    repeating-linear-gradient(90deg, transparent 0 34px, color-mix(in srgb, var(--flow-color), transparent 72%) 35px 38px, transparent 42px 78px);
+  opacity: calc(.28 + var(--flow-intensity) * .45);
+  filter: blur(9px);
+  transform: translateX(0);
+  mix-blend-mode: screen;
+}
+
+.flowline::after {
+  left: -2px;
+  right: -2px;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--flow-color), transparent 22%), transparent);
+  box-shadow:
+    0 calc(var(--flow-lane-spread) * -1) 0 color-mix(in srgb, var(--flow-color), transparent 82%),
+    0 var(--flow-lane-spread) 0 color-mix(in srgb, var(--flow-color), transparent 84%);
+  opacity: calc(.28 + var(--flow-intensity) * .40);
+}
+
+.flowline.is-active {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 0 0 1px color-mix(in srgb, var(--flow-color), transparent 78%),
+    0 0 calc(18px + var(--flow-intensity) * 36px) color-mix(in srgb, var(--flow-color), transparent 72%);
+}
+
+.flowline.is-active::before {
+  animation:
+    flowAmbient var(--ambient-duration, 9200ms) var(--ease-soft, ease) infinite,
+    flow-scan calc(4.8s - var(--flow-intensity) * 2.4s) linear infinite;
+}
+
+.particle {
+  width: calc(42px + var(--flow-intensity) * 38px);
+  height: 4px;
+  margin-top: -2px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--flow-color), white 18%) 48%, transparent);
+  box-shadow:
+    0 0 calc(10px + var(--flow-intensity) * 22px) color-mix(in srgb, var(--flow-color), transparent 16%),
+    0 0 2px rgba(255,255,255,.72);
+  will-change: left, opacity, transform;
+}
+
+.particle:nth-child(2) { top: calc(50% - var(--flow-lane-spread)); transform: scaleX(.78); opacity: .72; }
+.particle:nth-child(3) { top: calc(50% + var(--flow-lane-spread)); transform: scaleX(.64); opacity: .60; }
+.particle:nth-child(4) { top: calc(50% - var(--flow-lane-spread) * .45); transform: scaleX(.42); opacity: .50; }
+.particle:nth-child(5) { top: calc(50% + var(--flow-lane-spread) * .48); transform: scaleX(.48); opacity: .54; }
+
+.arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  font-weight: 1000;
+}
+
+.arrow .ico {
+  display: inline-block;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+
+.arrow .ico {
+  animation: arrow-nudge 1.25s ease-in-out infinite;
+}
+
+.node.is-active .value {
+  animation: value-live-flicker 3.2s ease-in-out infinite;
+}
+
+.node.is-active .icon::before {
+  animation: icon-sheen 4.8s ease-in-out infinite;
+}
+
+@keyframes flow-scan {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 180px 0, 240px 0; }
+}
+
+@keyframes arrow-nudge {
+  0%, 100% { transform: translateX(0); opacity: .86; }
+  50%      { transform: translateX(-4px); opacity: 1; }
+}
+
+@keyframes value-live-flicker {
+  0%, 100% { filter: brightness(1); }
+  48%      { filter: brightness(1.08); }
+  52%      { filter: brightness(1.16); }
+}
+
+@keyframes icon-sheen {
+  0%, 100% { transform: rotate(0deg) scale(1); opacity: .58; }
+  50%      { transform: rotate(8deg) scale(1.04); opacity: .82; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flowline.is-active::before,
+  .arrow .ico,
+  .node.is-active .value,
+  .node.is-active .icon::before {
+    animation: none;
+  }
+}
+
+.particle,
+.icon,
+.arrow .ico {
+  animation-play-state: var(--anim-state, running);
+}
+
+/* ============================================================
+   PRIORITY 1 FIX — calmer, separated live-flow lanes
+   Keep the micro-animation, but prevent particles/glow from running
+   through labels, nodes and each other.
+   ============================================================ */
+.flowbox {
+  padding-top: 54px;
+  position: relative;
+  z-index: 1;
+}
+
+.flowline {
+  height: 12px;
+  overflow: hidden;
+  isolation: isolate;
+  contain: paint;
+  border-radius: var(--radius-pill);
+  --flow-lane-spread: 0px;
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--flow-color), transparent 82%), transparent),
+    rgba(190,210,255,.11);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 0 0 1px color-mix(in srgb, var(--flow-color), transparent 86%),
+    0 0 calc(10px + var(--flow-intensity) * 18px) color-mix(in srgb, var(--flow-color), transparent 82%);
+}
+
+.flowline::before {
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--flow-color), transparent 78%) 48%, transparent 100%);
+  opacity: calc(.26 + var(--flow-intensity) * .34);
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.flowline::after {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  box-shadow: none;
+  opacity: calc(.22 + var(--flow-intensity) * .30);
+}
+
+.flowline.is-active::before {
+  animation: flow-scan calc(5.8s - var(--flow-intensity) * 2.2s) linear infinite;
+}
+
+.particle {
+  top: 50% !important;
+  width: calc(24px + var(--flow-intensity) * 28px);
+  height: 5px;
+  margin-top: -2.5px;
+  transform: none !important;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--flow-color), white 14%) 50%, transparent);
+  box-shadow: 0 0 calc(8px + var(--flow-intensity) * 14px) color-mix(in srgb, var(--flow-color), transparent 32%);
+}
+
+.particle:nth-child(n+4) {
+  display: none;
+}
+
+.arrow {
+  margin-top: 8px;
+  min-height: 18px;
+  gap: 0;
+  font-size: 20px;
+  line-height: 1;
+  opacity: .88;
+}
+
+.arrow .ico {
+  animation: arrow-soft-nudge 1.6s ease-in-out infinite;
+}
+
+@keyframes arrow-soft-nudge {
+  0%, 100% { transform: translateX(0); opacity: .75; }
+  50%      { transform: translateX(-2px); opacity: 1; }
+}
+
+.node {
+  position: relative;
+  z-index: 2;
+}
+
+.node.is-active .value {
+  animation: value-soft-pulse 4s ease-in-out infinite;
+}
+
+@keyframes value-soft-pulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.07); }
+}
+
+/* v26 polish: flow labels stay centered and never push outside their node. */
+.node,
+.node-text,
+.label,
+.value,
+.sub,
+.limitBadge {
+  max-width: 100%;
+  min-width: 0;
+}
+.label,
+.value,
+.sub,
+.limitBadge {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.label,
+.sub,
+.limitBadge {
+  white-space: nowrap;
+}

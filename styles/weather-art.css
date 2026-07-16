@@ -1,0 +1,805 @@
+/* ============================================================
+   Final clarity fix - remove confusing blob and fully contain weather icon
+   ============================================================ */
+@media (min-width: 1101px) {
+  /* The small yellow dot on the orbit read as a random blob; remove it. */
+  .celestial-map-sun,
+  .celestial-map-moon {
+    display: none !important;
+  }
+
+  /* Keep orbit decoration behind modules only; never compete with text. */
+  .celestial-map-line {
+    opacity: .22 !important;
+  }
+
+  .command-zone--weather {
+    overflow: hidden;
+  }
+
+  .weather-now {
+    grid-template-columns: minmax(220px, 1fr) 124px !important;
+    gap: 14px !important;
+  }
+
+  .weather-art {
+    width: 124px !important;
+    height: 92px !important;
+    transform: translateY(5px) scale(.74) !important;
+    transform-origin: center center !important;
+    overflow: visible !important;
+  }
+
+  .weather-art::before {
+    inset: 18px 0 4px 8px !important;
+  }
+
+  .weather-art .sun {
+    width: 68px !important;
+    height: 68px !important;
+    right: -2px !important;
+    top: 16px !important;
+  }
+
+  .weather-art .sun::before {
+    inset: -8px !important;
+    opacity: .76 !important;
+  }
+
+  .weather-art .cloud {
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 118px !important;
+    height: 52px !important;
+  }
+
+  .weather-art .cloud::before {
+    width: 52px !important;
+    height: 52px !important;
+    left: 14px !important;
+    top: -22px !important;
+  }
+
+  .weather-art .cloud::after {
+    width: 64px !important;
+    height: 64px !important;
+    right: 16px !important;
+    top: -28px !important;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(210px, 1fr) 106px !important;
+    gap: 10px !important;
+  }
+
+  .weather-art {
+    width: 106px !important;
+    height: 86px !important;
+    transform: translateY(4px) scale(.66) !important;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(190px, 1fr) 88px !important;
+    gap: 8px !important;
+  }
+
+  .weather-art {
+    width: 88px !important;
+    height: 78px !important;
+    transform: translateY(3px) scale(.58) !important;
+  }
+}
+
+/* ============================================================
+   Weather glyph cleanup - readable overcast icon, no half sun
+   The previous sun/cloud combo looked clipped and ambiguous. Use a
+   centered premium cloud glyph that stays fully inside the weather card.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .command-zone--weather {
+    overflow: hidden;
+  }
+
+  .weather-now {
+    grid-template-columns: minmax(230px, 1fr) 112px !important;
+    gap: 12px !important;
+  }
+
+  .weather-art {
+    justify-self: end;
+    align-self: center;
+    width: 112px !important;
+    height: 82px !important;
+    transform: translateY(1px) scale(1) !important;
+    transform-origin: center center !important;
+    overflow: visible !important;
+    opacity: .96;
+  }
+
+  .weather-art::before {
+    inset: 16px 6px 6px 8px !important;
+    border-radius: 999px;
+    background: radial-gradient(circle at 50% 55%, rgba(130,176,224,.20), transparent 68%) !important;
+    opacity: .78 !important;
+  }
+
+  .weather-art .sun,
+  .weather-art .sun::before {
+    display: none !important;
+  }
+
+  .weather-art .cloud {
+    left: 2px !important;
+    right: auto !important;
+    bottom: 7px !important;
+    width: 106px !important;
+    height: 44px !important;
+    border-radius: 28px !important;
+    background: linear-gradient(180deg, #9aa9bf 0%, #8092aa 58%, #687f9b 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      inset 0 -10px 18px rgba(36,55,82,.20),
+      0 14px 24px rgba(0,0,0,.22) !important;
+  }
+
+  .weather-art .cloud::before {
+    width: 50px !important;
+    height: 50px !important;
+    left: 14px !important;
+    top: -24px !important;
+    background: #98a8be !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14) !important;
+  }
+
+  .weather-art .cloud::after {
+    width: 64px !important;
+    height: 64px !important;
+    right: 12px !important;
+    top: -33px !important;
+    background: #9aa9bf !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14) !important;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(220px, 1fr) 104px !important;
+  }
+
+  .weather-art {
+    width: 104px !important;
+    height: 78px !important;
+    transform: translateY(1px) scale(.94) !important;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(200px, 1fr) 92px !important;
+    gap: 8px !important;
+  }
+
+  .weather-art {
+    width: 92px !important;
+    height: 72px !important;
+    transform: translateY(1px) scale(.86) !important;
+  }
+}
+
+
+
+/* ============================================================
+   Dynamic weather icon - condition-aware, unclipped and readable
+   The Visual Crossing `currentConditions.icon` / conditions string
+   controls the class added by scripts/ui/weather.js.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .command-zone--weather {
+    overflow: hidden;
+  }
+
+  .weather-art {
+    --art-sun: #d1a91f;
+    --art-cloud-top: #9aa9bd;
+    --art-cloud-bottom: #7288a2;
+    --art-rain: #57c7ff;
+    --art-snow: rgba(238,248,255,.95);
+    --art-bolt: #ffd13c;
+    position: relative;
+    z-index: 2;
+    justify-self: end;
+    align-self: center;
+    width: 134px;
+    height: 104px;
+    transform: translateY(4px) scale(.86);
+    transform-origin: center center;
+    filter: drop-shadow(0 18px 28px rgba(0,0,0,.24));
+    overflow: visible;
+  }
+
+  .weather-art::before {
+    content: "";
+    position: absolute;
+    inset: 18px 4px 8px 10px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255,255,255,.11), transparent 70%);
+    opacity: .65;
+  }
+
+  .weather-art .sun,
+  .weather-art .cloud,
+  .weather-art .rain,
+  .weather-art .snow,
+  .weather-art .bolt,
+  .weather-art .fog {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .weather-art .sun {
+    width: 58px;
+    height: 58px;
+    right: 8px;
+    top: 8px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 32%, rgba(255,255,255,.20), transparent 27%),
+      var(--art-sun);
+    box-shadow: 0 0 24px rgba(255,196,0,.22);
+    opacity: 0;
+  }
+
+  .weather-art .sun::before {
+    content: "";
+    position: absolute;
+    inset: -10px;
+    border-radius: inherit;
+    background: conic-gradient(from 18deg,
+      transparent 0 8%, rgba(209,169,31,.95) 8% 15%,
+      transparent 15% 26%, rgba(209,169,31,.82) 26% 33%,
+      transparent 33% 45%, rgba(209,169,31,.82) 45% 52%,
+      transparent 52% 64%, rgba(209,169,31,.90) 64% 72%,
+      transparent 72% 84%, rgba(209,169,31,.84) 84% 91%,
+      transparent 91% 100%);
+  }
+
+  .weather-art .cloud {
+    left: 8px;
+    bottom: 22px;
+    width: 104px;
+    height: 46px;
+    border-radius: 28px;
+    background: linear-gradient(180deg, var(--art-cloud-top), var(--art-cloud-bottom));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 12px 24px rgba(0,0,0,.18);
+    opacity: 1;
+  }
+
+  .weather-art .cloud::before {
+    content: "";
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    left: 16px;
+    top: -24px;
+    border-radius: 50%;
+    background: var(--art-cloud-top);
+  }
+
+  .weather-art .cloud::after {
+    content: "";
+    position: absolute;
+    width: 62px;
+    height: 62px;
+    right: 12px;
+    top: -32px;
+    border-radius: 50%;
+    background: var(--art-cloud-top);
+  }
+
+  .weather-art .rain {
+    left: 32px;
+    right: 24px;
+    bottom: 3px;
+    height: 22px;
+    opacity: 0;
+    background:
+      linear-gradient(115deg, transparent 0 35%, var(--art-rain) 35% 46%, transparent 46% 100%) 0 0 / 18px 22px repeat-x;
+    filter: drop-shadow(0 0 5px rgba(87,199,255,.55));
+  }
+
+  .weather-art .snow {
+    left: 31px;
+    right: 23px;
+    bottom: 4px;
+    height: 22px;
+    opacity: 0;
+    background:
+      radial-gradient(circle, var(--art-snow) 0 2px, transparent 2.5px) 0 0 / 18px 18px repeat-x,
+      radial-gradient(circle, var(--art-snow) 0 1.7px, transparent 2.2px) 9px 8px / 18px 18px repeat-x;
+    filter: drop-shadow(0 0 5px rgba(238,248,255,.48));
+  }
+
+  .weather-art .bolt {
+    left: 54px;
+    bottom: 2px;
+    width: 20px;
+    height: 32px;
+    opacity: 0;
+    background: var(--art-bolt);
+    clip-path: polygon(44% 0, 100% 0, 63% 42%, 92% 42%, 24% 100%, 45% 55%, 12% 55%);
+    filter: drop-shadow(0 0 8px rgba(255,209,60,.58));
+  }
+
+  .weather-art .fog {
+    left: 18px;
+    right: 10px;
+    bottom: 12px;
+    height: 30px;
+    opacity: 0;
+    background:
+      linear-gradient(90deg, transparent, rgba(218,234,250,.65), transparent) 0 3px / 100% 2px no-repeat,
+      linear-gradient(90deg, transparent, rgba(218,234,250,.50), transparent) 0 14px / 100% 2px no-repeat,
+      linear-gradient(90deg, transparent, rgba(218,234,250,.42), transparent) 0 25px / 100% 2px no-repeat;
+  }
+
+  .weather-art--clear-day .cloud,
+  .weather-art--clear-night .cloud {
+    opacity: 0;
+  }
+
+  .weather-art--clear-day .sun {
+    opacity: 1;
+    right: 36px;
+    top: 18px;
+    transform: scale(1.12);
+  }
+
+  .weather-art--clear-night .sun {
+    opacity: 1;
+    right: 39px;
+    top: 18px;
+    background:
+      radial-gradient(circle at 28% 28%, rgba(255,255,255,.26), transparent 30%),
+      #d9e3f4;
+    box-shadow: 0 0 24px rgba(196,218,255,.20);
+  }
+
+  .weather-art--clear-night .sun::after {
+    content: "";
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    right: -8px;
+    top: -8px;
+    border-radius: 50%;
+    background: rgba(10,27,65,.96);
+  }
+
+  .weather-art--partly-cloudy-day .sun {
+    opacity: 1;
+  }
+
+  .weather-art--partly-cloudy-night .sun {
+    opacity: 1;
+    background: #d9e3f4;
+    box-shadow: 0 0 24px rgba(196,218,255,.18);
+  }
+
+  .weather-art--partly-cloudy-night .sun::after {
+    content: "";
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    right: -7px;
+    top: -7px;
+    border-radius: 50%;
+    background: rgba(10,27,65,.96);
+  }
+
+  .weather-art--cloudy .sun {
+    opacity: 0;
+  }
+
+  .weather-art--rain .rain {
+    opacity: 1;
+  }
+
+  .weather-art--rain .sun {
+    opacity: 0;
+  }
+
+  .weather-art--snow .snow {
+    opacity: 1;
+  }
+
+  .weather-art--snow .sun {
+    opacity: 0;
+  }
+
+  .weather-art--storm .rain,
+  .weather-art--storm .bolt {
+    opacity: 1;
+  }
+
+  .weather-art--storm .sun {
+    opacity: 0;
+  }
+
+  .weather-art--fog .fog {
+    opacity: 1;
+  }
+
+  .weather-art--fog .sun {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(205px, 1fr) 118px;
+    gap: 10px;
+  }
+
+  .weather-art {
+    width: 118px;
+    height: 98px;
+    transform: translateY(4px) scale(.78);
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(190px, 1fr) 96px;
+  }
+
+  .weather-art {
+    width: 104px;
+    height: 92px;
+    transform: translateY(4px) scale(.70);
+  }
+}
+
+
+
+/* ============================================================
+   Weather icon containment hotfix
+   Prevents the top/right portions of the icon from being clipped
+   on wide desktop layouts.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(210px, 1fr) 122px;
+    gap: 12px;
+  }
+
+  .weather-art {
+    width: 122px;
+    height: 92px;
+    transform: translateY(10px) scale(.78);
+    transform-origin: center center;
+  }
+
+  .weather-art::before {
+    inset: 16px 6px 8px 10px;
+    opacity: .52;
+  }
+
+  .weather-art .sun {
+    width: 52px;
+    height: 52px;
+    right: 6px;
+    top: 10px;
+  }
+
+  .weather-art .sun::before {
+    inset: -8px;
+  }
+
+  .weather-art .cloud {
+    left: 10px;
+    bottom: 16px;
+    width: 94px;
+    height: 40px;
+    border-radius: 24px;
+  }
+
+  .weather-art .cloud::before {
+    width: 42px;
+    height: 42px;
+    left: 14px;
+    top: -18px;
+  }
+
+  .weather-art .cloud::after {
+    width: 52px;
+    height: 52px;
+    right: 10px;
+    top: -24px;
+  }
+
+  .weather-art .rain,
+  .weather-art .snow {
+    left: 28px;
+    right: 20px;
+    bottom: 2px;
+  }
+
+  .weather-art .bolt {
+    left: 49px;
+    bottom: 0;
+    width: 18px;
+    height: 28px;
+  }
+
+  .weather-art .fog {
+    left: 18px;
+    right: 14px;
+    bottom: 8px;
+  }
+
+  .weather-art--clear-day .sun,
+  .weather-art--clear-night .sun {
+    right: 34px;
+    top: 16px;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(205px, 1fr) 110px;
+  }
+
+  .weather-art {
+    width: 110px;
+    height: 88px;
+    transform: translateY(10px) scale(.74);
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-now {
+    grid-template-columns: minmax(190px, 1fr) 96px;
+  }
+
+  .weather-art {
+    width: 96px;
+    height: 84px;
+    transform: translateY(10px) scale(.70);
+  }
+}
+
+
+/* ============================================================
+   Final weather icon fit fix
+   Make every icon fully self-contained inside the weather-art box,
+   so no cloud/sun lobe can be clipped by ancestor overflow.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(210px, 1fr) 104px;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .command-zone--weather .weather-art {
+    width: 104px;
+    height: 76px;
+    transform: none;
+    justify-self: end;
+    align-self: center;
+    margin-top: 6px;
+    overflow: hidden;
+    filter: drop-shadow(0 12px 20px rgba(0,0,0,.18));
+  }
+
+  .command-zone--weather .weather-art::before {
+    inset: 10px 4px 4px 4px;
+    opacity: .38;
+  }
+
+  .command-zone--weather .weather-art .sun {
+    width: 42px;
+    height: 42px;
+    right: 6px;
+    top: 6px;
+  }
+
+  .command-zone--weather .weather-art .sun::before {
+    inset: -6px;
+  }
+
+  .command-zone--weather .weather-art .cloud {
+    left: 8px;
+    bottom: 10px;
+    width: 84px;
+    height: 30px;
+    border-radius: 20px;
+  }
+
+  .command-zone--weather .weather-art .cloud::before {
+    width: 34px;
+    height: 34px;
+    left: 12px;
+    top: 4px;
+  }
+
+  .command-zone--weather .weather-art .cloud::after {
+    width: 44px;
+    height: 44px;
+    right: 10px;
+    top: -2px;
+  }
+
+  .command-zone--weather .weather-art .rain,
+  .command-zone--weather .weather-art .snow {
+    left: 24px;
+    right: 16px;
+    bottom: 0;
+    height: 18px;
+    background-size: 14px 18px, 14px 18px;
+  }
+
+  .command-zone--weather .weather-art .bolt {
+    left: 43px;
+    bottom: 0;
+    width: 16px;
+    height: 22px;
+  }
+
+  .command-zone--weather .weather-art .fog {
+    left: 14px;
+    right: 12px;
+    bottom: 8px;
+    height: 22px;
+  }
+
+  .command-zone--weather .weather-art--clear-day .sun,
+  .command-zone--weather .weather-art--clear-night .sun {
+    right: 31px;
+    top: 14px;
+    transform: none;
+  }
+
+  .command-zone--weather .weather-art--clear-night .sun::after {
+    width: 32px;
+    height: 32px;
+    right: -5px;
+    top: -5px;
+  }
+
+  .command-zone--weather .weather-art--partly-cloudy-night .sun::after {
+    width: 30px;
+    height: 30px;
+    right: -5px;
+    top: -5px;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(205px, 1fr) 96px;
+    gap: 12px;
+  }
+
+  .command-zone--weather .weather-art {
+    width: 96px;
+    height: 72px;
+  }
+
+  .command-zone--weather .weather-art .cloud {
+    width: 78px;
+    left: 8px;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(190px, 1fr) 88px;
+    gap: 10px;
+  }
+
+  .command-zone--weather .weather-art {
+    width: 88px;
+    height: 68px;
+  }
+
+  .command-zone--weather .weather-art .cloud {
+    width: 72px;
+    left: 8px;
+    height: 28px;
+  }
+
+  .command-zone--weather .weather-art .cloud::before {
+    width: 30px;
+    height: 30px;
+  }
+
+  .command-zone--weather .weather-art .cloud::after {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+
+/* ============================================================
+   Definitive SVG weather icon system
+   Replaces fragile CSS blob icons with a fixed-viewBox SVG renderer.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .command-zone--weather {
+    overflow: hidden;
+  }
+
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(200px, 1fr) 112px;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    width: 112px;
+    height: 84px;
+    margin-right: 10px;
+    transform: none !important;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: end;
+    align-self: center;
+    filter: none !important;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg::before,
+  .command-zone--weather .weather-art.weather-art--svg::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg .sun,
+  .command-zone--weather .weather-art.weather-art--svg .cloud,
+  .command-zone--weather .weather-art.weather-art--svg .rain,
+  .command-zone--weather .weather-art.weather-art--svg .snow,
+  .command-zone--weather .weather-art.weather-art--svg .bolt,
+  .command-zone--weather .weather-art.weather-art--svg .fog {
+    display: none !important;
+  }
+
+  .command-zone--weather .weather-art-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(195px, 1fr) 104px;
+    gap: 12px;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    width: 104px;
+    height: 78px;
+    margin-right: 6px;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(180px, 1fr) 96px;
+    gap: 10px;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    width: 96px;
+    height: 72px;
+    margin-right: 4px;
+  }
+}
+

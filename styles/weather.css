@@ -1,0 +1,7 @@
+/* Weather styles are split by concern for maintainability.
+   energy-dashboard.html loads the split files directly; this file is kept as
+   a backwards-compatible import manifest for custom deployments. */
+@import url('./weather-core.css');
+@import url('./weather-command-desktop.css');
+@import url('./weather-art.css');
+@import url('./weather-final.css');

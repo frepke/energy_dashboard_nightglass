@@ -1,0 +1,583 @@
+/* ============================================================
+   Header icon alignment refinements
+   - Clock icon uses the same footprint as the sun-cycle icon.
+   - Desktop/landscape weather SVG is centered in the weather card.
+   Portrait/mobile rules are left untouched because that layout already fits.
+   ============================================================ */
+
+/* Keep the clock/sun icon perfectly round at every width — previously this
+   was only forced on desktop (≥1101px) via !important, while narrower
+   widths fell back to whichever square-ish border-radius happened to win
+   the cascade in that breakpoint. That mismatch caused the icon to visibly
+   flip between a circle and a rounded square as the window was resized
+   across 1100px. Applying the same rule unconditionally removes the jump. */
+.command-zone--time .weather-section-icon,
+.celestial-module--sun .weather-section-icon,
+.weather-section-icon--sun,
+.weather-section-icon--clock {
+  border-radius: 50% !important;
+}
+
+@media (min-width: 1101px) {
+  .command-zone--time .weather-section-icon,
+  .celestial-module--sun .weather-section-icon,
+  .weather-section-icon--sun {
+    width: 56px !important;
+    height: 56px !important;
+    flex-basis: 56px !important;
+    border-radius: 50% !important;
+  }
+
+  .command-zone--time .weather-section-icon svg,
+  .celestial-module--sun .weather-section-icon svg,
+  .weather-section-icon--sun svg {
+    width: 29px !important;
+    height: 29px !important;
+  }
+
+  .command-zone--weather .weather-now {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) 132px !important;
+    align-items: center !important;
+    min-height: 118px;
+  }
+
+  .command-zone--weather .weather-now-copy {
+    padding-right: 8px;
+    min-width: 0;
+    z-index: 1;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    position: absolute !important;
+    right: 10px !important;
+    top: 50% !important;
+    width: 132px !important;
+    height: 98px !important;
+    margin: 0 !important;
+    transform: translateY(-50%) !important;
+    transform-origin: center center !important;
+    align-self: auto !important;
+    justify-self: auto !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .command-zone--time .weather-section-icon,
+  .celestial-module--sun .weather-section-icon,
+  .weather-section-icon--sun {
+    width: 52px !important;
+    height: 52px !important;
+    flex-basis: 52px !important;
+  }
+
+  .command-zone--time .weather-section-icon svg,
+  .celestial-module--sun .weather-section-icon svg,
+  .weather-section-icon--sun svg {
+    width: 27px !important;
+    height: 27px !important;
+  }
+
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(0, 1fr) 118px !important;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    right: 8px !important;
+    width: 118px !important;
+    height: 90px !important;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .command-zone--time .weather-section-icon,
+  .celestial-module--sun .weather-section-icon,
+  .weather-section-icon--sun {
+    width: 48px !important;
+    height: 48px !important;
+    flex-basis: 48px !important;
+  }
+
+  .command-zone--time .weather-section-icon svg,
+  .celestial-module--sun .weather-section-icon svg,
+  .weather-section-icon--sun svg {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(0, 1fr) 108px !important;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    right: 6px !important;
+    width: 108px !important;
+    height: 82px !important;
+  }
+}
+
+/* ============================================================
+   Weather label visibility fix
+   The previous desktop icon alignment used too much vertical room in the
+   weather card, which could clip the top of the WEATHER label. Keep the
+   desktop/landscape SVG icon alignment, but give the label its own safe line
+   height and reduce the weather block's forced height. Portrait/mobile stays
+   untouched.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .command-zone--weather {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .command-zone--weather > .weather-section-copy {
+    height: 100%;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .command-zone--weather .weather-section-label {
+    display: block;
+    line-height: 1.35 !important;
+    margin-bottom: 4px !important;
+    padding-top: 2px;
+    overflow: visible;
+  }
+
+  .command-zone--weather .weather-now {
+    min-height: 0 !important;
+  }
+}
+
+
+/* ============================================================
+   Final desktop clean-up
+   - restore full WEATHER label visibility
+   - remove inner mini-tiles from the sun/moon block
+   - keep mobile/portrait untouched
+   ============================================================ */
+@media (min-width: 1101px) {
+  .command-zone--weather {
+    padding-top: 16px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .command-zone--weather > .weather-section-copy {
+    justify-content: flex-start !important;
+    padding-top: 2px !important;
+    overflow: visible !important;
+  }
+
+  .command-zone--weather .weather-section-label {
+    display: inline-block !important;
+    line-height: 1.55 !important;
+    min-height: 16px !important;
+    margin-bottom: 8px !important;
+    padding-top: 0 !important;
+    overflow: visible !important;
+  }
+
+  .command-zone--weather .weather-now {
+    min-height: 0 !important;
+  }
+
+  .command-zone--celestial {
+    align-items: center !important;
+  }
+
+  .command-zone--celestial .celestial-module {
+    min-height: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .command-zone--celestial .weather-section-copy {
+    justify-content: center;
+  }
+
+  .command-zone--celestial .weather-sun {
+    align-items: center !important;
+  }
+
+  .command-zone--celestial .sun-stat,
+  .command-zone--celestial .day-length {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .command-zone--celestial .day-length {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+
+/* ============================================================
+   Extra polish round - top row alignment
+   - harmonise vertical rhythm across clock / sun / moon / weather
+   - keep desktop row visually balanced
+   - mobile and portrait remain untouched
+   ============================================================ */
+@media (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    align-items: stretch !important;
+  }
+
+  .command-zone--time,
+  .command-zone--weather {
+    align-items: flex-start !important;
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+    gap: 16px !important;
+  }
+
+  .command-zone--celestial {
+    align-items: flex-start !important;
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+    gap: 16px !important;
+  }
+
+  .command-zone--time .weather-section-copy,
+  .command-zone--weather > .weather-section-copy,
+  .command-zone--celestial .weather-section-copy {
+    min-height: 0;
+  }
+
+  .command-zone--time .weather-section-label,
+  .command-zone--weather .weather-section-label,
+  .command-zone--celestial .weather-section-label {
+    display: block !important;
+    min-height: 16px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .command-zone--time .weather-status-row {
+    margin-top: 10px !important;
+  }
+
+  .command-zone--celestial .celestial-module {
+    align-items: center !important;
+  }
+
+  .command-zone--celestial .weather-sun {
+    gap: 16px !important;
+    align-items: center !important;
+  }
+
+  .command-zone--celestial .sun-stat {
+    justify-content: center;
+  }
+
+  .command-zone--celestial .sun-time {
+    margin-top: 6px !important;
+  }
+
+  .command-zone--celestial .day-length {
+    margin-top: 8px !important;
+    line-height: 1.15 !important;
+  }
+
+  .command-zone--celestial .moon-body {
+    align-items: center !important;
+    gap: 14px !important;
+  }
+
+  .command-zone--celestial .moon-info {
+    gap: 3px !important;
+  }
+
+  .command-zone--weather > .weather-section-copy {
+    justify-content: flex-start !important;
+  }
+
+  .command-zone--weather .weather-now {
+    align-items: center !important;
+  }
+
+  .command-zone--weather .weather-desc-row {
+    margin-top: 8px !important;
+  }
+}
+
+
+/* ============================================================
+   Final self-reviewed premium pass
+   - optical balance for the full desktop header row
+   - slightly calmer moon/weather rhythm
+   - no portrait/mobile changes
+   ============================================================ */
+@media (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 194px !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  .command-zone--time,
+  .command-zone--weather,
+  .command-zone--celestial {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .command-zone--time,
+  .command-zone--weather {
+    gap: 15px !important;
+  }
+
+  .command-zone--time .weather-section-copy {
+    justify-content: flex-start !important;
+    padding-top: 2px !important;
+  }
+
+  .command-zone--time .weather-section-label,
+  .command-zone--celestial .weather-section-label,
+  .command-zone--weather .weather-section-label {
+    min-height: 15px !important;
+    margin-bottom: 7px !important;
+    line-height: 1.3 !important;
+  }
+
+  .command-zone--time .weather-date {
+    margin-top: 9px !important;
+  }
+
+  .command-zone--time .weather-status-row {
+    margin-top: 9px !important;
+  }
+
+  .command-zone--celestial {
+    grid-template-columns: minmax(238px, .9fr) minmax(358px, 1.1fr) !important;
+    gap: 18px !important;
+  }
+
+  .command-zone--celestial .celestial-module {
+    align-items: center !important;
+  }
+
+  .command-zone--celestial .celestial-module--sun .weather-section-copy,
+  .command-zone--celestial .celestial-module--moon .weather-section-copy {
+    justify-content: flex-start !important;
+    padding-top: 1px !important;
+  }
+
+  .command-zone--celestial .weather-sun {
+    gap: 18px !important;
+    align-items: center !important;
+  }
+
+  .command-zone--celestial .sun-stat {
+    min-width: 72px !important;
+  }
+
+  .command-zone--celestial .sun-time {
+    margin-top: 5px !important;
+  }
+
+  .command-zone--celestial .day-length {
+    margin-top: 7px !important;
+    font-size: 11.5px !important;
+  }
+
+  .command-zone--celestial .moon-body {
+    gap: 15px !important;
+    align-items: center !important;
+  }
+
+  .command-zone--celestial .moon-info {
+    gap: 2px !important;
+    padding-top: 1px !important;
+  }
+
+  .command-zone--celestial .moon-phase {
+    line-height: 1.04 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .command-zone--celestial .moon-illum {
+    line-height: 1.18 !important;
+  }
+
+  .command-zone--weather {
+    padding-left: 20px !important;
+    padding-right: 18px !important;
+  }
+
+  .command-zone--weather > .weather-section-copy {
+    justify-content: flex-start !important;
+    padding-top: 2px !important;
+  }
+
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(0, 1fr) 126px !important;
+    gap: 12px !important;
+    min-height: 0 !important;
+    align-items: center !important;
+  }
+
+  .command-zone--weather .weather-temp {
+    line-height: .94 !important;
+  }
+
+  .command-zone--weather .weather-meta {
+    margin-top: 8px !important;
+  }
+
+  .command-zone--weather .weather-desc-row {
+    margin-top: 7px !important;
+    gap: 7px 10px !important;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    width: 126px !important;
+    height: 92px !important;
+    right: 8px !important;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 198px !important;
+  }
+
+  .command-zone--celestial {
+    grid-template-columns: minmax(212px, .86fr) minmax(326px, 1.14fr) !important;
+    gap: 14px !important;
+  }
+
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(0, 1fr) 114px !important;
+    gap: 10px !important;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    width: 114px !important;
+    height: 88px !important;
+    right: 6px !important;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    min-height: 202px !important;
+  }
+
+  .command-zone--celestial {
+    grid-template-columns: minmax(198px, .84fr) minmax(304px, 1.16fr) !important;
+    gap: 12px !important;
+  }
+
+  .command-zone--weather .weather-now {
+    grid-template-columns: minmax(0, 1fr) 104px !important;
+    gap: 8px !important;
+  }
+
+  .command-zone--weather .weather-art.weather-art--svg {
+    width: 104px !important;
+    height: 80px !important;
+    right: 4px !important;
+  }
+}
+
+/* ============================================================
+   Weather text fit v3 - preserve original header geometry
+   Fixes the condition line without increasing the top hero/card height
+   or allowing nested cards to escape their rounded containers.
+   ============================================================ */
+@media (min-width: 1101px) {
+  .weather-hero.weather-hero--command {
+    overflow: hidden !important;
+  }
+
+  .command-zone--weather {
+    overflow: hidden !important;
+  }
+
+  .command-zone--weather > .weather-section-copy {
+    justify-content: flex-start !important;
+    padding-top: 0 !important;
+  }
+
+  .command-zone--weather .weather-section-label {
+    margin-bottom: 5px !important;
+  }
+
+  .command-zone--weather .weather-now {
+    align-items: center !important;
+    min-height: 0 !important;
+  }
+
+  .command-zone--weather .weather-temp {
+    font-size: clamp(40px, 3.05vw, 52px) !important;
+    line-height: .9 !important;
+  }
+
+  .command-zone--weather .weather-meta {
+    margin-top: 6px !important;
+    gap: 5px 6px !important;
+    line-height: 1.15 !important;
+  }
+
+  .command-zone--weather .weather-meta span {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+  }
+
+  .command-zone--weather .weather-desc-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 5px !important;
+    min-height: 20px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .command-zone--weather .weather-desc {
+    display: inline-block !important;
+    line-height: 1.35 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 72% !important;
+  }
+}
+
+@media (max-width: 1540px) and (min-width: 1101px) {
+  .command-zone--weather .weather-desc {
+    font-size: 13px !important;
+    max-width: 70% !important;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 1101px) {
+  .command-zone--weather .weather-desc-row {
+    gap: 6px !important;
+  }
+
+  .command-zone--weather .weather-desc {
+    font-size: 12.8px !important;
+    max-width: 68% !important;
+  }
+}
+
+/* Fix: prevent descenders in the moon phase title (for example the "g" in
+   "Waning Gibbous") from being clipped in the compact command header. */
+.command-zone--celestial .moon-info,
+.command-zone--celestial .moon-phase {
+  overflow: visible !important;
+}
+
+.command-zone--celestial .moon-phase {
+  line-height: 1.16 !important;
+  padding-bottom: 2px !important;
+  margin-bottom: 0 !important;
+}

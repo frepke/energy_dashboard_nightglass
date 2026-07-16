@@ -1,0 +1,254 @@
+/* ============================================================
+   1. DESIGN TOKENS - dark & light themes
+   ============================================================ */
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --bg:          #030617;
+  --bg2:         #07112d;
+  --panel:       rgba(12,22,48,.62);
+  --panel-hi:    rgba(28,45,86,.72);
+  --glass:       rgba(255,255,255,.072);
+  --glass2:      rgba(255,255,255,.042);
+
+  /* borders & text */
+  --line:        rgba(170,195,255,.15);
+  --line2:       rgba(255,255,255,.075);
+  --text:        #f7f9ff;
+  --muted:       rgba(229,238,255,.58);
+  --soft:        rgba(229,238,255,.36);
+
+  /* accent palette */
+  --green:   #00e0ba;
+  --lime:    #6bee72;
+  --solar:   #ffc400;
+  --orange:  #ff761a;
+  --blue:    #43b7ff;
+  --red:     #ff4f62;
+
+  /* fullscreen dashboard canvas */
+  --dashboard-canvas-width: 1920px;
+  --dashboard-canvas-height: 1080px;
+  --dashboard-max-width: 1600px;
+  --dashboard-auto-width: 1600px;
+  --dashboard-padding-x: 20px;
+  --dashboard-padding-y: 12px;
+  --dashboard-padding-bottom: 18px;
+  --panel-padding: 20px;
+  --dashboard-fit-scale: 1;
+  --zoom-scale: 1;
+  --dashboard-total-scale: calc(var(--dashboard-fit-scale, 1) * var(--zoom-scale, 1));
+
+  /* fullscreen vertical budget */
+  --topbar-height: 34px;
+  --weather-hero-height: 158px;
+  --insight-height: 72px;
+  --flow-panel-height: 356px;
+  --price-panel-height: 398px;
+  --section-gap: 10px;
+
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 7px;
+  --space-3: 10px;
+  --space-4: 12px;
+  --space-5: 14px;
+  --space-6: 16px;
+  --space-7: 18px;
+  --space-8: 22px;
+  --space-9: 24px;
+  --space-10: 28px;
+  --space-11: 30px;
+  --space-12: 34px;
+
+  /* typography */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 15px;
+  --text-lg: 18px;
+
+  /* radius */
+  --radius-sm: 14px;
+  --radius-md: 18px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+  --radius: 34px;
+  --radius-pill: 999px;
+
+  /* components */
+  --control-height: 34px;
+  --card-height: 128px;
+  --card-height-mobile: 128px;
+  --chart-height: 292px;
+
+
+  /* weather */
+  --weather-hero-min-height: var(--weather-hero-height);
+  --weather-hero-gap: 40px;
+  --weather-art-width: 126px;
+  --weather-art-height: 104px;
+  --weather-icon-size: 34px;
+  --weather-moon-size: 64px;
+
+  /* insights */
+  --insight-min-height: 58px;
+  --insight-icon-size: 42px;
+  --insight-pill-height: 40px;
+
+  /* motion & layers */
+  --duration-fast: .2s;
+  --duration-base: .25s;
+  --duration-slow: .55s;
+  --z-chart-dayline: 6;
+  --z-chart-day-label: 7;
+  --z-hoverline: 98;
+  --z-tooltip: 99;
+  --z-modal: 9999;
+  --z-kiosk-overlay: 9999;
+  --z-kiosk-controls: 10000;
+
+  /* misc */
+  --shadow:  0 30px 90px rgba(0,0,0,.44);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg:       #f0f4ff;
+  --bg2:      #e4ecff;
+  --panel:    rgba(255,255,255,.82);
+  --panel-hi: rgba(240,246,255,.90);
+  --glass:    rgba(255,255,255,.72);
+  --glass2:   rgba(255,255,255,.52);
+
+  --line:     rgba(100,140,220,.18);
+  --line2:    rgba(80,120,200,.12);
+  --text:     #0a1535;
+  --muted:    rgba(30,60,120,.58);
+  --soft:     rgba(30,60,120,.36);
+
+  --green:   #009d82;
+  --lime:    #3da642;
+  --solar:   #d49000;
+  --orange:  #d95f00;
+  --blue:    #1a88d4;
+  --red:     #d42040;
+
+  --shadow:  0 16px 50px rgba(60,100,200,.13);
+}
+
+
+/* ============================================================
+   v16 PREMIUM POLISH TOKENS
+   ============================================================ */
+:root {
+  /* glow scale - intentionally calmer than previous ad-hoc glows */
+  --glow-soft: 0 0 12px rgba(0,224,186,.16);
+  --glow-medium: 0 0 18px rgba(0,224,186,.24);
+  --glow-strong: 0 0 24px rgba(0,224,186,.34);
+  --glow-orange-soft: 0 0 12px rgba(255,118,26,.14);
+  --glow-orange-medium: 0 0 18px rgba(255,118,26,.22);
+  --glow-yellow-soft: 0 0 12px rgba(255,196,0,.15);
+  --glow-blue-soft: 0 0 12px rgba(67,183,255,.16);
+
+  /* compact chip metrics */
+  --chip-height: 38px;
+  --chip-padding-x: 14px;
+  --chip-gap: 8px;
+  --metric-gap: 6px;
+
+  /* semantic type scale */
+  --type-primary-color: rgba(247,249,255,.96);
+  --type-secondary-color: rgba(229,238,255,.58);
+  --type-tertiary-color: rgba(229,238,255,.42);
+  --type-primary-weight: 900;
+  --type-secondary-weight: 650;
+
+  /* motion aliases */
+  --motion-fast: 140ms;
+  --motion-normal: 220ms;
+  --motion-slow: 420ms;
+  --ease-standard: cubic-bezier(.2,.8,.2,1);
+  --ease-soft: cubic-bezier(.19,1,.22,1);
+
+  /* chart polish */
+  --chart-bar-radius: 14px;
+  --chart-label-opacity: .70;
+  --chart-hover-lift: -4px;
+}
+
+[data-theme="light"] {
+  --type-primary-color: rgba(7,21,56,.94);
+  --type-secondary-color: rgba(30,60,120,.58);
+  --type-tertiary-color: rgba(30,60,120,.42);
+}
+
+/* ============================================================
+   v17 ULTRA POLISH TOKENS
+   ============================================================ */
+:root {
+  /* calmer alert/orange glow */
+  --glow-orange-soft: 0 0 9px rgba(255,118,26,.10);
+  --glow-orange-medium: 0 0 14px rgba(255,118,26,.16);
+  --glow-orange-focus: 0 0 18px rgba(255,118,26,.20);
+
+  /* depth layers */
+  --surface-bg: linear-gradient(150deg, rgba(28,45,86,.60), rgba(9,17,42,.50) 42%, rgba(10,10,30,.70));
+  --surface-elevated-bg: linear-gradient(180deg, rgba(255,255,255,.095), rgba(255,255,255,.030)), rgba(9,13,27,.34);
+  --surface-focus-bg: linear-gradient(180deg, rgba(255,255,255,.125), rgba(255,255,255,.040)), rgba(12,17,34,.40);
+  --shadow-surface: 0 14px 42px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.11);
+  --shadow-elevated: 0 22px 64px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.15);
+  --shadow-focus: 0 30px 88px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.17);
+
+  /* quieter labels */
+  --secondary-label-opacity: .48;
+  --tertiary-label-opacity: .36;
+
+  /* chart focus intelligence */
+  --chart-context-dim-opacity: .76;
+  --chart-context-dim-filter: saturate(.88) brightness(.88);
+  --chart-focus-filter: saturate(1.16) brightness(1.08);
+  --chart-orange-glow-alpha: .20;
+
+  /* very slow ambient motion */
+  --ambient-duration: 9200ms;
+  --ambient-opacity: .34;
+}
+
+[data-theme="light"] {
+  --surface-bg: rgba(255,255,255,.80);
+  --surface-elevated-bg: rgba(255,255,255,.88);
+  --surface-focus-bg: rgba(255,255,255,.94);
+  --shadow-surface: 0 10px 34px rgba(60,100,200,.10), inset 0 1px 0 rgba(255,255,255,.80);
+  --shadow-elevated: 0 16px 46px rgba(60,100,200,.14), inset 0 1px 0 rgba(255,255,255,.88);
+  --shadow-focus: 0 22px 64px rgba(60,100,200,.18), inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+
+/* v23: final polish tuning */
+:root {
+  --secondary-label-opacity: .42;
+  --tertiary-label-opacity: .30;
+  --chart-orange-glow-alpha: .12;
+  --ambient-opacity: .24;
+}
+
+/* ============================================================
+   v25: readability recovery after ultra-polish
+   Keep the calm visual hierarchy, but make operational labels
+   readable again on fullscreen/laptop displays.
+   ============================================================ */
+:root {
+  --secondary-label-opacity: .64;
+  --tertiary-label-opacity: .50;
+  --readable-muted: rgba(229,238,255,.66);
+  --readable-muted-soft: rgba(229,238,255,.56);
+}
+
+[data-theme="light"] {
+  --secondary-label-opacity: .68;
+  --tertiary-label-opacity: .56;
+  --readable-muted: rgba(22,42,82,.68);
+  --readable-muted-soft: rgba(22,42,82,.56);
+}
