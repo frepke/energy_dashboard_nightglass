@@ -13,13 +13,9 @@ const flowCurrent = new WeakMap();
 const PARTICLE_COUNT = 3;
 
 function getFlowAnimationName(dir) {
-  try {
-    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 560px) and (orientation: portrait)').matches) {
-      return dir === 'dir-left' ? 'ng-flow-up-portrait-v3' : 'ng-flow-down-portrait-v3';
-    }
-  } catch {
-    // Ignore matchMedia/window access issues outside the browser.
-  }
+  // The portrait layout uses the same horizontal energy lanes as desktop.
+  // Keeping one animation model also avoids stale vertical inline animation
+  // names after an iPhone orientation change.
   return dir === 'dir-left' ? 'flow-left' : 'flow-right';
 }
 

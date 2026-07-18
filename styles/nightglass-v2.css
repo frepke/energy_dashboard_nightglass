@@ -5567,3 +5567,345 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     opacity: 0 !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.9 — compact iPhone flow + fluid lunar scaling
+   --------------------------------------------------------------------------
+   - iPhone portrait keeps Grid / House / Solar in one horizontal composition.
+   - Individual flow nodes lose their card chrome so the relation reads as one
+     live energy diagram instead of three stacked cards.
+   - The moon is sized by its own module, with its available height acting as a
+     hard ceiling. This prevents clipping or disproportionate scaling on short,
+     wide and Retina viewports.
+   ========================================================================== */
+
+/* Size the lunar artwork from the module instead of from the viewport. */
+.celestial-module--moon {
+  container-type: size;
+  --moon-fluid-size: clamp(64px, min(31cqw, 62cqh), 122px);
+  --moon-orbit-fluid-size: min(48%, 196px);
+}
+
+.celestial-module--moon .moon-body {
+  grid-template-columns: minmax(64px, min(34%, 122px)) minmax(0, 1fr) !important;
+  align-items: center !important;
+}
+
+.celestial-module--moon .big-moon {
+  inline-size: var(--moon-fluid-size) !important;
+  block-size: var(--moon-fluid-size) !important;
+  aspect-ratio: 1 / 1;
+  max-inline-size: 100% !important;
+  max-block-size: 100% !important;
+  align-self: center !important;
+  justify-self: center !important;
+}
+
+.celestial-module--moon .moon-canvas {
+  inline-size: 100% !important;
+  block-size: 100% !important;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+.celestial-module--moon .moon-orbit {
+  inline-size: var(--moon-orbit-fluid-size) !important;
+  block-size: auto !important;
+  aspect-ratio: 1 / 1;
+  max-inline-size: calc(100% - 24px) !important;
+  max-block-size: calc(100% - 18px) !important;
+}
+
+@media (min-width: 900px) and (max-height: 820px) {
+  .celestial-module--moon {
+    --moon-fluid-size: clamp(56px, min(28cqw, 55cqh), 92px);
+    --moon-orbit-fluid-size: min(43%, 148px);
+  }
+
+  .celestial-module--moon .moon-body {
+    grid-template-columns: minmax(58px, min(31%, 92px)) minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 899px), (orientation: portrait) and (max-width: 1180px) {
+  .celestial-module--moon {
+    --moon-fluid-size: clamp(78px, min(30cqw, 60cqh), 122px);
+    --moon-orbit-fluid-size: min(44%, 176px);
+  }
+
+  .celestial-module--moon .moon-body {
+    grid-template-columns: minmax(82px, min(31%, 132px)) minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .celestial-module--moon {
+    --moon-fluid-size: clamp(76px, min(30cqw, 55cqh), 104px);
+    --moon-orbit-fluid-size: min(43%, 150px);
+  }
+
+  .celestial-module--moon .moon-body {
+    grid-template-columns: minmax(78px, min(30%, 104px)) minmax(0, 1fr) !important;
+  }
+
+  /* One compact, horizontal live-flow diagram on iPhone portrait. */
+  .energy-panel {
+    gap: 8px !important;
+    padding: 10px 8px !important;
+  }
+
+  .flow {
+    position: relative !important;
+    isolation: isolate;
+    grid-template-columns:
+      minmax(0, 1fr)
+      clamp(20px, 7vw, 34px)
+      minmax(0, 1fr)
+      clamp(20px, 7vw, 34px)
+      minmax(0, 1fr) !important;
+    grid-template-rows: minmax(144px, auto) !important;
+    align-items: stretch !important;
+    gap: clamp(2px, 1vw, 5px) !important;
+    min-height: 144px !important;
+    padding: 5px 2px 7px !important;
+    overflow: hidden !important;
+    background:
+      radial-gradient(circle at 50% 12%, rgba(var(--accent-rgb), .065), transparent 48%),
+      linear-gradient(180deg, rgba(var(--surface-high-rgb), .08), transparent 72%);
+  }
+
+  body:not(.dashboard-fit-micro) .flow .node,
+  body:not(.dashboard-fit-micro) .node,
+  .flow .node,
+  .node {
+    z-index: 2;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 136px !important;
+    height: auto !important;
+    padding: 4px 1px 2px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    align-content: start !important;
+    align-items: start !important;
+    justify-items: center !important;
+    gap: 7px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    contain: none !important;
+    overflow: visible !important;
+  }
+
+  .flow .node::before,
+  .flow .node::after,
+  .node::before,
+  .node::after {
+    display: none !important;
+  }
+
+  .node-icon,
+  .node .icon,
+  .flow .icon {
+    width: clamp(43px, 13.2vw, 52px) !important;
+    height: clamp(43px, 13.2vw, 52px) !important;
+    margin: 0 auto !important;
+    border-width: 2px !important;
+    box-shadow:
+      0 0 calc(12px + 19px * var(--icon-intensity, .15)) rgba(var(--accent-rgb), .15),
+      inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+  }
+
+  .node.house .node-icon,
+  .node.house .icon {
+    border-color: rgba(var(--text-rgb), .26) !important;
+    box-shadow:
+      0 0 20px rgba(var(--text-rgb), .08),
+      inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+  }
+
+  .node.solar .node-icon,
+  .node.solar .icon {
+    box-shadow:
+      0 0 20px rgba(var(--warning-rgb), .10),
+      inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+  }
+
+  .node .icon svg,
+  .flow .icon svg {
+    width: 46% !important;
+    height: 46% !important;
+  }
+
+  .node-text {
+    width: 100%;
+    min-width: 0 !important;
+    display: grid !important;
+    align-content: start !important;
+    justify-items: center !important;
+    gap: 4px !important;
+    text-align: center !important;
+  }
+
+  .node .label {
+    max-width: 100% !important;
+    margin: 0 !important;
+    color: var(--soft) !important;
+    font-size: clamp(6.5px, 2vw, 8.5px) !important;
+    line-height: 1 !important;
+    letter-spacing: .14em !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .node .value {
+    max-width: 100% !important;
+    margin: 1px 0 0 !important;
+    font-size: clamp(17px, 5.6vw, 22px) !important;
+    line-height: 1 !important;
+    letter-spacing: -.045em !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .node .sub {
+    max-width: 100% !important;
+    margin: 0 !important;
+    font-size: clamp(7px, 2.25vw, 9px) !important;
+    line-height: 1.08 !important;
+    text-align: center !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .limitBadge {
+    max-width: 100% !important;
+    margin: 1px auto 0 !important;
+    padding: 2px 4px !important;
+    font-size: 6.5px !important;
+  }
+
+  .flowbox {
+    z-index: 1;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 74px !important;
+    min-height: 74px !important;
+    margin: 0 !important;
+    padding: clamp(23px, 7.2vw, 29px) 0 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 7px 18px !important;
+    align-content: start !important;
+    align-items: center !important;
+    justify-items: stretch !important;
+    gap: 6px !important;
+    align-self: start !important;
+    transform: none !important;
+    overflow: visible !important;
+  }
+
+  .flow-caption {
+    display: none !important;
+  }
+
+  .flowline {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    position: relative !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 7px !important;
+    min-height: 7px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: var(--radius-pill) !important;
+    contain: paint !important;
+  }
+
+  .flowline::before {
+    inset: 0 !important;
+    background:
+      linear-gradient(90deg, transparent 0%, rgba(255,255,255,.10) 48%, transparent 100%),
+      linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--flow-color), transparent 72%) 50%, transparent 100%) !important;
+  }
+
+  .flowline .particle,
+  .flowline .particle:nth-child(n) {
+    top: 50% !important;
+    left: -30px !important;
+    width: clamp(19px, 5vw, 24px) !important;
+    height: 4px !important;
+    margin: -2px 0 0 !important;
+    transform: none !important;
+    opacity: 0;
+    overflow: visible !important;
+    border-radius: var(--radius-pill) !important;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--flow-color), white 16%) 50%, transparent) !important;
+    box-shadow: 0 0 11px color-mix(in srgb, var(--flow-color), transparent 20%) !important;
+    will-change: left, opacity !important;
+  }
+
+  .flowline .particle::after {
+    content: none !important;
+    display: none !important;
+    animation: none !important;
+  }
+
+  .flowline.dir-right.is-active .particle {
+    animation-name: flow-right !important;
+  }
+
+  .flowline.dir-left.is-active .particle {
+    animation-name: flow-left !important;
+  }
+
+  .arrow {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    margin: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: clamp(12px, 4vw, 17px) !important;
+    line-height: 1 !important;
+  }
+
+  .arrow .ico {
+    display: inline-block !important;
+    transform: none !important;
+    transform-origin: center !important;
+  }
+}
+
+@media (max-width: 360px) and (orientation: portrait) {
+  .flow {
+    grid-template-columns:
+      minmax(0, 1fr) 18px
+      minmax(0, 1fr) 18px
+      minmax(0, 1fr) !important;
+    gap: 2px !important;
+  }
+
+  .flow .node,
+  .node {
+    min-height: 132px !important;
+    gap: 6px !important;
+  }
+
+  .node .value {
+    font-size: clamp(16px, 5.7vw, 20px) !important;
+  }
+}

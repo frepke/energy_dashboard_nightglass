@@ -138,3 +138,10 @@ window.DASHBOARD_CONFIG = {
 ```
 
 Beschikbare iconen: `bolt`, `grid`, `plug`, `home`, `solar`, `panel`, `flame`, `leaf`, `gauge`, `battery`, `water`, `wind` en `check`.
+
+## 2.7.9
+
+- iPhone portrait toont de live energiestroom opnieuw horizontaal als `Net → Huis ← Zon`.
+- De drie live knooppunten vormen één compacte visual zonder afzonderlijke kaartvlakken.
+- Horizontale flowanimaties blijven correct na draaien tussen portrait en landscape.
+- De maan en decoratieve baan schalen nu ten opzichte van de maanmodule en worden begrensd door de beschikbare hoogte, zodat korte of afwijkende resoluties niet meer afkappen.
