@@ -5909,3 +5909,66 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     font-size: clamp(16px, 5.7vw, 20px) !important;
   }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.10 — visible iPhone portrait flow particles
+   --------------------------------------------------------------------------
+   The compact portrait connectors are only a few dozen pixels wide. Reusing
+   the desktop keyframes (-60px to 100% + 60px) kept each particle outside the
+   clipped rail for most of its cycle. These phone-specific keyframes keep the
+   complete trip close to the visible rail and use a shorter, brighter streak.
+   ========================================================================== */
+
+@keyframes ng-phone-flow-right {
+  0%   { left: -12px; opacity: 0; }
+  10%  { opacity: .95; }
+  90%  { opacity: .95; }
+  100% { left: calc(100% + 2px); opacity: 0; }
+}
+
+@keyframes ng-phone-flow-left {
+  0%   { left: calc(100% + 2px); opacity: 0; }
+  10%  { opacity: .95; }
+  90%  { opacity: .95; }
+  100% { left: -12px; opacity: 0; }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .flowline .particle,
+  .flowline .particle:nth-child(n) {
+    left: -12px !important;
+    width: clamp(9px, 2.8vw, 12px) !important;
+    height: 4px !important;
+    opacity: 0;
+    background:
+      linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--flow-color), white 32%) 48%, transparent 100%) !important;
+    box-shadow:
+      0 0 7px color-mix(in srgb, var(--flow-color), transparent 6%),
+      0 0 13px color-mix(in srgb, var(--flow-color), transparent 32%) !important;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: left, opacity !important;
+  }
+
+  .flowline.dir-right.is-active .particle {
+    animation-name: ng-phone-flow-right !important;
+  }
+
+  .flowline.dir-left.is-active .particle {
+    animation-name: ng-phone-flow-left !important;
+  }
+}
+
+/* Keep the energy state visible without movement when the device explicitly
+   requests reduced motion. */
+@media (max-width: 560px) and (orientation: portrait) and (prefers-reduced-motion: reduce) {
+  .flowline.is-active .particle,
+  .flowline.is-active .particle:nth-child(n) {
+    animation: none !important;
+    opacity: .72 !important;
+  }
+
+  .flowline.is-active .particle:nth-child(1) { left: 12% !important; }
+  .flowline.is-active .particle:nth-child(2) { left: 46% !important; }
+  .flowline.is-active .particle:nth-child(3) { left: 78% !important; }
+}

@@ -1,5 +1,12 @@
 # Nightglass wijzigingen
 
+## 2.7.10
+
+- compacte iPhone-portraitverbindingen gebruiken nu eigen korte keyframes in plaats van de brede desktopbaan;
+- drie duidelijk zichtbare partikels blijven daardoor het grootste deel van hun cyclus binnen de flowbalk;
+- de partikels zijn korter en helderder gemaakt voor de smalle Grid–House–Solar-verbindingen;
+- bij ingeschakelde verminderde beweging blijven statische energiemarkers zichtbaar zonder animatie.
+
 ## 2.7.0
 
 - de dagtotalen rechts in de drie grote live-energietegels zijn verwijderd; deze tegels tonen nu uitsluitend actuele W-waarden en richting/status;
