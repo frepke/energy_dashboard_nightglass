@@ -1,6 +1,6 @@
 {
   "name": "energy_dashboard",
-  "version": "1.0.0",
+  "version": "2.7.10",
   "description": "A private, self-hosted energy dashboard for Domoticz with Zonneplan dynamic pricing.",
   "type": "module",
   "scripts": {
@@ -17,8 +17,8 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@vitest/coverage-v8": "^4.1.9",
-    "eslint": "^10.6.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.7.0",
     "globals": "^17.7.0",
     "vitest": "^4.1.5",
     "@playwright/test": "^1.61.1",

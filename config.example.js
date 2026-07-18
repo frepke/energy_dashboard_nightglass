@@ -49,6 +49,26 @@ window.DASHBOARD_CONFIG = {
   longitude:  5.947,
   timezone:   'Europe/Amsterdam',
 
+  // ----------------------------------------------------------------
+  // Nightglass UI customisation
+  // Bundled icon names: bolt, grid, plug, home, solar, panel, flame,
+  // leaf, gauge, battery, water, wind, check.
+  // Keys correspond to data-icon-target attributes in energy-dashboard.html.
+  // ----------------------------------------------------------------
+  ui: {
+    iconOverrides: {
+      grid:            'grid',
+      house:           'home',
+      solar:           'panel',
+      'grid-card':     'grid',
+      'house-card':    'home',
+      'solar-card':    'panel',
+      'self-suff-card':'check',
+      'self-cons-card':'gauge',
+      'gas-card':      'flame',
+    },
+  },
+
   // Moon rendering: by default the dashboard uses the local Sun altitude to
   // make the unlit lunar side softer during real daylight and darker at night.
   // Override only when you want fixed behaviour for screenshots/testing.
