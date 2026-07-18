@@ -34,13 +34,16 @@ function updateFlowIntensity(el, power) {
   const p = Math.abs(+power || 0);
   const intensity = Math.max(0, Math.min(1, p / 3000));
   const laneSpread = Math.round(3 + intensity * 10);
+  const railWidth = Math.round(el.getBoundingClientRect().width || el.clientWidth || 32);
   el.style.setProperty('--flow-intensity', intensity.toFixed(3));
   el.style.setProperty('--flow-lane-spread', laneSpread + 'px');
+  el.style.setProperty('--phone-flow-travel', Math.max(24, railWidth + 14) + 'px');
 }
 
 function applyFlowState(el, arrow, state) {
   const particles = ensureFlowParticles(el);
   const cur = flowCurrent.get(el) || {};
+  el.style.setProperty('--flow-speed', state.speed);
 
   if (state.dir !== cur.dir) {
     el.classList.remove('dir-left', 'dir-right');

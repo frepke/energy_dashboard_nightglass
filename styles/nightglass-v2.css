@@ -5920,17 +5920,17 @@ body.dashboard-fit-micro .history-watermark.is-visible {
    ========================================================================== */
 
 @keyframes ng-phone-flow-right {
-  0%   { left: -12px; opacity: 0; }
+  0%   { left: -12px; translate: 0 0; opacity: 0; }
   10%  { opacity: .95; }
   90%  { opacity: .95; }
-  100% { left: calc(100% + 2px); opacity: 0; }
+  100% { left: calc(100% + 2px); translate: var(--phone-flow-travel, 46px) 0; opacity: 0; }
 }
 
 @keyframes ng-phone-flow-left {
-  0%   { left: calc(100% + 2px); opacity: 0; }
+  0%   { left: calc(100% + 2px); translate: var(--phone-flow-travel, 46px) 0; opacity: 0; }
   10%  { opacity: .95; }
   90%  { opacity: .95; }
-  100% { left: -12px; opacity: 0; }
+  100% { left: -12px; translate: 0 0; opacity: 0; }
 }
 
 @media (max-width: 560px) and (orientation: portrait) {
@@ -5945,9 +5945,23 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     box-shadow:
       0 0 7px color-mix(in srgb, var(--flow-color), transparent 6%),
       0 0 13px color-mix(in srgb, var(--flow-color), transparent 32%) !important;
+    translate: 0 0;
+    animation-duration: var(--flow-speed, 3.8s) !important;
+    animation-timing-function: cubic-bezier(.45,0,.55,1) !important;
+    animation-iteration-count: infinite !important;
+    animation-fill-mode: none !important;
+    animation-delay: 0s !important;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    will-change: left, opacity !important;
+    will-change: translate, opacity !important;
+  }
+
+  .flowline.is-active .particle:nth-child(2) {
+    animation-delay: calc(var(--flow-speed, 3.8s) / -3) !important;
+  }
+
+  .flowline.is-active .particle:nth-child(3) {
+    animation-delay: calc(var(--flow-speed, 3.8s) / -1.5) !important;
   }
 
   .flowline.dir-right.is-active .particle {
