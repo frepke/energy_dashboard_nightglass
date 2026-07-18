@@ -1,397 +1,317 @@
 <!doctype html>
-<html lang="nl" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Nightglass fullscreen energiedashboard voor Domoticz met Zonneplan-prijzen, weer en uitgebreide maaninformatie.">
-  <meta name="theme-color" content="#1b1d25">
-  <title>Nightglass Energy Dashboard</title>
+  <meta name="description" content="Private energy dashboard for Domoticz with Zonneplan dynamic pricing.">
+  <meta name="theme-color" content="#030617" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f4ff" media="(prefers-color-scheme: light)">
+  <title>Energy Dashboard</title>
 
-  <!-- Bestaande componentlogica; nightglass-v2.css beheert de volledige lay-out. -->
+  <!-- Styles -->
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/base.css">
-  <link rel="stylesheet" href="styles/flow.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/weather-core.css">
+  <link rel="stylesheet" href="styles/weather-command-desktop.css">
+  <link rel="stylesheet" href="styles/weather-art.css">
+  <link rel="stylesheet" href="styles/weather-final.css">
+  <link rel="stylesheet" href="styles/flow.css?v=connector-align-3">
   <link rel="stylesheet" href="styles/cards.css">
   <link rel="stylesheet" href="styles/chart.css">
   <link rel="stylesheet" href="styles/insights.css">
-  <link rel="stylesheet" href="styles/weather-art.css">
-  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.7.10">
-
-  <script>
-    // Nieuwe installaties starten in het Nederlands. Bestaande voorkeuren blijven behouden.
-    // Playwright gebruikt bewust de oorspronkelijke Engelse standaard voor de testselectors.
-    try {
-      if (!window.__PLAYWRIGHT__ && !localStorage.getItem('ed-lang')) {
-        localStorage.setItem('ed-lang', 'nl');
-      }
-    } catch (_) {}
-  </script>
+  <link rel="stylesheet" href="styles/kiosk.css">
+  <link rel="stylesheet" href="styles/responsive-base.css?v=connector-align-3">
+  <link rel="stylesheet" href="styles/responsive-layout.css">
+  <link rel="stylesheet" href="styles/responsive-weather.css?v=iphone-pro-gutter-2">
+  <link rel="stylesheet" href="styles/responsive-flow.css?v=iphone-particles-1">
+  <link rel="stylesheet" href="styles/responsive-chart.css">
 </head>
 
 <body>
-<main class="dashboard" data-dashboard-version="nightglass-v2.7.9">
+<main class="dashboard" data-dashboard-version="final-edition">
+  <!-- Top bar -->
   <header class="topbar">
     <div class="topbar-left">
-      <div class="brand-lockup" aria-label="Nightglass Energy">
-        <span class="brand-orb" aria-hidden="true"></span>
-        <h1 class="brand">NIGHTGLASS<span>·</span>ENERGY</h1>
-      </div>
-
-      <nav class="topbar-controls" aria-label="Dashboardinstellingen">
-        <button class="control-button theme-toggle" id="themeToggle" type="button"
-                aria-label="Schakel licht/donker thema" aria-pressed="true" title="Schakel licht/donker thema">🌙</button>
-        <button class="control-button lang-toggle" id="langToggle" type="button"
-                aria-label="Switch to English" lang="nl" title="Switch to English">NL</button>
-        <button class="control-button weather-provider-toggle" id="weatherProviderToggle" type="button"
-                aria-label="Weerbron wisselen" title="Weerbron wisselen">VB</button>
-      </nav>
+      <h1 class="brand">ENERGY<span>·</span>DASH<span>·</span>PREMIUM</h1>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" aria-pressed="true" title="Toggle dark/light mode">🌙</button>
+      <button class="zoom-btn" id="zoomOut" aria-label="Zoom out" title="Zoom out">🔍−</button>
+      <button class="zoom-btn" id="zoomIn"  aria-label="Zoom in"  title="Zoom in">🔍+</button>
+      <button class="lang-toggle" id="langToggle" aria-label="Schakel naar Nederlands" lang="nl" title="Schakel naar Nederlands">NL</button>
+      <button class="weather-provider-toggle" id="weatherProviderToggle" aria-label="Weerbron wisselen" title="Schakel naar OpenWeatherMap">OWM</button>
     </div>
-
     <div class="status" id="status" role="status" aria-live="polite">
-      <span class="status-dot" aria-hidden="true"></span>
-      <span id="statusText" data-i18n="status-init">Live data starten…</span>
+      <span class="status-dot"></span>
+      <span id="statusText" data-i18n="status-init">Starting live data…</span>
     </div>
   </header>
 
-  <div class="dashboard-content">
-    <!-- Tijd, zon, maan en weer -->
-    <section class="weather-hero panel" id="weatherHero" aria-label="Weeroverzicht" data-i18n-label="section-weather">
-      <article class="command-zone command-zone--time weather-section weather-section--clock"
-               aria-label="Huidige tijd" data-i18n-label="weather-current-time-aria">
-        <div class="zone-accent" aria-hidden="true"></div>
-        <div class="zone-heading">
-          <span class="zone-kicker" data-i18n="weather-live-dashboard">Live-overzicht</span>
-          <span class="zone-state" id="domoticzLiveState" data-state="loading" role="img" aria-label="Domoticz verbinden…">
-            <i aria-hidden="true"></i><span data-i18n="weather-realtime">Realtime</span>
-          </span>
-        </div>
+  <!-- Weather header — cohesive status console -->
+  <section class="weather-hero weather-hero--command" id="weatherHero" aria-label="Weeroverzicht" data-i18n-label="section-weather">
+    <div class="weather-hero-bg" aria-hidden="true"></div>
+    <div class="weather-hero-orbit" aria-hidden="true"></div>
+    <div class="weather-hero-sheen" aria-hidden="true"></div>
+
+    <article class="command-zone command-zone--time weather-section weather-section--clock" aria-label="Huidige tijd" data-i18n-label="weather-current-time-aria">
+      <div class="command-zone-glow" aria-hidden="true"></div>
+      <div class="weather-section-icon weather-section-icon--clock" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <circle class="stroke" cx="12" cy="12" r="8.5"/>
+          <path class="stroke" d="M12 7v5l3.2-2.1"/>
+          <path class="stroke ticks" d="M12 2.8v1.7M12 19.5v1.7M2.8 12h1.7M19.5 12h1.7"/>
+        </svg>
+      </div>
+      <div class="weather-section-copy">
+        <div class="weather-section-label" data-i18n="weather-live-dashboard">Live-overzicht</div>
         <time class="weather-time" id="weatherTime">--:--:--</time>
         <div class="weather-date" id="weatherDate">--</div>
-        <div class="clock-footer">
-          <span data-i18n="weather-energy-console">Energieconsole</span>
-          <span class="clock-separator" aria-hidden="true"></span>
-          <span>Domoticz</span>
+        <div class="weather-status-row" aria-hidden="true">
+          <span data-i18n="weather-realtime">Realtime</span><span data-i18n="weather-energy-console">Energieconsole</span>
         </div>
-      </article>
+      </div>
+    </article>
 
-      <!-- display: contents in CSS: zon en maan worden zelfstandige, gelijk uitgelijnde tegels -->
-      <div class="command-zone command-zone--celestial" aria-label="Zon- en maancyclus" data-i18n-label="weather-sun-moon-cycle-aria">
-        <article class="celestial-module celestial-module--sun weather-section weather-section--sun"
-                 aria-label="Zoncyclus" data-i18n-label="weather-sun-cycle-aria">
-          <div class="zone-accent" aria-hidden="true"></div>
-          <div class="zone-heading">
-            <span class="zone-kicker" data-i18n="weather-sun-cycle">Zoncyclus</span>
-          </div>
-          <div class="sun-layout">
-            <div class="weather-section-icon weather-section-icon--sun" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <circle class="fill" cx="12" cy="12" r="3.8"/>
-                <path class="stroke" d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>
-              </svg>
-            </div>
-            <div class="weather-sun">
-              <div class="sun-stat sun-stat--rise">
-                <div class="sun-label" data-i18n="sunrise">Zonsopkomst</div>
-                <div class="sun-time" id="sunriseTime">--:--</div>
-              </div>
-              <div class="sun-stat sun-stat--set">
-                <div class="sun-label" data-i18n="sunset">Zonsondergang</div>
-                <div class="sun-time" id="sunsetTime">--:--</div>
-              </div>
-            </div>
-          </div>
-          <div class="sun-cycle-footer">
-            <div class="daylight-progress" id="sunCycleStatus" data-state="unknown" data-phase="unknown"
-                 role="img" aria-label="Zoncyclus nog niet beschikbaar" data-i18n-label="sun-status-unavailable">
-              <span class="daylight-time daylight-time--start" id="daylightSunrise">--:--</span>
-              <span class="daylight-track" aria-hidden="true">
-                <span class="daylight-track-fill"></span>
-                <span class="daylight-marker"></span>
-              </span>
-              <span class="daylight-time daylight-time--end" id="daylightSunset">--:--</span>
-            </div>
-            <div class="daylight-meta">
-              <span class="day-length" id="dayLength">Daglengte: --:--</span>
-              <span class="daylight-status-text" id="daylightStatusText" aria-live="polite" data-i18n="sun-status-unavailable">Zoncyclus niet beschikbaar</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="celestial-module celestial-module--moon weather-section weather-section--moon"
-                 aria-label="Maanfase" data-i18n-label="weather-moon-phase-aria">
-          <div class="moon-orbit" aria-hidden="true"></div>
-          <div class="zone-heading">
-            <span class="zone-kicker" data-i18n="weather-moon-label">Maan</span>
-            <span class="moon-priority">LUNAR</span>
-          </div>
-          <div class="moon-body">
-            <div class="big-moon" id="moonIcon" aria-hidden="true">
-              <canvas class="moon-canvas" id="moonCanvas" width="640" height="640"></canvas>
-            </div>
-            <div class="moon-info">
-              <div class="moon-phase" id="moonPhase">--</div>
-              <div class="moon-illum" id="moonIllum">--%</div>
-              <div class="moon-details" aria-label="Maangegevens">
-                <div class="moon-detail"><span data-i18n="moonrise-label">Opkomst</span><strong id="moonRise">--:--</strong></div>
-                <div class="moon-detail"><span data-i18n="moonset-label">Onder</span><strong id="moonSet">--:--</strong></div>
-                <div class="moon-detail"><span data-i18n="moon-age-label">Leeftijd</span><strong id="moonAge">--</strong></div>
-                <div class="moon-detail"><span data-i18n="moon-distance-label">Afstand</span><strong id="moonDistance">--</strong></div>
-              </div>
-              <div class="moon-events" aria-label="Volgende maanmomenten">
-                <div class="moon-event">
-                  <span data-i18n="next-full-moon-prefix">Volle maan</span>
-                  <strong id="moonFullMoonWhen">--</strong>
-                </div>
-                <div class="moon-event">
-                  <span data-i18n="next-moon-prefix">Nieuwe maan</span>
-                  <strong id="moonNewMoonWhen">--</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
+    <article class="command-zone command-zone--celestial" aria-label="Zon- en maancyclus" data-i18n-label="weather-sun-moon-cycle-aria">
+      <div class="celestial-map" aria-hidden="true">
+        <span class="celestial-map-line"></span>
+        <span class="celestial-map-sun"></span>
+        <span class="celestial-map-moon"></span>
       </div>
 
-      <article class="command-zone command-zone--weather weather-section weather-section--now"
-               aria-label="Huidig weer" data-i18n-label="weather-current-weather-aria">
-        <div class="zone-accent" aria-hidden="true"></div>
-        <div class="zone-heading">
-          <span class="zone-kicker"><span data-i18n="weather-label">Weer</span><span class="weather-source-badge" id="weatherSource"></span></span>
-          <span class="weather-live-dot" id="weatherLiveStatus" data-state="loading" role="img" aria-label="Weergegevens laden"></span>
+      <div class="celestial-module celestial-module--sun weather-section weather-section--sun" aria-label="Zoncyclus" data-i18n-label="weather-sun-cycle-aria">
+        <div class="weather-section-icon weather-section-icon--sun" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle class="fill" cx="12" cy="12" r="3.8"/>
+            <path class="stroke" d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>
+          </svg>
         </div>
+        <div class="weather-section-copy">
+          <div class="weather-section-label" data-i18n="weather-sun-cycle">Zoncyclus</div>
+          <div class="weather-sun">
+            <div class="sun-stat sun-stat--rise">
+              <div class="sun-label" data-i18n="sunrise">Zonsopkomst</div>
+              <div class="sun-time" id="sunriseTime">--:--</div>
+            </div>
+            <div class="sun-stat sun-stat--set">
+              <div class="sun-label" data-i18n="sunset">Zonsondergang</div>
+              <div class="sun-time" id="sunsetTime">--:--</div>
+            </div>
+          </div>
+          <div class="day-length" id="dayLength">Daglengte: --:--</div>
+        </div>
+      </div>
+
+      <div class="celestial-module celestial-module--moon weather-section weather-section--moon" aria-label="Maanfase" data-i18n-label="weather-moon-phase-aria">
+        <div class="moon-body">
+          <div class="big-moon" id="moonIcon" aria-hidden="true">
+            <canvas class="moon-canvas" id="moonCanvas" width="640" height="640"></canvas>
+          </div>
+          <div class="weather-section-copy moon-info">
+            <div class="weather-section-label" data-i18n="weather-moon-label">Maan</div>
+            <div class="moon-phase" id="moonPhase">--</div>
+            <div class="moon-illum" id="moonIllum">--%</div>
+            <div class="moon-rows moon-rows--full-only">
+              <div class="moon-row moon-row--full-only" id="moonFullMoonRow">
+                <span class="moon-row-label moon-row-label--full-only" id="moonFullMoonWhen">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="command-zone command-zone--weather weather-section weather-section--now" aria-label="Huidig weer" data-i18n-label="weather-current-weather-aria">
+      <div class="weather-atmosphere" aria-hidden="true"></div>
+      <div class="weather-section-copy">
+        <div class="weather-section-label"><span data-i18n="weather-label">Weer</span> <span class="weather-source-badge" id="weatherSource"></span></div>
         <div class="weather-now">
           <div class="weather-now-copy">
             <div class="weather-temp" id="weatherTemp" aria-live="polite" aria-atomic="true">--&deg;C</div>
-            <div class="weather-desc" id="weatherDesc" aria-live="polite">--</div>
             <div class="weather-meta">
-              <span id="weatherHumidity">💧 --%</span>
-              <span id="weatherWind">💨 -- km/h</span>
-              <span id="weatherPressure">🌐 -- hPa</span>
-              <span id="weatherPrecipRate" style="display:none">🌧 -- mm/u</span>
+              <span id="weatherHumidity">&#128167; --%</span>
+              <span id="weatherWind">&#128168; -- km/h</span>
+              <span id="weatherPressure">&#127760; -- hPa</span>
+              <span id="weatherPrecipRate" style="display:none">&#127783; -- mm/u</span>
+            </div>
+            <div class="weather-desc-row">
+              <span class="weather-desc" id="weatherDesc" aria-live="polite">--</span>
             </div>
           </div>
           <div class="weather-art weather-art--svg weather-art--unknown" id="weatherArt" aria-hidden="true"></div>
         </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Smart energy insight bar -->
+  <section class="smart-insight" id="smartInsight" aria-label="Slim energieadvies" data-i18n-label="section-insight">
+    <div class="smart-insight-main">
+      <div class="smart-insight-icon" id="smartInsightIcon">&#9889;</div>
+      <div class="smart-insight-copy">
+        <h2 class="smart-insight-title" data-i18n="smart-insight-title">Smart Insight</h2>
+        <div class="smart-insight-text" id="smartInsightText" aria-live="polite" data-i18n="smart-insight-init">Live data is being analyzed…</div>
+        <div class="smart-insight-context" id="smartInsightContext" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="smart-insight-meta">
+      <span class="smart-pill smart-pill--status" id="smartGridPill" aria-live="polite" aria-atomic="true">Grid --</span>
+      <span class="smart-pill smart-pill--status" id="smartSolarPill" aria-live="polite" aria-atomic="true">Solar --</span>
+      <span class="smart-pill smart-pill--status" id="smartPricePill" aria-live="polite" aria-atomic="true">Price --</span>
+      <span class="smart-pill smart-pill--primary" id="smartNextPill" aria-live="polite" aria-atomic="true">Best --</span>
+    </div>
+  </section>
+
+  <!-- Energy flow + stat cards -->
+  <section class="panel" aria-label="Energiestroom" data-i18n-label="section-flow">
+    <p class="sr-only" id="flowSummary" aria-live="polite" aria-atomic="true"></p>
+    <div class="flow">
+
+      <!-- Grid node -->
+      <div class="node grid" id="gridNode">
+        <div class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M13.8 2.4 4.2 13.3h6.1l-1.5 8.3 10.9-12.8h-6.3l.4-6.4z"/></svg>
+        </div>
+        <div class="node-text">
+          <div class="label" data-i18n="label-grid">Grid</div>
+          <div class="value green" id="gridW" aria-live="polite" aria-atomic="true">-- W</div>
+          <div class="sub green" id="gridDir" aria-live="polite" aria-atomic="true">--</div>
+        </div>
+      </div>
+
+      <!-- Grid ↔ House flow line -->
+      <!-- sr-only flow status is updated by JS via #gridFlowStatus -->
+      <div class="flowbox">
+        <div class="flowline is-off" id="gridFlow"><span class="particle"></span></div>
+        <div class="arrow" id="gridArrow"><span class="ico">&#8592;</span></div>
+      </div>
+
+      <!-- House node -->
+      <div class="node house" id="houseNode">
+        <div class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3.2 11.2 12 3.6l8.8 7.6h-2.4v8.7h-4.5v-5.8h-3.8v5.8H5.6v-8.7H3.2z"/><path class="stroke" d="M8.2 20h7.6M12 3.6v3.2" opacity=".35"/></svg>
+        </div>
+        <div class="node-text">
+          <div class="label" data-i18n="label-house">House</div>
+          <div class="value" id="houseW" aria-live="polite" aria-atomic="true">-- W</div>
+          <div class="sub muted" data-i18n="live-load">Live load</div>
+        </div>
+      </div>
+
+      <!-- Solar ↔ House flow line -->
+      <div class="flowbox">
+        <div class="flowline solarLine is-off" id="solarFlow"><span class="particle"></span></div>
+        <div class="arrow solarArrow" id="solarArrow"><span class="ico">&#8592;</span></div>
+      </div>
+
+      <!-- Solar node -->
+      <div class="node solar" id="solarNode">
+        <div class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.6"/><path class="stroke" d="M12 1.8v3M12 19.2v3M4.8 4.8l2.1 2.1M17.1 17.1l2.1 2.1M1.8 12h3M19.2 12h3M4.8 19.2l2.1-2.1M17.1 6.9l2.1-2.1"/></svg>
+        </div>
+        <div class="node-text">
+          <div class="label" data-i18n="label-solar">Solar</div>
+          <div class="value solarText" id="solarW" aria-live="polite" aria-atomic="true">-- W</div>
+          <div class="sub solarText" id="localSolarW" aria-live="polite" aria-atomic="true">On-site -- W</div>
+          <div class="limitBadge" id="limitBadge" hidden></div>
+        </div>
+      </div>
+
+    </div><!-- /.flow -->
+
+    <!-- Stat cards -->
+    <div class="cards">
+      <article class="card card-grid">
+        <div class="card-glow"></div>
+        <h3 data-i18n="card-grid">Grid</h3>
+        <strong id="gridToday">--</strong>
+        <small id="gridNet">Net --</small>
+        <small class="price-line" id="gridPrice">
+          <span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2L4 13h6l-1 9 10-12h-6l1-8z"/></svg></span>
+          <span class="price-text">--</span>
+        </small>
       </article>
-    </section>
+      <article class="card card-house">
+        <div class="card-glow"></div>
+        <h3 data-i18n="card-house">House</h3>
+        <strong id="houseToday">--</strong>
+        <small data-i18n="today">Today</small>
+        <small class="price-line card-placeholder">&nbsp;</small>
+      </article>
+      <article class="card card-solar">
+        <div class="card-glow"></div>
+        <h3 data-i18n="card-solar">Solar</h3>
+        <strong class="solarText" id="solarToday">--</strong>
+        <small id="solarStatus" data-i18n="today">Today</small>
+        <small class="solar-price" id="solarPrice">
+          <span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.6"/><path class="stroke" d="M12 1.8v3M12 19.2v3M4.8 4.8l2.1 2.1M17.1 17.1l2.1 2.1M1.8 12h3M19.2 12h3M4.8 19.2l2.1-2.1M17.1 6.9l2.1-2.1"/></svg></span>
+          <span class="price-text">--</span>
+        </small>
+      </article>
+      <article class="card card-kpi card-self-suff">
+        <div class="card-glow"></div>
+        <h3 data-i18n="card-self-suff">Self-sufficiency</h3>
+        <strong class="green" id="selfSuff">--%</strong>
+        <small data-i18n="self-suff-sub">of consumption covered</small>
+        <small class="price-line card-placeholder">&nbsp;</small>
+      </article>
+      <article class="card card-kpi card-self-cons">
+        <div class="card-glow"></div>
+        <h3 data-i18n="card-self-cons">Self-consumption</h3>
+        <strong class="solarText" id="selfCons">--%</strong>
+        <small data-i18n="self-cons-sub">of solar used on-site</small>
+        <small class="price-line card-placeholder">&nbsp;</small>
+      </article>
+      <article class="card card-gas">
+        <div class="card-glow"></div>
+        <h3 data-i18n="card-gas">Gas</h3>
+        <strong id="gasToday">--</strong>
+        <small id="gasYear">-- m&sup3; this year</small>
+        <small class="gas-price" id="gasPrice">
+          <span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c0 0-1.5 3-1.5 5.5 0 1 .4 1.9 1 2.5C10.2 8.5 10 7 10 7c-2 2.5-3 5-3 7a5 5 0 0 0 10 0c0-3-1.5-5.5-3-7 0 0 .2 2.5-1 4.5-.5-.8-.5-2-.5-2.5C12.5 6.5 12 2 12 2z"/></svg></span>
+          <span class="price-text">--</span>
+        </small>
+      </article>
+    </div><!-- /.cards -->
+  </section>
 
-    <!-- Slim energieadvies -->
-    <section class="smart-insight panel" id="smartInsight" aria-label="Slim energieadvies" data-i18n-label="section-insight">
-      <div class="smart-insight-main">
-        <div class="smart-insight-icon" id="smartInsightIcon" aria-hidden="true">⚡</div>
-        <div class="smart-insight-copy">
-          <h2 class="smart-insight-title" data-i18n="smart-insight-title">Slim advies</h2>
-          <div class="smart-insight-text" id="smartInsightText" aria-live="polite" data-i18n="smart-insight-init">Live data wordt geanalyseerd…</div>
-          <div class="smart-insight-context" id="smartInsightContext" aria-live="polite"></div>
+  <!-- Prices chart panel -->
+  <section class="panel" aria-label="Energieprijzen" data-i18n-label="section-prices">
+    <div class="pricesHeader">
+      <div class="usage-window-selector" id="usageWindowSelector" aria-label="Voordeligste reeks uren" data-i18n-label="usage-window-aria">
+        <span class="usage-window-label" data-i18n="usage-window-label">Voordeligste reeks</span>
+        <button type="button" data-usage-window="all" aria-label="Alle uren" data-i18n="usage-window-all-btn" data-i18n-aria="usage-window-all-aria">Alle</button>
+        <button type="button" data-usage-window="1" aria-label="1 uur" data-i18n="usage-window-1-btn" data-i18n-aria="usage-window-1-aria">1u</button>
+        <button type="button" data-usage-window="2" aria-label="2 uur" data-i18n="usage-window-2-btn" data-i18n-aria="usage-window-2-aria">2u</button>
+        <button type="button" data-usage-window="3" aria-label="3 uur" data-i18n="usage-window-3-btn" data-i18n-aria="usage-window-3-aria">3u</button>
+        <button type="button" data-usage-window="4" aria-label="4 uur" data-i18n="usage-window-4-btn" data-i18n-aria="usage-window-4-aria">4u</button>
+        <button type="button" data-usage-window="6" aria-label="6 uur" data-i18n="usage-window-6-btn" data-i18n-aria="usage-window-6-aria">6u</button>
+      </div>
+      <div class="pricesTitleBlock">
+        <h2 class="title" data-i18n="prices-title">ZONNEPLAN ENERGY</h2>
+        <div class="updated" id="updated" aria-live="polite">Updated: --</div>
+      </div>
+      <div class="badges">
+        <div class="badge green" id="elecBadge">
+          <span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2L4 13h6l-1 9 10-12h-6l1-8z"/></svg></span>
+          <span class="price-text">--</span>
+        </div>
+        <div class="badge" id="gasBadge">
+          <span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c0 0-1.5 3-1.5 5.5 0 1 .4 1.9 1 2.5C10.2 8.5 10 7 10 7c-2 2.5-3 5-3 7a5 5 0 0 0 10 0c0-3-1.5-5.5-3-7 0 0 .2 2.5-1 4.5-.5-.8-.5-2-.5-2.5C12.5 6.5 12 2 12 2z"/></svg></span>
+          <span class="price-text">--</span>
         </div>
       </div>
-      <div class="smart-insight-meta">
-        <span class="smart-pill smart-pill--status" id="smartGridPill" aria-live="polite" aria-atomic="true">Net --</span>
-        <span class="smart-pill smart-pill--status" id="smartSolarPill" aria-live="polite" aria-atomic="true">Zon --</span>
-        <span class="smart-pill smart-pill--status" id="smartPricePill" aria-live="polite" aria-atomic="true">Prijs --</span>
-        <span class="smart-pill smart-pill--primary" id="smartNextPill" aria-live="polite" aria-atomic="true">Beste --</span>
-      </div>
-    </section>
-
-    <!-- Energiestroom en dagtegels -->
-    <section class="energy-panel panel" aria-label="Energiestroom" data-i18n-label="section-flow">
-      <div class="section-heading energy-heading">
-        <div>
-          <span class="section-kicker">LIVE</span>
-          <h2 data-i18n="section-flow">Energiestroom</h2>
-        </div>
-        <div class="energy-legend" aria-hidden="true">
-          <span><i class="legend-dot legend-dot--grid"></i><span data-i18n="label-grid">Net</span></span>
-          <span><i class="legend-dot legend-dot--house"></i><span data-i18n="label-house">Huis</span></span>
-          <span><i class="legend-dot legend-dot--solar"></i><span data-i18n="label-solar">Zonnepanelen</span></span>
-        </div>
-      </div>
-
-      <p class="sr-only" id="flowSummary" aria-live="polite" aria-atomic="true"></p>
-      <div class="flow">
-        <div class="node grid" id="gridNode">
-          <div class="node-icon icon" data-icon-target="grid" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M13.8 2.4 4.2 13.3h6.1l-1.5 8.3 10.9-12.8h-6.3l.4-6.4z"/></svg>
-          </div>
-          <div class="node-text">
-            <div class="label" data-i18n="label-grid">Net</div>
-            <div class="value green" id="gridW" aria-live="polite" aria-atomic="true">-- W</div>
-            <div class="sub green" id="gridDir" aria-live="polite" aria-atomic="true">--</div>
-          </div>
-        </div>
-
-        <div class="flowbox" aria-hidden="true">
-          <div class="flow-caption" id="gridFlowCaption">NET ↔ HUIS</div>
-          <div class="flowline is-off" id="gridFlow"><span class="particle"></span></div>
-          <div class="arrow" id="gridArrow"><span class="ico">→</span></div>
-        </div>
-
-        <div class="node house" id="houseNode">
-          <div class="node-icon icon" data-icon-target="house" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M3.2 11.2 12 3.6l8.8 7.6h-2.4v8.7h-4.5v-5.8h-3.8v5.8H5.6v-8.7H3.2z"/></svg>
-          </div>
-          <div class="node-text">
-            <div class="label" data-i18n="label-house">Huis</div>
-            <div class="value" id="houseW" aria-live="polite" aria-atomic="true">-- W</div>
-            <div class="sub muted" data-i18n="live-load">Live belasting</div>
-          </div>
-        </div>
-
-        <div class="flowbox" aria-hidden="true">
-          <div class="flow-caption" id="solarFlowCaption">HUIS ↔ ZON</div>
-          <div class="flowline solarLine is-off" id="solarFlow"><span class="particle"></span></div>
-          <div class="arrow solarArrow" id="solarArrow"><span class="ico">←</span></div>
-        </div>
-
-        <div class="node solar" id="solarNode">
-          <div class="node-icon icon" data-icon-target="solar" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.6"/><path class="stroke" d="M12 1.8v3M12 19.2v3M4.8 4.8 7 7M17 17l2.1 2.1M1.8 12h3M19.2 12h3M4.8 19.2 7 17M17 7l2.1-2.1"/></svg>
-          </div>
-          <div class="node-text">
-            <div class="label" data-i18n="label-solar">Zonnepanelen</div>
-            <div class="value solarText" id="solarW" aria-live="polite" aria-atomic="true">-- W</div>
-            <div class="sub solarText" id="localSolarW" aria-live="polite" aria-atomic="true">Lokaal -- W</div>
-            <div class="limitBadge" id="limitBadge" hidden></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="cards" aria-label="Dagstatistieken" data-i18n-label="section-cards">
-        <article class="card card-grid" data-history-card="grid">
-          <svg class="card-history-bg" data-history-chart="grid" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="card-topline">
-            <span class="card-icon" data-icon-target="grid-card" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4 13h6l-1 9 10-12h-6l1-8z"/></svg></span>
-            <h3 data-i18n="card-grid">Net</h3>
-          </div>
-          <div class="card-metric">
-            <strong id="gridToday">--</strong>
-            <small id="gridNet">Netto --</small>
-          </div>
-          <div class="card-footer">
-            <small class="history-summary" data-history-summary="grid"></small>
-            <small class="price-line" id="gridPrice"><span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4 13h6l-1 9 10-12h-6l1-8z"/></svg></span><span class="price-text">--</span></small>
-          </div>
-        </article>
-
-        <article class="card card-house" data-history-card="house">
-          <svg class="card-history-bg" data-history-chart="house" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="card-topline">
-            <span class="card-icon" data-icon-target="house-card" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.2 11.2 12 3.6l8.8 7.6h-2.4v8.7h-4.5v-5.8h-3.8v5.8H5.6v-8.7H3.2z"/></svg></span>
-            <h3 data-i18n="card-house">Huis</h3>
-          </div>
-          <div class="card-metric">
-            <strong id="houseToday">--</strong>
-            <small data-i18n="today">Vandaag</small>
-          </div>
-          <div class="card-footer">
-            <small class="history-summary" data-history-summary="house"></small>
-          </div>
-        </article>
-
-        <article class="card card-solar" data-history-card="solar">
-          <svg class="card-history-bg" data-history-chart="solar" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="card-topline">
-            <span class="card-icon" data-icon-target="solar-card" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.6"/><path class="stroke" d="M12 1.8v3M12 19.2v3M4.8 4.8 7 7M17 17l2.1 2.1M1.8 12h3M19.2 12h3M4.8 19.2 7 17M17 7l2.1-2.1"/></svg></span>
-            <h3 data-i18n="card-solar">Zonnepanelen</h3>
-          </div>
-          <div class="card-metric">
-            <strong class="solarText" id="solarToday">--</strong>
-            <small id="solarStatus" data-i18n="today">Vandaag</small>
-          </div>
-          <div class="card-footer">
-            <small class="history-summary" data-history-summary="solar"></small>
-            <small class="solar-price" id="solarPrice"><span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.6"/><path class="stroke" d="M12 1.8v3M12 19.2v3M4.8 4.8 7 7M17 17l2.1 2.1M1.8 12h3M19.2 12h3M4.8 19.2 7 17M17 7l2.1-2.1"/></svg></span><span class="price-text">--</span></small>
-          </div>
-        </article>
-
-        <article class="card card-kpi card-self-suff" data-history-card="selfSuff">
-          <svg class="card-history-bg" data-history-chart="selfSuff" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="card-topline">
-            <span class="card-icon" data-icon-target="self-suff-card" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 3.1 6.3" class="stroke"/><path d="m3 16 4.3.2L5.8 12"/><path d="m9 12 2 2 4-5" class="stroke"/></svg></span>
-            <h3 data-i18n="card-self-suff">Zelfvoorziening</h3>
-          </div>
-          <div class="card-metric">
-            <strong class="green" id="selfSuff">--%</strong>
-            <small data-i18n="self-suff-sub">van verbruik gedekt</small>
-          </div>
-          <div class="card-footer">
-            <small class="history-summary" data-history-summary="selfSuff"></small>
-          </div>
-        </article>
-
-        <article class="card card-kpi card-self-cons" data-history-card="selfCons">
-          <svg class="card-history-bg" data-history-chart="selfCons" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="card-topline">
-            <span class="card-icon" data-icon-target="self-cons-card" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9" class="stroke"/><path d="M12 3v9h9"/><path d="m8.5 13.5 2 2 4-5" class="stroke"/></svg></span>
-            <h3 data-i18n="card-self-cons">Zelfconsumptie</h3>
-          </div>
-          <div class="card-metric">
-            <strong class="solarText" id="selfCons">--%</strong>
-            <small data-i18n="self-cons-sub">van zon lokaal gebruikt</small>
-          </div>
-          <div class="card-footer">
-            <small class="history-summary" data-history-summary="selfCons"></small>
-          </div>
-        </article>
-
-        <article class="card card-gas" data-history-card="gas">
-          <svg class="card-history-bg" data-history-chart="gas" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="card-topline">
-            <span class="card-icon" data-icon-target="gas-card" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2s-1.5 3-1.5 5.5c0 1 .4 1.9 1 2.5C10.2 8.5 10 7 10 7c-2 2.5-3 5-3 7a5 5 0 0 0 10 0c0-3-1.5-5.5-3-7 0 0 .2 2.5-1 4.5-.5-.8-.5-2-.5-2.5C12.5 6.5 12 2 12 2z"/></svg></span>
-            <h3 data-i18n="card-gas">Gas</h3>
-          </div>
-          <div class="card-metric">
-            <strong id="gasToday">--</strong>
-            <small id="gasYear">-- m³ dit jaar</small>
-          </div>
-          <div class="card-footer">
-            <small class="history-summary" data-history-summary="gas"></small>
-            <small class="gas-price" id="gasPrice"><span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2s-1.5 3-1.5 5.5c0 1 .4 1.9 1 2.5C10.2 8.5 10 7 10 7c-2 2.5-3 5-3 7a5 5 0 0 0 10 0c0-3-1.5-5.5-3-7 0 0 .2 2.5-1 4.5-.5-.8-.5-2-.5-2.5C12.5 6.5 12 2 12 2z"/></svg></span><span class="price-text">--</span></small>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- Uurprijzen -->
-    <section class="prices-panel panel" aria-label="Energieprijzen" data-i18n-label="section-prices">
-      <div class="pricesHeader">
-        <div class="usage-window-selector" id="usageWindowSelector" aria-label="Voordeligste reeks uren" data-i18n-label="usage-window-aria">
-          <span class="usage-window-label" data-i18n="usage-window-label">Voordeligste reeks</span>
-          <button type="button" data-usage-window="all" aria-label="Alle uren" data-i18n="usage-window-all-btn" data-i18n-aria="usage-window-all-aria">Alle</button>
-          <button type="button" data-usage-window="1" aria-label="1 uur" data-i18n="usage-window-1-btn" data-i18n-aria="usage-window-1-aria">1u</button>
-          <button type="button" data-usage-window="2" aria-label="2 uur" data-i18n="usage-window-2-btn" data-i18n-aria="usage-window-2-aria">2u</button>
-          <button type="button" data-usage-window="3" aria-label="3 uur" data-i18n="usage-window-3-btn" data-i18n-aria="usage-window-3-aria">3u</button>
-          <button type="button" data-usage-window="4" aria-label="4 uur" data-i18n="usage-window-4-btn" data-i18n-aria="usage-window-4-aria">4u</button>
-          <button type="button" data-usage-window="6" aria-label="6 uur" data-i18n="usage-window-6-btn" data-i18n-aria="usage-window-6-aria">6u</button>
-        </div>
-
-        <div class="pricesTitleBlock">
-          <span class="section-kicker">DYNAMISCH</span>
-          <h2 class="title" data-i18n="prices-title">ZONNEPLAN ENERGIE</h2>
-          <div class="updated" id="updated" aria-live="polite">Bijgewerkt: --</div>
-        </div>
-
-        <div class="badges">
-          <div class="badge green" id="elecBadge">
-            <span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4 13h6l-1 9 10-12h-6l1-8z"/></svg></span>
-            <span class="price-text">--</span>
-          </div>
-          <div class="badge" id="gasBadge">
-            <span class="mini-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2s-1.5 3-1.5 5.5c0 1 .4 1.9 1 2.5C10.2 8.5 10 7 10 7c-2 2.5-3 5-3 7a5 5 0 0 0 10 0c0-3-1.5-5.5-3-7 0 0 .2 2.5-1 4.5-.5-.8-.5-2-.5-2.5C12.5 6.5 12 2 12 2z"/></svg></span>
-            <span class="price-text">--</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="chart" id="chart" role="img" aria-label="Grafiek met uurlijkse elektriciteitsprijzen" data-i18n-label="chart-aria">
-        <div class="gridlines" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-        <div class="bars" id="bars" role="list" aria-label="Prijsbalken" data-i18n-label="price-bars-aria"></div>
-      </div>
-    </section>
-  </div>
+    </div>
+    <div class="chart" id="chart" role="img" aria-label="Hourly electricity price chart showing today and tomorrow" data-i18n-label="chart-aria">
+      <div class="gridlines" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div class="bars" id="bars" role="list" aria-label="Price bars" data-i18n-label="price-bars-aria"></div>
+    </div>
+  </section>
 </main>
 
-<script src="config.js" onerror="console.warn('config.js ontbreekt — gebruik config.example.js als basis.')"></script>
-<script type="module" src="scripts/main.js?v=2.7.10"></script>
+<!-- Configuration — copy config.example.js to config.js and fill in your values. -->
+<script src="config.js" onerror="console.warn('config.js not found \u2014 using defaults. Copy config.example.js to config.js.')"></script>
+
+<!-- Application scripts (ES modules) -->
+<script type="module" src="scripts/main.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /* ============================================================
+   v13 final fit rules
    Desktop/laptop: fixed 1920x1080 canvas, scaled by JS.
    Mobile/tablet: normal document flow and scroll.
-   Kept for legacy builds; Nightglass V2 uses its own adaptive rules.
    ============================================================ */
 @media (min-width: 1101px) {
   .dashboard {
@@ -41,9 +41,67 @@
     min-height: var(--card-height);
   }
 
-  .chart { height: var(--chart-height); }
+  .chart {
+    height: var(--chart-height);
+  }
 }
 
+/* ============================================================
+   Mobile/tablet fallback
+   The fullscreen 1920x1080 canvas is desktop-only. Smaller screens use a
+   normal scrollable document, even when ?kiosk=1 is present.
+   ============================================================ */
+@media (max-width: 1100px) {
+  html,
+  body,
+  body.kiosk-mode {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+    touch-action: auto;
+    cursor: auto;
+  }
+
+  body {
+    display: block;
+    justify-content: initial;
+    align-items: initial;
+  }
+
+  .dashboard,
+  body.kiosk-mode .dashboard {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    max-height: none;
+    margin: 0 auto;
+    overflow: visible;
+    transform: none;
+  }
+}    margin-bottom: 0;
+  }
+
+  .card {
+    height: var(--card-height);
+    min-height: var(--card-height);
+  }
+
+  .chart {
+    height: var(--chart-height);
+  }
+}
+
+/* ============================================================
+   Mobile/tablet fallback
+   The fullscreen 1920x1080 canvas is desktop-only. Smaller screens use a
+   normal scrollable document, even when ?kiosk=1 is present.
+   ============================================================ */
 @media (max-width: 1100px) {
   html,
   body,
@@ -78,3 +136,4 @@
     transform: none;
   }
 }
+

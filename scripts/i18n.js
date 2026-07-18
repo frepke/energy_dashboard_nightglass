@@ -35,15 +35,6 @@ export const translations = {
     'status-push-ok':      'Push verbonden · realtime updates actief',
     'status-push-updated': 'Push bijgewerkt: ',
     'status-live-updated': 'Live bijgewerkt: ',
-    'source-domoticz-loading': 'Domoticz verbinden…',
-    'source-domoticz-live':    'Domoticz actueel',
-    'source-domoticz-stale':   'Domoticz-data verouderd',
-    'source-domoticz-error':   'Domoticz niet bereikbaar',
-    'source-weather-loading':  'Weergegevens laden…',
-    'source-weather-live':     'Weer actueel',
-    'source-weather-stale':    'Weergegevens verouderd',
-    'source-weather-error':    'Weerbron niet bereikbaar',
-    'source-weather-disabled': 'Weerbron niet geconfigureerd',
 
     /* Weather section */
     'section-weather':     'Weeroverzicht',
@@ -58,10 +49,6 @@ export const translations = {
     'weather-sun-cycle-aria': 'Zoncyclus',
     'weather-moon-phase-aria': 'Maanfase',
     'weather-current-weather-aria': 'Huidig weer',
-    'moonrise-label':      'Opkomst',
-    'moonset-label':       'Onder',
-    'moon-age-label':      'Leeftijd',
-    'moon-distance-label': 'Afstand',
     'sunrise':             'Zonsopkomst',
     'sunset':              'Zonsondergang',
     'day-length-prefix':   'Daglengte: ',
@@ -77,11 +64,6 @@ export const translations = {
     'weather-check':       'Controleer de Visual Crossing-sleutel/locatie in config.js',
     'temperature-label':    'Temperatuur: ',
     'wind-direction-label': 'Windrichting: ',
-    'sun-status-daylight':   'Daglicht',
-    'sun-status-night':      'Nacht',
-    'sun-status-remaining':  'nog',
-    'sun-status-sunrise-in': 'zon op over',
-    'sun-status-unavailable':'Zoncyclus niet beschikbaar',
 
     /* Smart insight */
     'section-insight':     'Slim energieadvies',
@@ -97,9 +79,6 @@ export const translations = {
     'grid-import':         'Import',
     'grid-export':         'Export',
     'on-site-prefix':      'Lokaal ',
-    'flow-grid-short':     'NET',
-    'flow-house-short':    'HUIS',
-    'flow-solar-short':    'ZON',
 
     /* Stat cards */
     'section-cards':       'Dagstatistieken',
@@ -117,17 +96,6 @@ export const translations = {
     'this-year':           'dit jaar',
     'pv-blocked':          'PV geblokkeerd',
     'pv-limited':          'PV beperkt ',
-    'sparkline-grid-label':      'Netvermogen',
-    'sparkline-house-label':     'Huisvermogen',
-    'sparkline-solar-label':     'Zonnevermogen',
-    'sparkline-self-suff-label': 'Zelfvoorziening',
-    'sparkline-self-cons-label': 'Zelfconsumptie',
-    'sparkline-gas-label':       'Gasverbruik vandaag',
-    'sparkline-period-60m':      'Afgelopen 60 minuten',
-    'sparkline-period-today':    'Vandaag tot nu',
-    'sparkline-current':         'Laatste waarde:',
-    'sparkline-scale':           'Schaal:',
-    'sparkline-no-data':         'Nog geen trendgegevens',
 
     /* History modal */
     'history-open-title':   'Toon historische grafiek',
@@ -146,11 +114,6 @@ export const translations = {
     'history-no-data':      'Geen historische data gevonden',
     'history-no-device':    'Geen Domoticz-device gevonden voor deze tegel',
     'history-error-title':  'Historie kon niet worden geladen',
-    'history-watermark-day':       'Daghistorie',
-    'history-watermark-domoticz':  'Domoticz',
-    'history-watermark-derived':   'berekend uit net en zon',
-    'history-watermark-points':    'meetpunten',
-    'history-watermark-no-data':   'geen daghistorie beschikbaar',
 
     /* Prices panel */
     'section-prices':      'Energieprijzen',
@@ -259,15 +222,6 @@ export const translations = {
     'status-push-ok':      'Push connected · realtime updates active',
     'status-push-updated': 'Push updated: ',
     'status-live-updated': 'Live updated: ',
-    'source-domoticz-loading': 'Connecting to Domoticz…',
-    'source-domoticz-live':    'Domoticz current',
-    'source-domoticz-stale':   'Domoticz data stale',
-    'source-domoticz-error':   'Domoticz unavailable',
-    'source-weather-loading':  'Loading weather data…',
-    'source-weather-live':     'Weather current',
-    'source-weather-stale':    'Weather data stale',
-    'source-weather-error':    'Weather source unavailable',
-    'source-weather-disabled': 'Weather source not configured',
 
     /* Weather section */
     'section-weather':     'Weather overview',
@@ -282,10 +236,6 @@ export const translations = {
     'weather-sun-cycle-aria': 'Sun cycle',
     'weather-moon-phase-aria': 'Moon phase',
     'weather-current-weather-aria': 'Current weather',
-    'moonrise-label':      'Moonrise',
-    'moonset-label':       'Moonset',
-    'moon-age-label':      'Age',
-    'moon-distance-label': 'Distance',
     'sunrise':             'Sunrise',
     'sunset':              'Sunset',
     'day-length-prefix':   'Day length: ',
@@ -301,11 +251,6 @@ export const translations = {
     'weather-check':       'Check the Visual Crossing key/location in config.js',
     'temperature-label':    'Temperature: ',
     'wind-direction-label': 'Wind direction: ',
-    'sun-status-daylight':   'Daylight',
-    'sun-status-night':      'Night',
-    'sun-status-remaining':  'remaining',
-    'sun-status-sunrise-in': 'sunrise in',
-    'sun-status-unavailable':'Sun cycle unavailable',
 
     /* Smart insight */
     'section-insight':     'Smart energy insight',
@@ -321,9 +266,6 @@ export const translations = {
     'grid-import':         'Import',
     'grid-export':         'Export',
     'on-site-prefix':      'On-site ',
-    'flow-grid-short':     'GRID',
-    'flow-house-short':    'HOUSE',
-    'flow-solar-short':    'SOLAR',
 
     /* Stat cards */
     'section-cards':       'Daily statistics',
@@ -341,17 +283,6 @@ export const translations = {
     'this-year':           'this year',
     'pv-blocked':          'PV blocked',
     'pv-limited':          'PV limited ',
-    'sparkline-grid-label':      'Grid power',
-    'sparkline-house-label':     'House power',
-    'sparkline-solar-label':     'Solar power',
-    'sparkline-self-suff-label': 'Self-sufficiency',
-    'sparkline-self-cons-label': 'Self-consumption',
-    'sparkline-gas-label':       'Gas use today',
-    'sparkline-period-60m':      'Last 60 minutes',
-    'sparkline-period-today':    'Today so far',
-    'sparkline-current':         'Latest value:',
-    'sparkline-scale':           'Scale:',
-    'sparkline-no-data':         'No trend data yet',
 
     /* History modal */
     'history-open-title':   'Show historical chart',
@@ -370,11 +301,6 @@ export const translations = {
     'history-no-data':      'No historical data found',
     'history-no-device':    'No Domoticz device found for this card',
     'history-error-title':  'Could not load history',
-    'history-watermark-day':       'Day history',
-    'history-watermark-domoticz':  'Domoticz',
-    'history-watermark-derived':   'derived from grid and solar',
-    'history-watermark-points':    'samples',
-    'history-watermark-no-data':   'no day history available',
 
     /* Prices panel */
     'section-prices':      'Energy prices',

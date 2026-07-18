@@ -1,16 +1,37 @@
-# Stylesheetstructuur van Nightglass v2
+# Stylesheet structure
 
-`energy-dashboard.html` laadt de volgende bestanden in deze volgorde:
+The dashboard has no build step, so CSS is split into browser-loaded files in the same order as `energy-dashboard.html`.
 
-1. `tokens.css` — bestaande basisvariabelen;
-2. `base.css` — reset en algemene basis;
-3. `flow.css` — bestaande energiestroomcomponenten;
-4. `cards.css` — bestaande kaartcomponenten;
-5. `chart.css` — prijsbalken en tooltip;
-6. `insights.css` — slim advies;
-7. `weather-art.css` — lokale weerillustraties;
-8. `nightglass-v2.css` — volledige layout, Nightglass-thema en alle responsive regels.
+## Core files
 
-`nightglass-v2.css` is bewust de laatste laag. Het bestand bouwt de interface opnieuw op zonder vaste canvasmaat of `transform: scale(...)` en bevat ook de 1024×768-, ultrawide-, tablet- en telefoonregels.
+- `tokens.css` — design tokens and theme variables.
+- `base.css` — reset, body and background styling.
+- `layout.css` — dashboard wrapper, topbar and generic panel layout.
+- `flow.css` — live energy-flow nodes and connector lines.
+- `cards.css` — statistic cards and price badges.
+- `chart.css` — price bars, tooltip and usage-window selector.
+- `insights.css` — Smart Insight bar.
+- `kiosk.css` — kiosk/TV-mode rules.
 
-De overige layout-, weather- en responsive-bestanden zijn als compatibiliteitsmateriaal aanwezig, maar worden door de v2-HTML niet geladen.
+## Weather files
+
+The former large `weather.css` is now split without changing cascade order:
+
+1. `weather-core.css`
+2. `weather-command-desktop.css`
+3. `weather-art.css`
+4. `weather-final.css`
+
+`weather.css` remains as an import manifest for custom deployments that still link it directly.
+
+## Responsive files
+
+The former large `responsive.css` is now split without changing cascade order:
+
+1. `responsive-base.css`
+2. `responsive-layout.css`
+3. `responsive-weather.css`
+4. `responsive-flow.css`
+5. `responsive-chart.css`
+
+`responsive.css` remains as an import manifest for custom deployments that still link it directly.

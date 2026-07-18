@@ -311,3 +311,64 @@
     transform: translateY(32px) !important;
   }
 }
+
+/* ============================================================
+   v20 iPhone portrait particle visibility fix
+   Compact phone connectors are only a few dozen pixels wide. The desktop
+   particle path starts 60px outside the rail, leaving the streak clipped for
+   most of every cycle. Use a short, bright phone-specific path so all three
+   particles remain visibly in motion between Grid, House and Solar.
+   ============================================================ */
+@keyframes phone-flow-right {
+  0%   { left: -12px; opacity: 0; }
+  10%  { opacity: .95; }
+  90%  { opacity: .95; }
+  100% { left: calc(100% + 2px); opacity: 0; }
+}
+
+@keyframes phone-flow-left {
+  0%   { left: calc(100% + 2px); opacity: 0; }
+  10%  { opacity: .95; }
+  90%  { opacity: .95; }
+  100% { left: -12px; opacity: 0; }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .flowline .particle,
+  .flowline .particle:nth-child(n) {
+    left: -12px;
+    width: clamp(9px, 2.8vw, 12px) !important;
+    height: 4px !important;
+    margin-top: -2px !important;
+    opacity: 0;
+    background:
+      linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--flow-color), white 32%) 48%, transparent 100%) !important;
+    box-shadow:
+      0 0 7px color-mix(in srgb, var(--flow-color), transparent 6%),
+      0 0 13px color-mix(in srgb, var(--flow-color), transparent 32%) !important;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: left, opacity !important;
+  }
+
+  .flowline.dir-right.is-active .particle {
+    animation-name: phone-flow-right !important;
+  }
+
+  .flowline.dir-left.is-active .particle {
+    animation-name: phone-flow-left !important;
+  }
+}
+
+/* Preserve a visible flow indication for users who explicitly disable motion. */
+@media (max-width: 560px) and (orientation: portrait) and (prefers-reduced-motion: reduce) {
+  .flowline.is-active .particle,
+  .flowline.is-active .particle:nth-child(n) {
+    animation: none !important;
+    opacity: .72 !important;
+  }
+
+  .flowline.is-active .particle:nth-child(1) { left: 12% !important; }
+  .flowline.is-active .particle:nth-child(2) { left: 46% !important; }
+  .flowline.is-active .particle:nth-child(3) { left: 78% !important; }
+}

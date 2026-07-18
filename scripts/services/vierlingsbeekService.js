@@ -83,6 +83,17 @@ function normaliseDevice(dev) {
   };
 }
 
+async function fetchDeviceByIdx(idx) {
+  if (!idx) return null;
+  try {
+    const res = await api({ param: 'getdevices', rid: idx }, DEVICE_CACHE_TTL);
+    const dev = res && res.result && res.result[0];
+    return normaliseDevice(dev);
+  } catch {
+    return null;
+  }
+}
+
 function looksLikeVierlingsbeek(dev) {
   const hay = `${dev.HardwareName || ''} ${dev.Name || ''} ${dev.Description || ''}`.toLowerCase();
   return hay.includes('vierlingsbeek') || /\bvb\b/.test(hay);
@@ -111,31 +122,11 @@ async function fetchVierlingsbeekDevices() {
   const configuredFields = Object.keys(FIELD_TO_CFG_KEY).filter(field => configuredIdx(field));
 
   if (configuredFields.length > 0) {
-    // Build the full list of configured idx values and fetch them in one
-    // batched request using a comma-separated rid parameter.
-    const allFields = Object.keys(FIELD_TO_CFG_KEY);
-    const ridMap = {};
-    allFields.forEach(field => {
-      const idx = configuredIdx(field);
-      if (idx) ridMap[field] = idx;
-    });
-
-    const rids = Object.values(ridMap);
-    if (!rids.length) return Object.fromEntries(allFields.map(f => [f, null]));
-
-    const byIdx = {};
-    try {
-      const res = await api({ param: 'getdevices', rid: rids.join(',') }, DEVICE_CACHE_TTL);
-      (res && res.result || []).forEach(dev => {
-        const d = normaliseDevice(dev);
-        if (d) byIdx[d.idx] = d;
-      });
-    } catch { /* return nulls below */ }
-
-    return Object.fromEntries(allFields.map(field => {
-      const idx = ridMap[field];
-      return [field, idx ? (byIdx[idx] ?? null) : null];
+    const entries = await Promise.all(Object.keys(FIELD_TO_CFG_KEY).map(async field => {
+      const dev = await fetchDeviceByIdx(configuredIdx(field));
+      return [field, dev];
     }));
+    return Object.fromEntries(entries);
   }
 
   return fetchDetectedDevices();

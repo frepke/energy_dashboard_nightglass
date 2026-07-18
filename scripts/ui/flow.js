@@ -12,13 +12,6 @@ const flowCurrent = new WeakMap();
 
 const PARTICLE_COUNT = 3;
 
-function getFlowAnimationName(dir) {
-  // The portrait layout uses the same horizontal energy lanes as desktop.
-  // Keeping one animation model also avoids stale vertical inline animation
-  // names after an iPhone orientation change.
-  return dir === 'dir-left' ? 'flow-left' : 'flow-right';
-}
-
 function ensureFlowParticles(el) {
   const particles = Array.from(el.querySelectorAll('.particle'));
   for (let i = particles.length; i < PARTICLE_COUNT; i += 1) {
@@ -54,7 +47,7 @@ function applyFlowState(el, arrow, state) {
     el.style.setProperty('--flow-color', state.color);
   }
   if (particles.length && (state.speed !== cur.speed || state.dir !== cur.dir || state.active !== cur.active)) {
-    const animationName = getFlowAnimationName(state.dir);
+    const animationName = state.dir === 'dir-left' ? 'flow-left' : 'flow-right';
     particles.forEach((particle, index) => {
       if (state.active) {
         const delay = index === 0 ? 0 : -parseFloat(state.speed) * (index / particles.length);

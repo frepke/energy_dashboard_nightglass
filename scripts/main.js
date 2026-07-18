@@ -3,7 +3,6 @@
  */
 
 import { $ } from './core/dom.js';
-import { formatTime } from './core/formatters.js';
 import { CFG, validateConfig } from './config/resolveConfig.js';
 import { updateWeatherClock, refreshWeather, retranslateWeatherLabels } from './ui/weather.js';
 import { WEATHER_TTL as WEATHER_TTL_OWM } from './services/weatherService.js';
@@ -15,18 +14,11 @@ import { markBestWindowBars, setupTooltip, setupUsageWindowSelector } from './ui
 import { setupHistoryCards } from './ui/historyModal.js';
 import { initDashboardFitAndKiosk } from './ui/kiosk.js';
 import { setupWidthToggle } from './ui/widthToggle.js';
-import {
-  initDeviceHistoryWatermarks,
-  retranslateDeviceHistoryWatermarks,
-  destroyDeviceHistoryWatermarks,
-} from './ui/deviceHistoryWatermarks.js';
-import { applyIconOverrides } from './ui/iconOverrides.js';
-import { initI18n, t } from './i18n.js';
+import { initI18n } from './i18n.js';
 
 import { createRefreshController } from './app/refreshController.js';
 import { createWebSocketController } from './app/websocketController.js';
 import { initThemeToggle } from './app/themeController.js';
-import { initNightglassThemeSync } from './app/nightglassThemeController.js';
 import { initLanguageToggle } from './app/languageController.js';
 import { initVisibilityController } from './app/visibilityController.js';
 import { initPlaywrightMock } from './app/playwrightController.js';
@@ -41,54 +33,12 @@ function getWeatherTTL() {
 }
 
 
-const DOMOTICZ_STALE_AFTER_MS = Math.max(180_000, (Number(CFG.refresh) || 30) * 3_000);
-let domoticzSourceState = 'loading';
-let lastDomoticzSuccessAt = 0;
-
-function domoticzStateLabel(state) {
-  const lastTime = lastDomoticzSuccessAt
-    ? formatTime(new Date(lastDomoticzSuccessAt), { hour: '2-digit', minute: '2-digit' })
-    : '--:--';
-
-  if (state === 'live') return `${t('source-domoticz-live')} · ${lastTime}`;
-  if (state === 'stale') return `${t('source-domoticz-stale')} · ${lastTime}`;
-  if (state === 'error') return `${t('source-domoticz-error')} · ${lastTime}`;
-  return t('source-domoticz-loading');
-}
-
-function updateDomoticzIndicator(now = Date.now()) {
-  let visibleState = domoticzSourceState;
-  if (visibleState === 'live'
-      && lastDomoticzSuccessAt
-      && now - lastDomoticzSuccessAt > DOMOTICZ_STALE_AFTER_MS) {
-    visibleState = 'stale';
-  }
-
-  const label = domoticzStateLabel(visibleState);
-  const zoneState = $('#domoticzLiveState');
-  if (zoneState) {
-    zoneState.dataset.state = visibleState;
-    zoneState.title = label;
-    zoneState.setAttribute('aria-label', label);
-  }
-
-  const statusEl = $('#status');
-  if (statusEl) {
-    statusEl.dataset.state = visibleState;
-    statusEl.classList.toggle('is-live', visibleState === 'live');
-    statusEl.title = label;
-  }
-}
-
 function setStatus(ok, text) {
   const statusEl = $('#status');
   const statusTextEl = $('#statusText');
   if (!statusEl || !statusTextEl) return;
-
-  domoticzSourceState = ok ? 'live' : 'error';
-  if (ok) lastDomoticzSuccessAt = Date.now();
+  statusEl.classList.toggle('is-live', !!ok);
   statusTextEl.textContent = text;
-  updateDomoticzIndicator();
 }
 
 const WS_HEARTBEAT_SECONDS = 60;
@@ -105,7 +55,6 @@ let weatherRefreshTimeoutId = null;
 const refreshController = createRefreshController(setStatus);
 const websocketController = createWebSocketController({
   refreshAll: refreshController.refreshAll,
-  refreshDistribution: refreshController.refreshDistributionOnly,
   setStatus,
   getForecastDeviceId: refreshController.getForecastDeviceId,
   onOpen: () => {
@@ -117,11 +66,8 @@ const websocketController = createWebSocketController({
 });
 
 initThemeToggle();
-initNightglassThemeSync();
 initLanguageToggle(() => {
   retranslateWeatherLabels();
-  retranslateDeviceHistoryWatermarks();
-  updateDomoticzIndicator();
   updateSmartInsight();
   updateWeatherProviderTooltip();
   refreshController.retranslateLiveLabels();
@@ -138,12 +84,10 @@ initVisibilityController({
   onHidden: () => {
     pageVisible = false;
     refreshController.stopPolling();
-    destroyDeviceHistoryWatermarks();
   },
   onVisible: () => {
     pageVisible = true;
     refreshController.refreshAll('visible');
-    initDeviceHistoryWatermarks();
     const wsStarted = websocketController.isStarted() || websocketController.startWebSocket();
     refreshController.startPolling(wsStarted ? wsHeartbeatSeconds() : CFG.refresh);
     // Refresh weather immediately if the page was hidden long enough for the
@@ -158,16 +102,9 @@ initVisibilityController({
 validateConfig();
 initI18n();
 setupWidthToggle();
-applyIconOverrides();
-initDeviceHistoryWatermarks();
 setupHistoryCards();
-function updateUiClock() {
-  updateWeatherClock();
-  updateDomoticzIndicator();
-}
-
-updateUiClock();
-weatherClockIntervalId = setInterval(updateUiClock, 1000);
+updateWeatherClock();
+weatherClockIntervalId = setInterval(updateWeatherClock, 1000);
 lastWeatherRefresh = Date.now();
 refreshWeather();
 function scheduleWeatherRefresh() {
@@ -208,7 +145,6 @@ if (typeof window !== 'undefined') {
       weatherRefreshTimeoutId = null;
     }
     refreshController.stopPolling();
-    destroyDeviceHistoryWatermarks();
   });
 }
 

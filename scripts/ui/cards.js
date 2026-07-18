@@ -52,7 +52,7 @@ function setStableGasBadge(price) {
     gasBadgeInitialized = true;
     badge.classList.remove('syncGlow');
     badge.classList.add('gasStable');
-    badge.style.setProperty('--sync-color', 'var(--blue-light)');
+    badge.style.setProperty('--sync-color', '#43b7ff');
     if (!badge.querySelector('.price-text')) {
       badge.innerHTML = priceIconSvg('gas') + '<span class="price-text">' + text + '</span>';
     }
