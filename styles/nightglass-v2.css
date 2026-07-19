@@ -4847,7 +4847,23 @@ body.dashboard-fit-micro .history-watermark.is-visible {
   .chart {
     min-height: 220px !important;
     height: 220px !important;
+    padding-bottom: 30px !important;
     overflow: hidden !important;
+  }
+
+  /* The hour label under each bar sits at bottom:-28px relative to its own
+     column (see .time in chart.css). .chart clips overflow and had its
+     padding zeroed out globally, so that label was rendering completely
+     outside the visible box — the padding-bottom above reserves room for
+     it again within the fixed 220px height.
+     The price flag pill also renders at its unmodified desktop size here
+     (8px/16px padding, 13px font) against 39 very narrow bar columns, so
+     it visually spans several neighbouring bars instead of reading as
+     anchored to one. Shrink it so the connector dot stays the clear
+     anchor, matching the already-narrower pill used at other breakpoints. */
+  .flag {
+    padding: 3px 7px !important;
+    font-size: 11px !important;
   }
 }
 
