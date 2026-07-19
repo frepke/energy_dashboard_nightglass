@@ -35,6 +35,17 @@
   will-change: transform, opacity, filter;
 }
 
+/* Each barwrap is its own stacking context (transform above). Without an
+   explicit z-index, siblings simply paint in DOM order, so a price flag
+   that visually overflows into a later (taller) neighbouring bar column
+   gets painted underneath it. Lift the flagged column above its
+   neighbours so the pill (and its connector line/dot) stay on top
+   regardless of which bar it happens to overlap. */
+.barwrap.is-cheapest-hour,
+.barwrap.is-expensive-hour {
+  z-index: 20;
+}
+
 .bar {
   position: absolute;
   left: 0; right: 0;
