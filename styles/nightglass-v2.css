@@ -6002,3 +6002,60 @@ body.dashboard-fit-micro .history-watermark.is-visible {
   .flowline.is-active .particle:nth-child(2) { left: 46% !important; }
   .flowline.is-active .particle:nth-child(3) { left: 78% !important; }
 }
+
+/* ========================================================================== 
+   Nightglass chart marker alignment and iPhone time-label fix
+   --------------------------------------------------------------------------
+   Keep both price flags centred on the exact bar column, allow their leader
+   line and white anchor dot to render outside the pill, and reserve a visible
+   lane for hour labels on narrow portrait screens.
+   ========================================================================== */
+
+/* A flag belongs to the centre of its own grid column. The former edge guard
+   right-aligned the final three flags, which made the marker appear attached
+   to a neighbouring bar. */
+.panel[data-i18n-label="section-prices"] .barwrap .flag,
+.panel[data-i18n-label="section-prices"] .barwrap:nth-last-child(-n + 3) .flag {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Ensure the decorative connector and its white endpoint remain visible. */
+.panel[data-i18n-label="section-prices"] .flag::after,
+.panel[data-i18n-label="section-prices"] .flag::before {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .prices-panel {
+    min-height: 330px !important;
+    height: 330px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .chart {
+    box-sizing: border-box !important;
+    min-height: 230px !important;
+    height: 230px !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .bars {
+    bottom: 38px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .time {
+    bottom: -27px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: .82 !important;
+    color: rgba(229, 238, 255, .78) !important;
+    font-size: 9px !important;
+    z-index: 30 !important;
+  }
+}
