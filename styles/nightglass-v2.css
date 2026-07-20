@@ -6004,109 +6004,134 @@ body.dashboard-fit-micro .history-watermark.is-visible {
 }
 
 /* ========================================================================== 
-   Nightglass Energy 2.7.14 - Premium mobile chart geometry
+   Nightglass 2.7.15 - Premium chart geometry parity (mobile/tablet)
    --------------------------------------------------------------------------
-   Keep the Premium dashboard's mobile chart behaviour intact:
-   - a real axis lane inside the chart for the sparse time labels;
-   - price flags may overflow their pill so the connector and anchor dot are
-     never clipped by Nightglass' compact pill styling.
+   The chart layout below intentionally follows the working Premium chart:
+   - fixed chart canvas
+   - a real bottom axis lane inside that canvas
+   - time labels rendered from the same bar wrappers
+   - price flag connector and anchor allowed to paint outside the pill
+   Nightglass keeps only its visual colours/radii; it no longer changes the
+   structural chart geometry on mobile.
    ========================================================================== */
+@media (max-width: 1100px) {
+  .panel[data-i18n-label="section-prices"],
+  .panel[data-i18n-label="section-prices"].prices-panel {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
 
-.panel[data-i18n-label="section-prices"] .flag {
-  overflow: visible !important;
-  contain: none !important;
-  isolation: auto !important;
-}
-
-.panel[data-i18n-label="section-prices"] .flag::after,
-.panel[data-i18n-label="section-prices"] .flag::before {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: none !important;
-}
-
-.panel[data-i18n-label="section-prices"] .flag::after {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: 100% !important;
-  width: 2px !important;
-  height: 40px !important;
-  transform: translateX(-50%) !important;
-  background: rgba(255,255,255,.52) !important;
-  box-shadow: 0 0 10px rgba(255,255,255,.24) !important;
-}
-
-.panel[data-i18n-label="section-prices"] .flag::before {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  width: 8px !important;
-  height: 8px !important;
-  border-radius: 50% !important;
-  transform: translateX(-50%) !important;
-  background: rgba(255,255,255,.98) !important;
-  box-shadow: 0 0 8px rgba(255,255,255,.85), 0 0 18px rgba(255,255,255,.42) !important;
-  z-index: 3 !important;
-}
-
-.panel[data-i18n-label="section-prices"] .flag.is-positive::before {
-  top: auto !important;
-  bottom: -43px !important;
-}
-
-.panel[data-i18n-label="section-prices"] .flag.is-negative::before {
-  top: calc(100% + 37px) !important;
-  bottom: auto !important;
-}
-
-@media (max-width: 560px) and (orientation: portrait) {
   .panel[data-i18n-label="section-prices"] .chart {
-    height: clamp(285px, 48vh, 330px) !important;
-    padding: 0 !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 325px !important;
+    min-height: 325px !important;
+    margin: 0 !important;
+    padding: 24px 0 36px !important;
     overflow: hidden !important;
   }
 
   .panel[data-i18n-label="section-prices"] .gridlines {
-    top: 28px !important;
-    bottom: 46px !important;
+    inset: 46px 8px 52px !important;
   }
 
   .panel[data-i18n-label="section-prices"] .bars {
-    --bar-fill-scale: 60;
-    top: 18px !important;
-    bottom: 46px !important;
-    left: 4px !important;
-    right: 4px !important;
-    width: auto !important;
-    min-width: 0 !important;
-    gap: clamp(2px, .72vw, 4px) !important;
+    position: absolute !important;
+    inset: 16px 8px 36px !important;
+    height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
+    --bar-fill-scale: 60;
   }
 
   .panel[data-i18n-label="section-prices"] .time {
     display: block !important;
-    visibility: visible !important;
-    bottom: -31px !important;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
+    bottom: -28px !important;
     max-width: none !important;
-    color: rgba(229,238,255,.78) !important;
-    font-size: 10px !important;
+    overflow: visible !important;
+    color: var(--muted) !important;
+    font-size: 9px !important;
     font-weight: 800 !important;
     line-height: 1 !important;
-    letter-spacing: 0 !important;
     white-space: nowrap !important;
-    opacity: 1 !important;
-    overflow: visible !important;
+    opacity: .82 !important;
   }
 
-  .panel[data-i18n-label="section-prices"] .barwrap:first-child .time,
-  .panel[data-i18n-label="section-prices"] .barwrap:last-child .time {
-    left: 50% !important;
+  .panel[data-i18n-label="section-prices"] .barwrap.now .time,
+  .panel[data-i18n-label="section-prices"] .barwrap.is-best-window .time {
+    color: var(--text) !important;
+    opacity: 1 !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag {
+    overflow: visible !important;
+    contain: none !important;
+    text-overflow: clip !important;
+    z-index: 20 !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag::after,
+  .panel[data-i18n-label="section-prices"] .flag::before {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive {
+    bottom: calc(var(--zero, 0%) + var(--h, 10%) + 22px) !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive::after {
+    top: 100% !important;
+    bottom: auto !important;
+    width: 2px !important;
+    height: 40px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-positive::before {
+    top: auto !important;
+    bottom: calc(-40px - 3px) !important;
+    width: 7px !important;
+    height: 7px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-negative::after {
+    top: 100% !important;
+    bottom: auto !important;
+    width: 2px !important;
+    height: 40px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag.is-negative::before {
+    top: calc(100% + 37px) !important;
+    bottom: auto !important;
+    width: 7px !important;
+    height: 7px !important;
+  }
+
+  /* Undo Nightglass' edge repositioning; Premium keeps every flag centred on
+     the bar that owns it. */
+  .panel[data-i18n-label="section-prices"] .barwrap:nth-last-child(-n + 3) .flag {
     right: auto !important;
+    left: 50% !important;
     transform: translateX(-50%) !important;
+  }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .panel[data-i18n-label="section-prices"] .chart {
+    height: 325px !important;
+    min-height: 325px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .bars {
+    inset: 16px 8px 38px !important;
+    gap: 3px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .time {
+    bottom: -29px !important;
+    font-size: 8.5px !important;
   }
 }
