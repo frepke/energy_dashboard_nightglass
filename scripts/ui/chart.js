@@ -389,12 +389,6 @@ function updateBarFill(w, x, c) {
 }
 
 function shouldShowTimeLabel(hour, labelDensity, ts, nowTs) {
-  // Premium parity on phones: the portrait chart has enough horizontal room
-  // for a readable two-hour axis. Do not let the generic sparse-density rule
-  // remove nearly every label on iPhone.
-  const isPhonePortrait = typeof globalThis.matchMedia === 'function'
-    && globalThis.matchMedia('(max-width: 560px) and (orientation: portrait)').matches;
-  if (isPhonePortrait) return hour % 2 === 0;
   if (labelDensity === 'full') return hour % 2 === 0;
   if (labelDensity === 'medium') return hour % 4 === 0;
   return hour % 6 === 0 || ts === nowTs;
