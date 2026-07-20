@@ -6059,3 +6059,66 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     z-index: 30 !important;
   }
 }
+
+
+/* ==========================================================================
+   iPhone chart marker hardening v2
+   Use real DOM elements for the leader and anchor, avoiding Safari clipping
+   of pseudo-elements outside a blurred price pill. Keep a dedicated time lane.
+   ========================================================================== */
+.panel[data-i18n-label="section-prices"] .flag-connector,
+.panel[data-i18n-label="section-prices"] .flag-anchor {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 24;
+}
+
+.panel[data-i18n-label="section-prices"] .flag-connector {
+  bottom: calc(var(--zero, 0%) + var(--h, 10%) - 2px);
+  width: 2px;
+  height: 25px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 0 8px rgba(255,255,255,.38);
+}
+
+.panel[data-i18n-label="section-prices"] .flag-anchor {
+  bottom: calc(var(--zero, 0%) + var(--h, 10%) - 5px);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255,255,255,.9), 0 0 16px rgba(255,255,255,.4);
+}
+
+.panel[data-i18n-label="section-prices"] .flag-connector[hidden],
+.panel[data-i18n-label="section-prices"] .flag-anchor[hidden] { display: none !important; }
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .panel[data-i18n-label="section-prices"] .chart {
+    height: 248px !important;
+    min-height: 248px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .bars {
+    top: 12px !important;
+    bottom: 44px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .time {
+    bottom: -31px !important;
+    min-width: 32px;
+    line-height: 1 !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    color: rgba(235,242,255,.9) !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.9);
+  }
+
+  .prices-panel {
+    height: 350px !important;
+    min-height: 350px !important;
+  }
+}
