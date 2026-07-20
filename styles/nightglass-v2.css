@@ -123,6 +123,8 @@ body {
   min-height: 100%;
   margin: 0;
   overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -6025,10 +6027,10 @@ body.dashboard-fit-micro .history-watermark.is-visible {
   .panel[data-i18n-label="section-prices"] .chart {
     position: relative !important;
     width: 100% !important;
-    height: 325px !important;
-    min-height: 325px !important;
+    height: 345px !important;
+    min-height: 345px !important;
     margin: 0 !important;
-    padding: 24px 0 36px !important;
+    padding: 24px 0 46px !important;
     overflow: hidden !important;
   }
 
@@ -6038,7 +6040,7 @@ body.dashboard-fit-micro .history-watermark.is-visible {
 
   .panel[data-i18n-label="section-prices"] .bars {
     position: absolute !important;
-    inset: 16px 8px 36px !important;
+    inset: 16px 8px 46px !important;
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
@@ -6047,7 +6049,7 @@ body.dashboard-fit-micro .history-watermark.is-visible {
 
   .panel[data-i18n-label="section-prices"] .time {
     display: block !important;
-    bottom: -28px !important;
+    bottom: -30px !important;
     max-width: none !important;
     overflow: visible !important;
     color: var(--muted) !important;
@@ -6121,17 +6123,17 @@ body.dashboard-fit-micro .history-watermark.is-visible {
 
 @media (max-width: 560px) and (orientation: portrait) {
   .panel[data-i18n-label="section-prices"] .chart {
-    height: 325px !important;
-    min-height: 325px !important;
+    height: 345px !important;
+    min-height: 345px !important;
   }
 
   .panel[data-i18n-label="section-prices"] .bars {
-    inset: 16px 8px 38px !important;
+    inset: 16px 8px 50px !important;
     gap: 3px !important;
   }
 
   .panel[data-i18n-label="section-prices"] .time {
-    bottom: -29px !important;
+    bottom: -32px !important;
     font-size: 8.5px !important;
   }
 }

@@ -207,6 +207,13 @@ scripts/ui/iconOverrides.js    configureerbare lokale SVG-iconen
 config.example.js              configuratievoorbeeld
 ```
 
+## Wijzigingen
+
+### 2.7.16
+
+- Opgelost: tijdlabels onder de Zonneplan-uurgrafiek vielen op iPhone in portrait-modus buiten beeld. `styles/nightglass-v2.css` reserveerde in de `@media (max-width: 560px) and (orientation: portrait)`-regels maar 9px ruimte tussen de bars en de `overflow: hidden`-rand van `.chart`, waar het tijdlabel met een negatieve `bottom`-offset in stond. Opgelost door de kaarthoogte, de onderafstand van `.bars` en de `bottom`-offset van `.time` op zowel het `max-width: 1100px`- als het `max-width: 560px`-blok ruimer te maken (marge nu 16-18px in plaats van 9px).
+- Toegevoegd: `-webkit-text-size-adjust: 100%` / `text-size-adjust: 100%` op `html, body`, zodat Mobile Safari's automatische lettergrootte-opschaling zulke krappe marges niet opnieuw kan laten overlopen.
+
 ## Ontwikkelcontrole
 
 Node.js is alleen nodig voor tests en linting:
