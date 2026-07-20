@@ -6004,121 +6004,86 @@ body.dashboard-fit-micro .history-watermark.is-visible {
 }
 
 /* ========================================================================== 
-   Nightglass chart marker alignment and iPhone time-label fix
+   Nightglass Energy 2.7.11 - premium chart marker parity
    --------------------------------------------------------------------------
-   Keep both price flags centred on the exact bar column, allow their leader
-   line and white anchor dot to render outside the pill, and reserve a visible
-   lane for hour labels on narrow portrait screens.
+   The premium dashboard lets the flag pseudo-elements paint outside the pill.
+   Nightglass previously applied paint containment to .flag, which clips both
+   the connector and its white endpoint in WebKit. Disable that containment
+   and reserve a dedicated axis lane on iPhone portrait.
    ========================================================================== */
-
-/* A flag belongs to the centre of its own grid column. The former edge guard
-   right-aligned the final three flags, which made the marker appear attached
-   to a neighbouring bar. */
-.panel[data-i18n-label="section-prices"] .barwrap .flag,
-.panel[data-i18n-label="section-prices"] .barwrap:nth-last-child(-n + 3) .flag {
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
+.panel[data-i18n-label="section-prices"] .flag {
+  contain: none !important;
   overflow: visible !important;
-  text-overflow: clip !important;
 }
 
-/* Ensure the decorative connector and its white endpoint remain visible. */
 .panel[data-i18n-label="section-prices"] .flag::after,
 .panel[data-i18n-label="section-prices"] .flag::before {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+  content: "" !important;
+  pointer-events: none !important;
+}
+
+.panel[data-i18n-label="section-prices"] .flag::after {
+  left: 50% !important;
+  top: 100% !important;
+  bottom: auto !important;
+  width: 2px !important;
+  height: 40px !important;
+  transform: translateX(-50%) !important;
+  background: rgba(255,255,255,.58) !important;
+  box-shadow: 0 0 10px rgba(255,255,255,.22) !important;
+}
+
+.panel[data-i18n-label="section-prices"] .flag::before {
+  left: 50% !important;
+  top: calc(100% + 37px) !important;
+  bottom: auto !important;
+  width: 7px !important;
+  height: 7px !important;
+  transform: translateX(-50%) !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 0 8px rgba(255,255,255,.85), 0 0 18px rgba(255,255,255,.42) !important;
+  z-index: 20 !important;
 }
 
 @media (max-width: 560px) and (orientation: portrait) {
-  .prices-panel {
-    min-height: 330px !important;
-    height: 330px !important;
-  }
-
   .panel[data-i18n-label="section-prices"] .chart {
-    box-sizing: border-box !important;
-    min-height: 230px !important;
-    height: 230px !important;
+    min-height: 240px !important;
+    height: 240px !important;
     padding-bottom: 0 !important;
     overflow: hidden !important;
   }
 
   .panel[data-i18n-label="section-prices"] .bars {
-    bottom: 38px !important;
+    top: 12px !important;
+    right: 6px !important;
+    bottom: 34px !important;
+    left: 6px !important;
+    overflow: visible !important;
   }
 
-  .panel[data-i18n-label="section-prices"] .time {
-    bottom: -27px !important;
+  .panel[data-i18n-label="section-prices"] .time,
+  body.dashboard-fit-micro .panel[data-i18n-label="section-prices"] .time {
     display: block !important;
     visibility: visible !important;
-    opacity: .82 !important;
-    color: rgba(229, 238, 255, .78) !important;
-    font-size: 9px !important;
-    z-index: 30 !important;
-  }
-}
-
-
-/* ==========================================================================
-   iPhone chart marker hardening v2
-   Use real DOM elements for the leader and anchor, avoiding Safari clipping
-   of pseudo-elements outside a blurred price pill. Keep a dedicated time lane.
-   ========================================================================== */
-.panel[data-i18n-label="section-prices"] .flag-connector,
-.panel[data-i18n-label="section-prices"] .flag-anchor {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-  z-index: 24;
-}
-
-.panel[data-i18n-label="section-prices"] .flag-connector {
-  bottom: calc(var(--zero, 0%) + var(--h, 10%) - 2px);
-  width: 2px;
-  height: 25px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.72);
-  box-shadow: 0 0 8px rgba(255,255,255,.38);
-}
-
-.panel[data-i18n-label="section-prices"] .flag-anchor {
-  bottom: calc(var(--zero, 0%) + var(--h, 10%) - 5px);
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 8px rgba(255,255,255,.9), 0 0 16px rgba(255,255,255,.4);
-}
-
-.panel[data-i18n-label="section-prices"] .flag-connector[hidden],
-.panel[data-i18n-label="section-prices"] .flag-anchor[hidden] { display: none !important; }
-
-@media (max-width: 560px) and (orientation: portrait) {
-  .panel[data-i18n-label="section-prices"] .chart {
-    height: 248px !important;
-    min-height: 248px !important;
-  }
-
-  .panel[data-i18n-label="section-prices"] .bars {
-    top: 12px !important;
-    bottom: 44px !important;
-  }
-
-  .panel[data-i18n-label="section-prices"] .time {
-    bottom: -31px !important;
-    min-width: 32px;
+    opacity: .78 !important;
+    bottom: -25px !important;
+    max-width: none !important;
+    font-size: 8px !important;
     line-height: 1 !important;
-    font-size: 9px !important;
-    font-weight: 800 !important;
-    color: rgba(235,242,255,.9) !important;
-    text-shadow: 0 1px 3px rgba(0,0,0,.9);
+    color: rgba(229,238,255,.72) !important;
+    white-space: nowrap !important;
+    z-index: 25 !important;
   }
 
-  .prices-panel {
-    height: 350px !important;
-    min-height: 350px !important;
+  .panel[data-i18n-label="section-prices"] .flag::after {
+    height: 34px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .flag::before {
+    top: calc(100% + 31px) !important;
   }
 }

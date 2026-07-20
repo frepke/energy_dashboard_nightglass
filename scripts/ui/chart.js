@@ -272,18 +272,12 @@ function ensureBarWrap(container, key) {
   const flag = document.createElement('div');
   flag.className = 'flag';
   flag.hidden = true;
-  const connector = document.createElement('span');
-  connector.className = 'flag-connector';
-  connector.hidden = true;
-  const anchor = document.createElement('span');
-  anchor.className = 'flag-anchor';
-  anchor.hidden = true;
   const bar = document.createElement('div');
   bar.className = 'bar';
   const time = document.createElement('div');
   time.className = 'time';
 
-  w.append(dayline, dayLabel, flag, connector, anchor, bar, time);
+  w.append(dayline, dayLabel, flag, bar, time);
   container.appendChild(w);
   return w;
 }
@@ -372,10 +366,6 @@ function updateFlag(w, x, cheapest, expensive, c) {
   const showFlag = (x === cheapest || x === expensive) && isNum(x.p);
 
   flag.hidden = !showFlag;
-  const connector = $('.flag-connector', w);
-  const anchor = $('.flag-anchor', w);
-  connector.hidden = !showFlag;
-  anchor.hidden = !showFlag;
   if (showFlag) {
     flag.textContent = fmt.ct(x.p);
     flag.style.color = c;
@@ -399,8 +389,12 @@ function updateBarFill(w, x, c) {
 }
 
 function shouldShowTimeLabel(hour, labelDensity, ts, nowTs) {
-  const isPhonePortrait = globalThis.window?.matchMedia?.('(max-width: 560px) and (orientation: portrait)')?.matches;
-  if (isPhonePortrait) return hour % 2 === 0 || ts === nowTs;
+  // Premium parity on phones: the portrait chart has enough horizontal room
+  // for a readable two-hour axis. Do not let the generic sparse-density rule
+  // remove nearly every label on iPhone.
+  const isPhonePortrait = typeof globalThis.matchMedia === 'function'
+    && globalThis.matchMedia('(max-width: 560px) and (orientation: portrait)').matches;
+  if (isPhonePortrait) return hour % 2 === 0;
   if (labelDensity === 'full') return hour % 2 === 0;
   if (labelDensity === 'medium') return hour % 4 === 0;
   return hour % 6 === 0 || ts === nowTs;
