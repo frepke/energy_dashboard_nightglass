@@ -152,3 +152,8 @@ Beschikbare iconen: `bolt`, `grid`, `plug`, `home`, `solar`, `panel`, `flame`, `
 - De drie live knooppunten vormen één compacte visual zonder afzonderlijke kaartvlakken.
 - Horizontale flowanimaties blijven correct na draaien tussen portrait en landscape.
 - De maan en decoratieve baan schalen nu ten opzichte van de maanmodule en worden begrensd door de beschikbare hoogte, zodat korte of afwijkende resoluties niet meer afkappen.
+
+## 2.7.14
+- Mobiele zonneplangrafiek gebruikt opnieuw een vaste tijdas binnen het grafiekvlak.
+- Nightglass knipt de Premium-verbindingslijn en het witte ankerpunt niet meer af.
+- Tijdlabels blijven zichtbaar in iPhone-portretmodus.

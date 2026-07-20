@@ -6002,3 +6002,111 @@ body.dashboard-fit-micro .history-watermark.is-visible {
   .flowline.is-active .particle:nth-child(2) { left: 46% !important; }
   .flowline.is-active .particle:nth-child(3) { left: 78% !important; }
 }
+
+/* ========================================================================== 
+   Nightglass Energy 2.7.14 - Premium mobile chart geometry
+   --------------------------------------------------------------------------
+   Keep the Premium dashboard's mobile chart behaviour intact:
+   - a real axis lane inside the chart for the sparse time labels;
+   - price flags may overflow their pill so the connector and anchor dot are
+     never clipped by Nightglass' compact pill styling.
+   ========================================================================== */
+
+.panel[data-i18n-label="section-prices"] .flag {
+  overflow: visible !important;
+  contain: none !important;
+  isolation: auto !important;
+}
+
+.panel[data-i18n-label="section-prices"] .flag::after,
+.panel[data-i18n-label="section-prices"] .flag::before {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.panel[data-i18n-label="section-prices"] .flag::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 100% !important;
+  width: 2px !important;
+  height: 40px !important;
+  transform: translateX(-50%) !important;
+  background: rgba(255,255,255,.52) !important;
+  box-shadow: 0 0 10px rgba(255,255,255,.24) !important;
+}
+
+.panel[data-i18n-label="section-prices"] .flag::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  transform: translateX(-50%) !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 0 8px rgba(255,255,255,.85), 0 0 18px rgba(255,255,255,.42) !important;
+  z-index: 3 !important;
+}
+
+.panel[data-i18n-label="section-prices"] .flag.is-positive::before {
+  top: auto !important;
+  bottom: -43px !important;
+}
+
+.panel[data-i18n-label="section-prices"] .flag.is-negative::before {
+  top: calc(100% + 37px) !important;
+  bottom: auto !important;
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .panel[data-i18n-label="section-prices"] .chart {
+    height: clamp(285px, 48vh, 330px) !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .gridlines {
+    top: 28px !important;
+    bottom: 46px !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .bars {
+    --bar-fill-scale: 60;
+    top: 18px !important;
+    bottom: 46px !important;
+    left: 4px !important;
+    right: 4px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    gap: clamp(2px, .72vw, 4px) !important;
+    overflow: visible !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .time {
+    display: block !important;
+    visibility: visible !important;
+    bottom: -31px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    max-width: none !important;
+    color: rgba(229,238,255,.78) !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+
+  .panel[data-i18n-label="section-prices"] .barwrap:first-child .time,
+  .panel[data-i18n-label="section-prices"] .barwrap:last-child .time {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+  }
+}
