@@ -209,6 +209,10 @@ config.example.js              configuratievoorbeeld
 
 ## Wijzigingen
 
+### 2.7.17 (devDependencies)
+
+- `npm audit fix` uitgevoerd: `brace-expansion` (transitieve dependency van `serve`/`serve-handler`, alleen gebruikt door `npm run test:visual`) bijgewerkt naar 1.1.16 / 5.0.7, tegen een high-severity ReDoS-advisory (GHSA-3jxr-9vmj-r5cp). Alleen `package-lock.json` gewijzigd, geen wijzigingen in `package.json`. `npm test` (410 tests) en `npm run lint` blijven groen.
+
 ### 2.7.17
 
 - Opgelost (desktop/breed scherm): het prijslabel boven een pieksbalk stond niet gecentreerd en de verbindingslijn met witte stip was onzichtbaar. Oorzaak: `.flag` had `overflow: hidden` en `contain: layout paint style`, die de eigen `::before`/`::after`-pseudo-elementen (de lijn en de stip, die met een negatieve offset buiten de pil-vorm vallen) wegknipten. Ook duwde `.barwrap:nth-last-child(-n + 3) .flag` het label voor de laatste drie balken bewust uit het midden — dat was op mobiel al bewust "ongedaan gemaakt", maar stond op desktop nog aan. Alle drie zijn nu bij de bron in `styles/nightglass-v2.css` gecorrigeerd, dus labels staan overal gecentreerd met een zichtbare lijn en stip.
