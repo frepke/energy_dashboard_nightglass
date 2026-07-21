@@ -209,6 +209,11 @@ config.example.js              configuratievoorbeeld
 
 ## Wijzigingen
 
+### 2.7.17
+
+- Opgelost (desktop/breed scherm): het prijslabel boven een pieksbalk stond niet gecentreerd en de verbindingslijn met witte stip was onzichtbaar. Oorzaak: `.flag` had `overflow: hidden` en `contain: layout paint style`, die de eigen `::before`/`::after`-pseudo-elementen (de lijn en de stip, die met een negatieve offset buiten de pil-vorm vallen) wegknipten. Ook duwde `.barwrap:nth-last-child(-n + 3) .flag` het label voor de laatste drie balken bewust uit het midden — dat was op mobiel al bewust "ongedaan gemaakt", maar stond op desktop nog aan. Alle drie zijn nu bij de bron in `styles/nightglass-v2.css` gecorrigeerd, dus labels staan overal gecentreerd met een zichtbare lijn en stip.
+- Aangepast (mobiel): `--bar-fill-scale` van 60 naar 70 zodat de balken een groter deel van de (in 2.7.16 vergrote) grafiekhoogte vullen, met minder lege ruimte boven de staafjes.
+
 ### 2.7.16
 
 - Opgelost: tijdlabels onder de Zonneplan-uurgrafiek vielen op iPhone in portrait-modus buiten beeld. `styles/nightglass-v2.css` reserveerde in de `@media (max-width: 560px) and (orientation: portrait)`-regels maar 9px ruimte tussen de bars en de `overflow: hidden`-rand van `.chart`, waar het tijdlabel met een negatieve `bottom`-offset in stond. Opgelost door de kaarthoogte, de onderafstand van `.bars` en de `bottom`-offset van `.time` op zowel het `max-width: 1100px`- als het `max-width: 560px`-blok ruimer te maken (marge nu 16-18px in plaats van 9px).
