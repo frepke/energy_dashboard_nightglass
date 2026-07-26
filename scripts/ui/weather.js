@@ -41,7 +41,7 @@ function weatherTtlMs() {
 
 let weatherSourceState = 'loading';
 let lastWeatherSuccessAt = 0;
-let lastSunCycle = { sunrise: null, sunset: null, previousSunrise: null, previousSunset: null, nextSunrise: null };
+let lastSunCycle = { sunrise: null, sunset: null, previousSunset: null, nextSunrise: null };
 
 export function resolveFreshnessState(baseState, lastSuccessAt, now, staleAfterMs) {
   if (baseState !== 'live') return baseState;
@@ -99,13 +99,12 @@ function parseSunMoment(value, referenceDate) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue, previousSunsetValue = null, nextSunriseValue = null, previousSunriseValue = null) {
+export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue, previousSunsetValue = null, nextSunriseValue = null) {
   const now = nowInput instanceof Date ? nowInput : new Date(nowInput);
   if (Number.isNaN(now.getTime())) {
     return {
       state: 'unknown', phase: 'unknown', progress: 0, sunrise: null, sunset: null,
-      cycleStart: null, cycleEnd: null, sunsetPosition: null,
-      nextEvent: null, nextEventAt: null, remainingMs: null,
+      cycleStart: null, cycleEnd: null, nextEvent: null, nextEventAt: null, remainingMs: null,
     };
   }
 
@@ -114,92 +113,71 @@ export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue, previousSu
   if (!sunrise || !sunset || sunset <= sunrise) {
     return {
       state: 'unknown', phase: 'unknown', progress: 0, sunrise, sunset,
-      cycleStart: null, cycleEnd: null, sunsetPosition: null,
-      nextEvent: null, nextEventAt: null, remainingMs: null,
+      cycleStart: null, cycleEnd: null, nextEvent: null, nextEventAt: null, remainingMs: null,
+    };
+  }
+
+  if (now >= sunrise && now < sunset) {
+    const progress = Math.max(0, Math.min(1, (now.getTime() - sunrise.getTime()) / (sunset.getTime() - sunrise.getTime())));
+    return {
+      state: 'day', phase: 'day', progress, sunrise, sunset,
+      cycleStart: sunrise, cycleEnd: sunset,
+      nextEvent: 'sunset', nextEventAt: sunset, remainingMs: Math.max(0, sunset.getTime() - now.getTime()),
     };
   }
 
   const beforeSunrise = now < sunrise;
-  let cycleStart;
-  let cycleEnd;
-  let cycleSunset;
+  let nightStart;
+  let nightEnd;
 
   if (beforeSunrise) {
-    cycleEnd = sunrise;
-    cycleSunset = parseSunMoment(previousSunsetValue, now);
-    if (cycleSunset && cycleSunset >= cycleEnd) {
-      cycleSunset = new Date(
-        cycleSunset.getFullYear(), cycleSunset.getMonth(), cycleSunset.getDate() - 1,
-        cycleSunset.getHours(), cycleSunset.getMinutes(), cycleSunset.getSeconds(), cycleSunset.getMilliseconds(),
+    nightStart = parseSunMoment(previousSunsetValue, now);
+    if (nightStart && nightStart >= sunrise) {
+      nightStart = new Date(
+        nightStart.getFullYear(), nightStart.getMonth(), nightStart.getDate() - 1,
+        nightStart.getHours(), nightStart.getMinutes(), nightStart.getSeconds(), nightStart.getMilliseconds(),
       );
     }
-    if (!cycleSunset) {
-      cycleSunset = new Date(
+    if (!nightStart) {
+      nightStart = new Date(
         sunset.getFullYear(), sunset.getMonth(), sunset.getDate() - 1,
         sunset.getHours(), sunset.getMinutes(), sunset.getSeconds(), sunset.getMilliseconds(),
       );
     }
-
-    cycleStart = parseSunMoment(previousSunriseValue, now);
-    // A time-only value such as 05:50 is initially parsed on today's date.
-    // The previous sunrise must be before the previous sunset, so move it back
-    // one day whenever the provider omitted the date component.
-    if (cycleStart && cycleStart >= cycleSunset) {
-      cycleStart = new Date(
-        cycleStart.getFullYear(), cycleStart.getMonth(), cycleStart.getDate() - 1,
-        cycleStart.getHours(), cycleStart.getMinutes(), cycleStart.getSeconds(), cycleStart.getMilliseconds(),
-      );
-    }
-    if (!cycleStart) {
-      cycleStart = new Date(
-        sunrise.getFullYear(), sunrise.getMonth(), sunrise.getDate() - 1,
-        sunrise.getHours(), sunrise.getMinutes(), sunrise.getSeconds(), sunrise.getMilliseconds(),
-      );
-    }
+    nightEnd = sunrise;
   } else {
-    cycleStart = sunrise;
-    cycleSunset = sunset;
-    cycleEnd = parseSunMoment(nextSunriseValue, now);
-    // A time-only next-sunrise value can be a minute later than today's
-    // sunrise (for example 05:52 versus 05:51). Comparing only with cycleStart
-    // would then incorrectly create a one-minute cycle. The next sunrise must
-    // always occur after today's sunset.
-    if (cycleEnd && cycleEnd <= cycleSunset) {
-      cycleEnd = new Date(
-        cycleEnd.getFullYear(), cycleEnd.getMonth(), cycleEnd.getDate() + 1,
-        cycleEnd.getHours(), cycleEnd.getMinutes(), cycleEnd.getSeconds(), cycleEnd.getMilliseconds(),
+    nightStart = sunset;
+    nightEnd = parseSunMoment(nextSunriseValue, now);
+    if (nightEnd && nightEnd <= sunset) {
+      nightEnd = new Date(
+        nightEnd.getFullYear(), nightEnd.getMonth(), nightEnd.getDate() + 1,
+        nightEnd.getHours(), nightEnd.getMinutes(), nightEnd.getSeconds(), nightEnd.getMilliseconds(),
       );
     }
-    if (!cycleEnd) {
-      cycleEnd = new Date(
+    if (!nightEnd) {
+      nightEnd = new Date(
         sunrise.getFullYear(), sunrise.getMonth(), sunrise.getDate() + 1,
         sunrise.getHours(), sunrise.getMinutes(), sunrise.getSeconds(), sunrise.getMilliseconds(),
       );
     }
   }
 
-  const cycleDuration = cycleEnd.getTime() - cycleStart.getTime();
-  const progress = cycleDuration > 0
-    ? Math.max(0, Math.min(1, (now.getTime() - cycleStart.getTime()) / cycleDuration))
+  const duration = nightEnd.getTime() - nightStart.getTime();
+  const progress = duration > 0
+    ? Math.max(0, Math.min(1, (now.getTime() - nightStart.getTime()) / duration))
     : 0;
-  const sunsetPosition = cycleDuration > 0
-    ? Math.max(0, Math.min(1, (cycleSunset.getTime() - cycleStart.getTime()) / cycleDuration))
-    : null;
-  const isDay = now >= sunrise && now < sunset;
-  const nextEventAt = isDay ? sunset : cycleEnd;
 
   return {
-    state: isDay ? 'day' : 'night',
-    phase: isDay ? 'day' : (beforeSunrise ? 'before-sunrise' : 'after-sunset'),
+    state: 'night',
+    phase: beforeSunrise ? 'before-sunrise' : 'after-sunset',
     progress,
     sunrise,
     sunset,
-    cycleStart,
-    cycleEnd,
-    sunsetPosition,
-    nextEvent: isDay ? 'sunset' : 'sunrise',
-    nextEventAt,
-    remainingMs: Math.max(0, nextEventAt.getTime() - now.getTime()),
+    cycleStart: nightStart,
+    cycleEnd: nightEnd,
+    nextEvent: 'sunrise',
+    nextEventAt: nightEnd,
+    remainingMs: Math.max(0, nightEnd.getTime() - now.getTime()),
   };
 }
 
@@ -222,8 +200,7 @@ function updateSunCycleIndicator(now = new Date()) {
   const statusText = $('#daylightStatusText');
   const trackSunrise = $('#daylightSunrise');
   const trackSunset = $('#daylightSunset');
-  const sunsetMarker = $('#daylightSunsetMarker');
-  const snapshot = sunCycleSnapshot(now, lastSunCycle.sunrise, lastSunCycle.sunset, lastSunCycle.previousSunset, lastSunCycle.nextSunrise, lastSunCycle.previousSunrise);
+  const snapshot = sunCycleSnapshot(now, lastSunCycle.sunrise, lastSunCycle.sunset, lastSunCycle.previousSunset, lastSunCycle.nextSunrise);
   const progressPct = Math.round(snapshot.progress * 100);
   const sunriseText = hhmmFrom(lastSunCycle.sunrise);
   const sunsetText = hhmmFrom(lastSunCycle.sunset);
@@ -234,9 +211,6 @@ function updateSunCycleIndicator(now = new Date()) {
   indicator.dataset.phase = snapshot.phase;
   indicator.dataset.progress = String(progressPct);
   indicator.style.setProperty('--sun-progress', `${progressPct}%`);
-  const sunsetPct = Number.isFinite(snapshot.sunsetPosition) ? snapshot.sunsetPosition * 100 : 0;
-  indicator.style.setProperty('--sunset-position', `${sunsetPct}%`);
-  if (sunsetMarker) sunsetMarker.hidden = !Number.isFinite(snapshot.sunsetPosition);
   if (trackSunrise) trackSunrise.textContent = cycleStartText;
   if (trackSunset) trackSunset.textContent = cycleEndText;
 
@@ -244,10 +218,10 @@ function updateSunCycleIndicator(now = new Date()) {
   let visibleLabel;
   let accessibleLabel;
   if (snapshot.state === 'day') {
-    visibleLabel = `${t('sun-status-daylight')} · ${t('sun-status-cycle')} ${progressPct}% · ${t('sun-status-remaining')} ${durationText}`;
+    visibleLabel = `${t('sun-status-daylight')} ${progressPct}% · ${t('sun-status-remaining')} ${durationText}`;
     accessibleLabel = `${visibleLabel} · ${t('sunset')} ${sunsetText}`;
   } else if (snapshot.state === 'night') {
-    visibleLabel = `${t('sun-status-night')} · ${t('sun-status-cycle')} ${progressPct}% · ${t('sun-status-sunrise-in')} ${durationText}`;
+    visibleLabel = `${t('sun-status-night')} ${progressPct}% · ${t('sun-status-sunrise-in')} ${durationText}`;
     accessibleLabel = `${visibleLabel} · ${t('sunrise')} ${sunriseText}`;
   } else {
     visibleLabel = t('sun-status-unavailable');
@@ -744,7 +718,7 @@ export async function refreshWeather() {
 
   if (!hasWeatherKey) {
     weatherSourceState = 'disabled';
-    lastSunCycle = { sunrise: null, sunset: null, previousSunrise: null, previousSunset: null, nextSunrise: null };
+    lastSunCycle = { sunrise: null, sunset: null, previousSunset: null, nextSunrise: null };
     $('#weatherDesc').textContent = t('weather-no-key');
     updateWeatherArt({ conditions: 'cloudy', icon: 'cloudy' }, {});
     updateWeatherStatusIndicator();
@@ -760,7 +734,6 @@ export async function refreshWeather() {
     lastSunCycle = {
       sunrise: day.sunrise || cc.sunrise || null,
       sunset: day.sunset || cc.sunset || null,
-      previousSunrise: day.previousSunrise || cc.previousSunrise || null,
       previousSunset: day.previousSunset || cc.previousSunset || null,
       nextSunrise: day.nextSunrise || cc.nextSunrise || null,
     };

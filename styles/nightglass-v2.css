@@ -3944,7 +3944,6 @@ body.dashboard-fit-micro .flowline .particle:nth-child(n) {
 
 .daylight-progress {
   --sun-progress: 0%;
-  --sunset-position: 65%;
   min-width: 0;
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) 34px;
@@ -3983,20 +3982,6 @@ body.dashboard-fit-micro .flowline .particle:nth-child(n) {
   background: linear-gradient(90deg, rgba(var(--warning-rgb), .44), var(--solar));
   box-shadow: 0 0 9px rgba(var(--warning-rgb), .30);
   transition: width .45s ease, opacity .25s ease, background .25s ease;
-}
-
-
-.daylight-sunset-marker {
-  position: absolute;
-  top: 50%;
-  left: clamp(4px, var(--sunset-position), calc(100% - 4px));
-  width: 2px;
-  height: 10px;
-  transform: translate(-50%, -50%);
-  border-radius: var(--radius-pill);
-  background: rgba(var(--warning-rgb), .78);
-  box-shadow: 0 0 6px rgba(var(--warning-rgb), .45);
-  opacity: .9;
 }
 
 .daylight-marker {

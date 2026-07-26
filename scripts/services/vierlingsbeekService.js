@@ -243,7 +243,6 @@ export async function fetchWeatherData() {
 
     sunrise:     om?.sunrise,
     sunset:      om?.sunset,
-    previousSunrise: om?.previousSunrise,
     previousSunset: om?.previousSunset,
     nextSunrise: om?.nextSunrise,
 
@@ -254,7 +253,6 @@ export async function fetchWeatherData() {
   const day = {
     sunrise:    om?.sunrise,
     sunset:     om?.sunset,
-    previousSunrise: om?.previousSunrise,
     previousSunset: om?.previousSunset,
     nextSunrise: om?.nextSunrise,
     conditions: om?.conditions ?? 'Overcast',

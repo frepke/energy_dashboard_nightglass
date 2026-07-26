@@ -124,7 +124,6 @@ export async function fetchWeatherData() {
   const dayIndex = Math.max(0, (daily.time || []).findIndex((value) => value === new Date().toLocaleDateString('en-CA')));
   const sunriseStr = isoStrToTimeStr(daily.sunrise && daily.sunrise[dayIndex]);
   const sunsetStr  = isoStrToTimeStr(daily.sunset  && daily.sunset[dayIndex]);
-  const previousSunriseStr = isoStrToTimeStr(daily.sunrise && daily.sunrise[Math.max(0, dayIndex - 1)]);
   const previousSunsetStr = isoStrToTimeStr(daily.sunset && daily.sunset[Math.max(0, dayIndex - 1)]);
   const nextSunriseStr = isoStrToTimeStr(daily.sunrise && daily.sunrise[Math.min((daily.sunrise?.length || 1) - 1, dayIndex + 1)]);
 
@@ -155,7 +154,6 @@ export async function fetchWeatherData() {
     // Sun times
     sunrise:     sunriseStr,
     sunset:      sunsetStr,
-    previousSunrise: previousSunriseStr,
     previousSunset: previousSunsetStr,
     nextSunrise: nextSunriseStr,
   };
@@ -163,7 +161,6 @@ export async function fetchWeatherData() {
   const day = {
     sunrise:    sunriseStr,
     sunset:     sunsetStr,
-    previousSunrise: previousSunriseStr,
     previousSunset: previousSunsetStr,
     nextSunrise: nextSunriseStr,
     conditions: currentConditions.conditions,

@@ -1,10 +1,3 @@
-## 2.7.18 — Doorlopende zoncyclus
-
-- De voortgangsbalk loopt nu in één cyclus van zonsopkomst tot de zonsopkomst van de volgende dag.
-- Zonsondergang staat als tussenmarkering op dezelfde balk.
-- De balk wordt pas bij de volgende zonsopkomst teruggezet.
-- Vorige en volgende zonsopkomsttijden worden uit de meerdaagse weerdata gebruikt.
-
 # Nightglass wijzigingen
 
 ## 2.7.10
