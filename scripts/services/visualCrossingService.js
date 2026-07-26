@@ -54,6 +54,7 @@ export async function fetchWeatherData() {
   const day = days[todayIndex] || days[0] || cc;
   const previousDay = days[Math.max(0, todayIndex - 1)] || {};
   const nextDay = days[Math.min(days.length - 1, todayIndex + 1)] || {};
+  day.previousSunrise = previousDay.sunrise || null;
   day.previousSunset = previousDay.sunset || null;
   day.nextSunrise = nextDay.sunrise || null;
   return { currentConditions: cc, day };
