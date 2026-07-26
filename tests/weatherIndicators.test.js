@@ -24,13 +24,15 @@ describe('weather and sun source indicators', () => {
     expect(resolveFreshnessState('error', success, success + 500_000, 120_000)).toBe('error');
   });
 
-  it('turns the sun marker into a daylight progress value', async () => {
+  it('tracks one continuous sunrise-to-next-sunrise cycle', async () => {
     const { sunCycleSnapshot } = await import('../scripts/ui/weather.js');
     const noon = new Date(2026, 6, 15, 12, 0, 0);
-    const snapshot = sunCycleSnapshot(noon, '06:00:00', '18:00:00');
+    const snapshot = sunCycleSnapshot(noon, '06:00:00', '18:00:00', '18:01', '06:02', '05:58');
 
     expect(snapshot.state).toBe('day');
-    expect(snapshot.progress).toBeCloseTo(0.5, 5);
+    expect(snapshot.progress).toBeCloseTo(6 / (24 + 2 / 60), 5);
+    expect(snapshot.sunsetPosition).toBeCloseTo(12 / (24 + 2 / 60), 5);
+    expect(snapshot.cycleEnd.getDate()).toBe(16);
     expect(snapshot.nextEvent).toBe('sunset');
     expect(snapshot.remainingMs).toBe(6 * 60 * 60 * 1000);
   });
@@ -38,16 +40,21 @@ describe('weather and sun source indicators', () => {
   it('distinguishes night before sunrise and after sunset', async () => {
     const { sunCycleSnapshot } = await import('../scripts/ui/weather.js');
 
-    const before = sunCycleSnapshot(new Date(2026, 6, 15, 4, 0, 0), '06:00', '18:00');
-    const after = sunCycleSnapshot(new Date(2026, 6, 15, 22, 0, 0), '06:00', '18:00');
+    const before = sunCycleSnapshot(new Date(2026, 6, 15, 4, 0, 0), '06:00', '18:00', '21:30', '06:02');
+    const after = sunCycleSnapshot(new Date(2026, 6, 15, 22, 0, 0), '06:00', '18:00', '21:30', '06:02');
 
     expect(before).toMatchObject({
-      state: 'night', phase: 'before-sunrise', progress: 0, nextEvent: 'sunrise', remainingMs: 2 * 60 * 60 * 1000,
+      state: 'night', phase: 'before-sunrise', nextEvent: 'sunrise', remainingMs: 2 * 60 * 60 * 1000,
     });
     expect(after).toMatchObject({
-      state: 'night', phase: 'after-sunset', progress: 1, nextEvent: 'sunrise', remainingMs: 8 * 60 * 60 * 1000,
+      state: 'night', phase: 'after-sunset', nextEvent: 'sunrise', remainingMs: (8 * 60 + 2) * 60 * 1000,
     });
+    expect(before.progress).toBeGreaterThan(0);
+    expect(before.progress).toBeLessThan(1);
+    expect(after.progress).toBeGreaterThan(0);
+    expect(after.progress).toBeLessThan(1);
     expect(after.nextEventAt.getDate()).toBe(16);
+    expect(after.nextEventAt.getMinutes()).toBe(2);
   });
 
   it('formats the remaining daylight duration compactly in both languages', async () => {
