@@ -243,6 +243,8 @@ export async function fetchWeatherData() {
 
     sunrise:     om?.sunrise,
     sunset:      om?.sunset,
+    previousSunset: om?.previousSunset,
+    nextSunrise: om?.nextSunrise,
 
     stationName: 'Vierlingsbeek NB',
     measuredAt:  devices.thb?.LastUpdate || devices.wind?.LastUpdate || devices.thb?.LastSeen || devices.wind?.LastSeen,
@@ -251,6 +253,8 @@ export async function fetchWeatherData() {
   const day = {
     sunrise:    om?.sunrise,
     sunset:     om?.sunset,
+    previousSunset: om?.previousSunset,
+    nextSunrise: om?.nextSunrise,
     conditions: om?.conditions ?? 'Overcast',
     icon:       om?.icon ?? 'cloudy',
   };

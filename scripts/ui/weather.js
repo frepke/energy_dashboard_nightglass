@@ -41,7 +41,7 @@ function weatherTtlMs() {
 
 let weatherSourceState = 'loading';
 let lastWeatherSuccessAt = 0;
-let lastSunCycle = { sunrise: null, sunset: null };
+let lastSunCycle = { sunrise: null, sunset: null, previousSunset: null, nextSunrise: null };
 
 export function resolveFreshnessState(baseState, lastSuccessAt, now, staleAfterMs) {
   if (baseState !== 'live') return baseState;
@@ -99,12 +99,12 @@ function parseSunMoment(value, referenceDate) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue) {
+export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue, previousSunsetValue = null, nextSunriseValue = null) {
   const now = nowInput instanceof Date ? nowInput : new Date(nowInput);
   if (Number.isNaN(now.getTime())) {
     return {
       state: 'unknown', phase: 'unknown', progress: 0, sunrise: null, sunset: null,
-      nextEvent: null, nextEventAt: null, remainingMs: null,
+      cycleStart: null, cycleEnd: null, nextEvent: null, nextEventAt: null, remainingMs: null,
     };
   }
 
@@ -113,7 +113,7 @@ export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue) {
   if (!sunrise || !sunset || sunset <= sunrise) {
     return {
       state: 'unknown', phase: 'unknown', progress: 0, sunrise, sunset,
-      nextEvent: null, nextEventAt: null, remainingMs: null,
+      cycleStart: null, cycleEnd: null, nextEvent: null, nextEventAt: null, remainingMs: null,
     };
   }
 
@@ -121,24 +121,63 @@ export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue) {
     const progress = Math.max(0, Math.min(1, (now.getTime() - sunrise.getTime()) / (sunset.getTime() - sunrise.getTime())));
     return {
       state: 'day', phase: 'day', progress, sunrise, sunset,
+      cycleStart: sunrise, cycleEnd: sunset,
       nextEvent: 'sunset', nextEventAt: sunset, remainingMs: Math.max(0, sunset.getTime() - now.getTime()),
     };
   }
 
   const beforeSunrise = now < sunrise;
-  const nextSunrise = beforeSunrise
-    ? sunrise
-    : new Date(sunrise.getFullYear(), sunrise.getMonth(), sunrise.getDate() + 1, sunrise.getHours(), sunrise.getMinutes(), sunrise.getSeconds(), sunrise.getMilliseconds());
+  let nightStart;
+  let nightEnd;
+
+  if (beforeSunrise) {
+    nightStart = parseSunMoment(previousSunsetValue, now);
+    if (nightStart && nightStart >= sunrise) {
+      nightStart = new Date(
+        nightStart.getFullYear(), nightStart.getMonth(), nightStart.getDate() - 1,
+        nightStart.getHours(), nightStart.getMinutes(), nightStart.getSeconds(), nightStart.getMilliseconds(),
+      );
+    }
+    if (!nightStart) {
+      nightStart = new Date(
+        sunset.getFullYear(), sunset.getMonth(), sunset.getDate() - 1,
+        sunset.getHours(), sunset.getMinutes(), sunset.getSeconds(), sunset.getMilliseconds(),
+      );
+    }
+    nightEnd = sunrise;
+  } else {
+    nightStart = sunset;
+    nightEnd = parseSunMoment(nextSunriseValue, now);
+    if (nightEnd && nightEnd <= sunset) {
+      nightEnd = new Date(
+        nightEnd.getFullYear(), nightEnd.getMonth(), nightEnd.getDate() + 1,
+        nightEnd.getHours(), nightEnd.getMinutes(), nightEnd.getSeconds(), nightEnd.getMilliseconds(),
+      );
+    }
+    if (!nightEnd) {
+      nightEnd = new Date(
+        sunrise.getFullYear(), sunrise.getMonth(), sunrise.getDate() + 1,
+        sunrise.getHours(), sunrise.getMinutes(), sunrise.getSeconds(), sunrise.getMilliseconds(),
+      );
+    }
+  }
+
+  const duration = nightEnd.getTime() - nightStart.getTime();
+  const progress = duration > 0
+    ? Math.max(0, Math.min(1, (now.getTime() - nightStart.getTime()) / duration))
+    : 0;
 
   return {
     state: 'night',
     phase: beforeSunrise ? 'before-sunrise' : 'after-sunset',
-    progress: beforeSunrise ? 0 : 1,
+    progress,
     sunrise,
     sunset,
+    cycleStart: nightStart,
+    cycleEnd: nightEnd,
     nextEvent: 'sunrise',
-    nextEventAt: nextSunrise,
-    remainingMs: Math.max(0, nextSunrise.getTime() - now.getTime()),
+    nextEventAt: nightEnd,
+    remainingMs: Math.max(0, nightEnd.getTime() - now.getTime()),
   };
 }
 
@@ -161,17 +200,19 @@ function updateSunCycleIndicator(now = new Date()) {
   const statusText = $('#daylightStatusText');
   const trackSunrise = $('#daylightSunrise');
   const trackSunset = $('#daylightSunset');
-  const snapshot = sunCycleSnapshot(now, lastSunCycle.sunrise, lastSunCycle.sunset);
+  const snapshot = sunCycleSnapshot(now, lastSunCycle.sunrise, lastSunCycle.sunset, lastSunCycle.previousSunset, lastSunCycle.nextSunrise);
   const progressPct = Math.round(snapshot.progress * 100);
   const sunriseText = hhmmFrom(lastSunCycle.sunrise);
   const sunsetText = hhmmFrom(lastSunCycle.sunset);
+  const cycleStartText = hhmmFrom(snapshot.cycleStart);
+  const cycleEndText = hhmmFrom(snapshot.cycleEnd);
 
   indicator.dataset.state = snapshot.state;
   indicator.dataset.phase = snapshot.phase;
   indicator.dataset.progress = String(progressPct);
   indicator.style.setProperty('--sun-progress', `${progressPct}%`);
-  if (trackSunrise) trackSunrise.textContent = sunriseText;
-  if (trackSunset) trackSunset.textContent = sunsetText;
+  if (trackSunrise) trackSunrise.textContent = cycleStartText;
+  if (trackSunset) trackSunset.textContent = cycleEndText;
 
   const durationText = formatSunDuration(snapshot.remainingMs);
   let visibleLabel;
@@ -180,7 +221,7 @@ function updateSunCycleIndicator(now = new Date()) {
     visibleLabel = `${t('sun-status-daylight')} ${progressPct}% · ${t('sun-status-remaining')} ${durationText}`;
     accessibleLabel = `${visibleLabel} · ${t('sunset')} ${sunsetText}`;
   } else if (snapshot.state === 'night') {
-    visibleLabel = `${t('sun-status-night')} · ${t('sun-status-sunrise-in')} ${durationText}`;
+    visibleLabel = `${t('sun-status-night')} ${progressPct}% · ${t('sun-status-sunrise-in')} ${durationText}`;
     accessibleLabel = `${visibleLabel} · ${t('sunrise')} ${sunriseText}`;
   } else {
     visibleLabel = t('sun-status-unavailable');
@@ -677,7 +718,7 @@ export async function refreshWeather() {
 
   if (!hasWeatherKey) {
     weatherSourceState = 'disabled';
-    lastSunCycle = { sunrise: null, sunset: null };
+    lastSunCycle = { sunrise: null, sunset: null, previousSunset: null, nextSunrise: null };
     $('#weatherDesc').textContent = t('weather-no-key');
     updateWeatherArt({ conditions: 'cloudy', icon: 'cloudy' }, {});
     updateWeatherStatusIndicator();
@@ -693,6 +734,8 @@ export async function refreshWeather() {
     lastSunCycle = {
       sunrise: day.sunrise || cc.sunrise || null,
       sunset: day.sunset || cc.sunset || null,
+      previousSunset: day.previousSunset || cc.previousSunset || null,
+      nextSunrise: day.nextSunrise || cc.nextSunrise || null,
     };
     $('#sunriseTime').textContent  = hhmmFrom(day.sunrise || cc.sunrise);
     $('#sunsetTime').textContent   = hhmmFrom(day.sunset  || cc.sunset);

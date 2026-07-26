@@ -104,6 +104,8 @@ export async function fetchWeatherData() {
     'timezone=auto',
     // Use KNMI HARMONIE-AROME for NL (2 km); falls back gracefully elsewhere
     'models=knmi_seamless',
+    'past_days=1',
+    'forecast_days=2',
   ].join('&');
 
   const url = `https://api.open-meteo.com/v1/forecast?${params}`;
@@ -119,8 +121,11 @@ export async function fetchWeatherData() {
   const isDay = cur.is_day === 1;
 
   // Sunrise/sunset come as ISO strings like "2025-06-12T06:13"
-  const sunriseStr = isoStrToTimeStr(daily.sunrise && daily.sunrise[0]);
-  const sunsetStr  = isoStrToTimeStr(daily.sunset  && daily.sunset[0]);
+  const dayIndex = Math.max(0, (daily.time || []).findIndex((value) => value === new Date().toLocaleDateString('en-CA')));
+  const sunriseStr = isoStrToTimeStr(daily.sunrise && daily.sunrise[dayIndex]);
+  const sunsetStr  = isoStrToTimeStr(daily.sunset  && daily.sunset[dayIndex]);
+  const previousSunsetStr = isoStrToTimeStr(daily.sunset && daily.sunset[Math.max(0, dayIndex - 1)]);
+  const nextSunriseStr = isoStrToTimeStr(daily.sunrise && daily.sunrise[Math.min((daily.sunrise?.length || 1) - 1, dayIndex + 1)]);
 
   const currentConditions = {
     // Temperature and atmosphere
@@ -149,11 +154,15 @@ export async function fetchWeatherData() {
     // Sun times
     sunrise:     sunriseStr,
     sunset:      sunsetStr,
+    previousSunset: previousSunsetStr,
+    nextSunrise: nextSunriseStr,
   };
 
   const day = {
     sunrise:    sunriseStr,
     sunset:     sunsetStr,
+    previousSunset: previousSunsetStr,
+    nextSunrise: nextSunriseStr,
     conditions: currentConditions.conditions,
     icon:       currentConditions.icon,
   };

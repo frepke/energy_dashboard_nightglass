@@ -26,9 +26,17 @@ export async function fetchWeatherData() {
   const loc       = encodeURIComponent(CFG.vcLocation || 'Vierlingsbeek,NL');
   const unitGroup = encodeURIComponent(CFG.vcUnitGroup);
 
+  const dateKey = (offsetDays = 0) => {
+    const date = new Date();
+    date.setDate(date.getDate() + offsetDays);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
+  const yesterday = dateKey(-1);
+  const tomorrow = dateKey(1);
+
   const url =
     'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/' +
-    loc +
+    loc + '/' + yesterday + '/' + tomorrow +
     '?unitGroup=' + unitGroup +
     '&include=current,days' +
     '&key='       + encodeURIComponent(CFG.vcKey) +
@@ -39,7 +47,14 @@ export async function fetchWeatherData() {
     cacheKey: 'weather:' + loc + ':' + unitGroup,
   });
 
-  const cc  = data.currentConditions || {};
-  const day = (data.days && data.days[0]) || cc;
+  const cc = data.currentConditions || {};
+  const days = data.days || [];
+  const todayKey = dateKey(0);
+  const todayIndex = Math.max(0, days.findIndex((item) => item.datetime === todayKey));
+  const day = days[todayIndex] || days[0] || cc;
+  const previousDay = days[Math.max(0, todayIndex - 1)] || {};
+  const nextDay = days[Math.min(days.length - 1, todayIndex + 1)] || {};
+  day.previousSunset = previousDay.sunset || null;
+  day.nextSunrise = nextDay.sunrise || null;
   return { currentConditions: cc, day };
 }
