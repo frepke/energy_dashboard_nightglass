@@ -37,6 +37,17 @@ describe('weather and sun source indicators', () => {
     expect(snapshot.remainingMs).toBe(6 * 60 * 60 * 1000);
   });
 
+  it('treats a slightly later time-only sunrise as tomorrow, not as a one-minute cycle', async () => {
+    const { sunCycleSnapshot } = await import('../scripts/ui/weather.js');
+    const now = new Date(2026, 6, 26, 13, 21, 26);
+    const snapshot = sunCycleSnapshot(now, '05:51', '21:33', '21:34', '05:52', '05:50');
+
+    expect(snapshot.cycleEnd.getDate()).toBe(27);
+    expect(snapshot.progress).toBeGreaterThan(0.30);
+    expect(snapshot.progress).toBeLessThan(0.32);
+    expect(snapshot.progress).toBeLessThan(1);
+  });
+
   it('distinguishes night before sunrise and after sunset', async () => {
     const { sunCycleSnapshot } = await import('../scripts/ui/weather.js');
 
