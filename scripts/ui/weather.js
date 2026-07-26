@@ -126,20 +126,6 @@ export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue, previousSu
 
   if (beforeSunrise) {
     cycleEnd = sunrise;
-    cycleStart = parseSunMoment(previousSunriseValue, now);
-    if (cycleStart && cycleStart >= cycleEnd) {
-      cycleStart = new Date(
-        cycleStart.getFullYear(), cycleStart.getMonth(), cycleStart.getDate() - 1,
-        cycleStart.getHours(), cycleStart.getMinutes(), cycleStart.getSeconds(), cycleStart.getMilliseconds(),
-      );
-    }
-    if (!cycleStart) {
-      cycleStart = new Date(
-        sunrise.getFullYear(), sunrise.getMonth(), sunrise.getDate() - 1,
-        sunrise.getHours(), sunrise.getMinutes(), sunrise.getSeconds(), sunrise.getMilliseconds(),
-      );
-    }
-
     cycleSunset = parseSunMoment(previousSunsetValue, now);
     if (cycleSunset && cycleSunset >= cycleEnd) {
       cycleSunset = new Date(
@@ -153,11 +139,32 @@ export function sunCycleSnapshot(nowInput, sunriseValue, sunsetValue, previousSu
         sunset.getHours(), sunset.getMinutes(), sunset.getSeconds(), sunset.getMilliseconds(),
       );
     }
+
+    cycleStart = parseSunMoment(previousSunriseValue, now);
+    // A time-only value such as 05:50 is initially parsed on today's date.
+    // The previous sunrise must be before the previous sunset, so move it back
+    // one day whenever the provider omitted the date component.
+    if (cycleStart && cycleStart >= cycleSunset) {
+      cycleStart = new Date(
+        cycleStart.getFullYear(), cycleStart.getMonth(), cycleStart.getDate() - 1,
+        cycleStart.getHours(), cycleStart.getMinutes(), cycleStart.getSeconds(), cycleStart.getMilliseconds(),
+      );
+    }
+    if (!cycleStart) {
+      cycleStart = new Date(
+        sunrise.getFullYear(), sunrise.getMonth(), sunrise.getDate() - 1,
+        sunrise.getHours(), sunrise.getMinutes(), sunrise.getSeconds(), sunrise.getMilliseconds(),
+      );
+    }
   } else {
     cycleStart = sunrise;
     cycleSunset = sunset;
     cycleEnd = parseSunMoment(nextSunriseValue, now);
-    if (cycleEnd && cycleEnd <= cycleStart) {
+    // A time-only next-sunrise value can be a minute later than today's
+    // sunrise (for example 05:52 versus 05:51). Comparing only with cycleStart
+    // would then incorrectly create a one-minute cycle. The next sunrise must
+    // always occur after today's sunset.
+    if (cycleEnd && cycleEnd <= cycleSunset) {
       cycleEnd = new Date(
         cycleEnd.getFullYear(), cycleEnd.getMonth(), cycleEnd.getDate() + 1,
         cycleEnd.getHours(), cycleEnd.getMinutes(), cycleEnd.getSeconds(), cycleEnd.getMilliseconds(),
