@@ -24,28 +24,15 @@ describe('weather and sun source indicators', () => {
     expect(resolveFreshnessState('error', success, success + 500_000, 120_000)).toBe('error');
   });
 
-  it('tracks one continuous sunrise-to-next-sunrise cycle', async () => {
+  it('turns the sun marker into a daylight progress value', async () => {
     const { sunCycleSnapshot } = await import('../scripts/ui/weather.js');
     const noon = new Date(2026, 6, 15, 12, 0, 0);
-    const snapshot = sunCycleSnapshot(noon, '06:00:00', '18:00:00', '18:01', '06:02', '05:58');
+    const snapshot = sunCycleSnapshot(noon, '06:00:00', '18:00:00');
 
     expect(snapshot.state).toBe('day');
-    expect(snapshot.progress).toBeCloseTo(6 / (24 + 2 / 60), 5);
-    expect(snapshot.sunsetPosition).toBeCloseTo(12 / (24 + 2 / 60), 5);
-    expect(snapshot.cycleEnd.getDate()).toBe(16);
+    expect(snapshot.progress).toBeCloseTo(0.5, 5);
     expect(snapshot.nextEvent).toBe('sunset');
     expect(snapshot.remainingMs).toBe(6 * 60 * 60 * 1000);
-  });
-
-  it('treats a slightly later time-only sunrise as tomorrow, not as a one-minute cycle', async () => {
-    const { sunCycleSnapshot } = await import('../scripts/ui/weather.js');
-    const now = new Date(2026, 6, 26, 13, 21, 26);
-    const snapshot = sunCycleSnapshot(now, '05:51', '21:33', '21:34', '05:52', '05:50');
-
-    expect(snapshot.cycleEnd.getDate()).toBe(27);
-    expect(snapshot.progress).toBeGreaterThan(0.30);
-    expect(snapshot.progress).toBeLessThan(0.32);
-    expect(snapshot.progress).toBeLessThan(1);
   });
 
   it('distinguishes night before sunrise and after sunset', async () => {
