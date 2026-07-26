@@ -30,7 +30,7 @@ export default defineConfig({
 
   // Run a lightweight static server before the tests
   webServer: {
-    command: 'npx serve . --listen 5500 --no-clipboard',
+    command: 'npx http-server . -p 5500 -s',
     url: 'http://127.0.0.1:5500',
     reuseExistingServer: true,
     timeout: 15_000,
