@@ -79,6 +79,149 @@ function isInside(inner, outer, tolerance = 1) {
     && inner.y + inner.height <= outer.y + outer.height + tolerance;
 }
 
+async function seedTextStressContent(page) {
+  await page.evaluate(() => {
+    const setText = (selector, text) => {
+      const element = document.querySelector(selector);
+      if (element) element.textContent = text;
+    };
+
+    setText('#statusText', 'Bijgewerkt om 07:31 — gateway synchroniseert grijzig prijsverloop');
+    setText('#weatherDesc', 'Zwaar bewolkt, grijzige motregen en vlagerige zijwind');
+    setText('#weatherHumidity', '💧 Luchtvochtigheid 97%');
+    setText('#weatherWind', '💨 Zijwind 37 km/h');
+    setText('#weatherPressure', '🌐 Luchtdruk 1007 hPa');
+    setText('#moonPhase', 'Afnemende gibbeus');
+    setText('#moonIllum', '97% verlicht');
+    setText('#moonRise', '21:47');
+    setText('#moonSet', '08:15');
+    setText('#moonAge', '17 dagen');
+    setText('#moonDistance', '394.425 km');
+    setText('#moonFullMoonWhen', 'vrijdag over negen dagen');
+    setText('#moonNewMoonWhen', 'zondag over twintig dagen');
+    setText('#smartInsightText', 'Gebruik je wasdroger tijdens de goedkoopste uren voor lagere dagkosten.');
+    setText('#smartInsightContext', 'Vergelijk teruglevering, verbruik en prijsbeweging zorgvuldig bij grijze pieken.');
+    setText('#smartGridPill', 'Net teruglevering');
+    setText('#smartSolarPill', 'Zon opbrengst');
+    setText('#smartPricePill', 'Prijs gunstig');
+    setText('#smartNextPill', 'Beste volgorde');
+    setText('#gridW', '12.345 W');
+    setText('#gridDir', 'Teruglevering bezig');
+    setText('#houseW', '3.210 W');
+    setText('#solarW', '9.876 W');
+    setText('#localSolarW', 'Lokaal 4.567 W');
+    setText('#gridToday', '12,7 kWh');
+    setText('#gridNet', 'Netto vergelijking gisteren');
+    setText('#houseToday', '8,9 kWh');
+    setText('#solarToday', '14,2 kWh');
+    setText('#solarStatus', 'Vandaag grijzig');
+    setText('#selfSuff', '97%');
+    setText('#selfCons', '83%');
+    setText('#gasToday', '2,17 m³');
+    setText('#gasYear', '1.024 m³ vergelijking');
+    setText('#updated', 'Bijgewerkt: vandaag 07:31');
+
+    document.querySelectorAll('.history-summary').forEach((element, index) => {
+      element.textContent = index % 2 === 0 ? 'Vergelijking gisteren' : 'Vergelijking vorige week';
+    });
+
+    document.querySelectorAll('.price-line .price-text, .solar-price .price-text, .gas-price .price-text')
+      .forEach((element, index) => {
+        element.textContent = [
+          'Stroom € 0,123/kWh',
+          'Zon € 0,118/kWh',
+          'Gas € 1,297/m³',
+        ][index] || 'Prijs € 0,123';
+      });
+
+    document.querySelectorAll('.badge .price-text').forEach((element, index) => {
+      element.textContent = index === 0 ? 'Stroom € 0,123/kWh' : 'Gas € 1,297/m³';
+    });
+
+    const limitBadge = document.getElementById('limitBadge');
+    if (limitBadge) {
+      limitBadge.hidden = false;
+      limitBadge.className = 'limitBadge is-visible is-blocked';
+      limitBadge.textContent = 'PV begrenzing actief';
+    }
+  });
+}
+
+async function auditTextStressLayout(page) {
+  return page.evaluate(() => {
+    const tolerance = 1;
+    const targets = [
+      { selector: '#statusText', container: '.status', minRatio: 1.12 },
+      { selector: '.zone-kicker', container: '.zone-heading', minRatio: 1.12 },
+      { selector: '#weatherDesc', container: '.weather-now-copy', minRatio: 1.12 },
+      { selector: '.weather-meta span', container: '.weather-meta', minRatio: 1.12 },
+      { selector: '#moonPhase', container: '.moon-info', minRatio: 1.08 },
+      { selector: '.moon-event > span', container: '.moon-event', minRatio: 1.12 },
+      { selector: '.moon-event > strong', container: '.moon-event', minRatio: 1.08 },
+      { selector: '#smartInsightText', container: '.smart-insight-copy', minRatio: 1.12 },
+      { selector: '#smartInsightContext', container: '.smart-insight-copy', minRatio: 1.12 },
+      { selector: '.smart-pill', container: '.smart-insight-meta', minRatio: 1.12 },
+      { selector: '.flow .label', container: '.node-text', minRatio: 1.12 },
+      { selector: '.flow .value', container: '.node-text', minRatio: 1.08 },
+      { selector: '.flow .sub', container: '.node-text', minRatio: 1.12 },
+      { selector: '.card h3', container: '.card-topline', minRatio: 1.12 },
+      { selector: '.card-metric > strong', container: '.card-metric', minRatio: 1.08 },
+      { selector: '.card-metric > small', container: '.card-metric', minRatio: 1.12 },
+      { selector: '.price-line .price-text, .solar-price .price-text, .gas-price .price-text', container: '.card-footer', minRatio: 1.12 },
+      { selector: '.usage-window-label', container: '#usageWindowSelector', minRatio: 1.12 },
+      { selector: '.pricesHeader .title', container: '.pricesTitleBlock', minRatio: 1.12 },
+      { selector: '#updated', container: '.pricesTitleBlock', minRatio: 1.12 },
+      { selector: '.badge .price-text', container: '.badge', minRatio: 1.12 },
+    ];
+
+    const failures = [];
+
+    for (const target of targets) {
+      const elements = Array.from(document.querySelectorAll(target.selector));
+
+      elements.forEach((element, index) => {
+        const rect = element.getBoundingClientRect();
+        if (rect.width < 1 || rect.height < 1) return;
+
+        const container = element.closest(target.container) || element.parentElement;
+        if (!container) return;
+
+        const containerRect = container.getBoundingClientRect();
+        const computed = window.getComputedStyle(element);
+        const fontSize = Number.parseFloat(computed.fontSize);
+        const lineHeight = Number.parseFloat(computed.lineHeight);
+        const ratio = Number.isFinite(fontSize) && Number.isFinite(lineHeight) && fontSize > 0
+          ? lineHeight / fontSize
+          : null;
+        const outside = rect.left < containerRect.left - tolerance
+          || rect.right > containerRect.right + tolerance
+          || rect.top < containerRect.top - tolerance
+          || rect.bottom > containerRect.bottom + tolerance;
+
+        if (outside || (ratio !== null && ratio + 0.01 < target.minRatio)) {
+          failures.push({
+            target: `${target.selector}[${index}]`,
+            text: element.textContent?.trim() || '',
+            outside,
+            ratio,
+            minRatio: target.minRatio,
+          });
+        }
+      });
+    }
+
+    const panelOverflow = Array.from(document.querySelectorAll('.panel')).some(panel => (
+      panel.scrollWidth > panel.clientWidth + 1
+    ));
+
+    return {
+      failures,
+      panelOverflow,
+      documentOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+    };
+  });
+}
+
 test('PV limit label stays fully inside the solar node', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.includes('iPhone'), 'Desktop geometry check');
 
@@ -119,7 +262,8 @@ test('card content and full-card history watermarks stay inside every tile', asy
     const cardRect = card.getBoundingClientRect();
     const metric = card.querySelector('.card-metric')?.getBoundingClientRect();
     const watermark = card.querySelector('.history-watermark')?.getBoundingClientRect();
-    const line = card.querySelector('.history-watermark-line')?.getAttribute('d') || '';
+    const lines = Array.from(card.querySelectorAll('.history-watermark-line'))
+      .map(line => line.getAttribute('d') || '');
     const inside = rect => Boolean(rect)
       && rect.left >= cardRect.left - 1
       && rect.right <= cardRect.right + 1
@@ -131,7 +275,7 @@ test('card content and full-card history watermarks stay inside every tile', asy
       watermarkCoversCard: Boolean(watermark)
         && Math.abs(watermark.width - cardRect.width) <= 1
         && Math.abs(watermark.height - cardRect.height) <= 1,
-      hasLine: line.startsWith('M') && line.includes('L'),
+      hasLine: lines.some(line => line.startsWith('M') && line.includes('L')),
     };
   }));
 
@@ -219,5 +363,32 @@ test('geometry remains contained across cozy, dense and micro viewports', async 
     expect(audit.panelOverflow, `${viewport.width}x${viewport.height}: panel overflow`).toBe(false);
     expect(audit.badgeInside, `${viewport.width}x${viewport.height}: PV badge escaped`).toBe(true);
     expect(audit.maxParticleDelta, `${viewport.width}x${viewport.height}: particle not centred`).toBeLessThanOrEqual(0.5);
+  }
+});
+
+test('text stays visible across representative viewport groups', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('iPhone'), 'Explicit cross-viewport audit uses desktop project sizing');
+
+  const viewports = [
+    { width: 320, height: 700 },
+    { width: 428, height: 926 },
+    { width: 768, height: 1024 },
+    { width: 1366, height: 900 },
+    { width: 1920, height: 1080 },
+  ];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto(`/energy-dashboard.html?text-audit=${viewport.width}x${viewport.height}`);
+    await page.waitForSelector('.prices-panel');
+    await page.waitForFunction(() => document.querySelectorAll('.card[data-history-card]').length === 6);
+    await page.waitForTimeout(600);
+    await seedTextStressContent(page);
+
+    const audit = await auditTextStressLayout(page);
+
+    expect(audit.documentOverflow, `${viewport.width}x${viewport.height}: document overflow`).toBe(false);
+    expect(audit.panelOverflow, `${viewport.width}x${viewport.height}: panel overflow`).toBe(false);
+    expect(audit.failures, `${viewport.width}x${viewport.height}: ${JSON.stringify(audit.failures, null, 2)}`).toEqual([]);
   }
 });

@@ -6138,3 +6138,146 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     font-size: 8.5px !important;
   }
 }
+
+/* ========================================================================== 
+   V2.7.11 text visibility hardening
+   Safe leading for descenders + responsive wrapping for dynamic strings.
+   ========================================================================== */
+
+.status,
+.brand,
+.zone-kicker,
+.weather-section-label,
+.section-kicker,
+.zone-state,
+.weather-date,
+.clock-footer,
+.sun-label,
+.day-length,
+.moon-priority,
+.moon-detail,
+.moon-event > span,
+.weather-desc,
+.weather-meta span,
+.smart-insight-title,
+.smart-insight-text,
+.smart-insight-context,
+.smart-pill,
+.section-heading h2,
+.pricesHeader .title,
+.updated,
+.usage-window-label,
+.usage-window-selector button,
+.badge .price-text,
+.card h3,
+.card-metric > small,
+.price-line,
+.solar-price,
+.gas-price,
+.sparkline-period,
+.flow .label,
+.flow .sub,
+.time,
+.day-label,
+.flag {
+  line-height: 1.18 !important;
+}
+
+.weather-time,
+.weather-temp,
+.sun-time,
+.moon-phase,
+.moon-illum,
+.flow .value,
+.card-metric > strong,
+.card strong,
+.card .value {
+  line-height: 1.1 !important;
+}
+
+.card-grid .card-metric > strong,
+.card-grid strong {
+  line-height: 1.1 !important;
+}
+
+.history-watermark {
+  inset: -1px !important;
+}
+
+#statusText,
+.weather-desc,
+.weather-meta span,
+.smart-insight-text,
+.smart-insight-context,
+.moon-event > span,
+.moon-event > strong,
+.badge .price-text,
+.price-line .price-text,
+.solar-price .price-text,
+.gas-price .price-text,
+.card h3,
+.card-metric > small {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 899px), (orientation: portrait) and (max-width: 1180px) {
+  .status {
+    height: auto !important;
+    min-height: 34px !important;
+    align-items: flex-start;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: normal;
+  }
+
+  #statusText,
+  .weather-desc,
+  .weather-meta span,
+  .day-length,
+  .moon-phase,
+  .moon-detail span,
+  .moon-event > span,
+  .moon-event > strong,
+  .smart-insight-text,
+  .smart-insight-context,
+  .updated,
+  .badge .price-text,
+  .price-line .price-text,
+  .solar-price .price-text,
+  .gas-price .price-text,
+  .card h3,
+  .card-metric > small {
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
+
+  .weather-meta span,
+  .smart-pill,
+  .badge {
+    height: auto !important;
+  }
+
+  .smart-pill,
+  .badge {
+    min-height: 30px !important;
+    white-space: normal !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  body.dashboard-fit-micro .panel[data-i18n-label="section-prices"] .chart {
+    height: 116px !important;
+    min-height: 116px !important;
+    padding: 10px 0 16px !important;
+  }
+
+  body.dashboard-fit-micro .panel[data-i18n-label="section-prices"] .gridlines {
+    inset: 23px 4px 16px !important;
+  }
+
+  body.dashboard-fit-micro .panel[data-i18n-label="section-prices"] .bars {
+    inset: 10px 4px 16px !important;
+  }
+}
