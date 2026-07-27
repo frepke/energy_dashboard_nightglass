@@ -6282,3 +6282,45 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     inset: 10px 4px 16px !important;
   }
 }
+
+/* v2.7.19 — Compact desktop weather metadata
+   In dashboard-fit-micro the fourth item (precipitation) previously stayed on
+   the same flex line and was clipped by the fixed-height weather card. Keep
+   humidity, wind and pressure on row one and reserve row two for rain data. */
+@media (min-width: 1101px) {
+  body.dashboard-fit-micro .command-zone--weather .weather-now-copy {
+    align-self: center !important;
+    min-width: 0 !important;
+  }
+
+  body.dashboard-fit-micro .command-zone--weather .weather-meta {
+    display: grid !important;
+    grid-template-columns: repeat(3, max-content) !important;
+    grid-auto-rows: 11px !important;
+    align-items: center !important;
+    justify-content: start !important;
+    column-gap: 3px !important;
+    row-gap: 2px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 1px !important;
+    overflow: visible !important;
+  }
+
+  body.dashboard-fit-micro .command-zone--weather .weather-meta span {
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 11px !important;
+    height: 11px !important;
+    padding: 0 3px !important;
+    font-size: 5.8px !important;
+    line-height: 11px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+  }
+
+  body.dashboard-fit-micro .command-zone--weather #weatherPrecipRate {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+  }
+}
