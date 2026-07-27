@@ -6324,3 +6324,63 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     justify-self: start !important;
   }
 }
+
+/* ========================================================================== 
+   V2.7.20 — Rain metadata visible in short desktop browser windows
+   --------------------------------------------------------------------------
+   The previous correction only targeted dashboard-fit-micro. A maximized
+   browser at 125% display scaling is normally classified as dashboard-fit-dense,
+   where the precipitation badge wrapped below the card's clipped content box.
+   Compact the weather typography slightly and reserve an explicit second row
+   for precipitation in dense landscape mode.
+   ========================================================================== */
+@media (min-width: 900px) and (orientation: landscape) {
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-now-copy {
+    align-self: center !important;
+    align-content: center !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-temp {
+    font-size: clamp(25px, 2.45vw, 36px) !important;
+    line-height: 1 !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-desc {
+    font-size: clamp(8px, .7vw, 11px) !important;
+    line-height: 1.05 !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-meta {
+    display: grid !important;
+    grid-template-columns: repeat(3, max-content) !important;
+    grid-auto-rows: 14px !important;
+    align-items: center !important;
+    justify-content: start !important;
+    column-gap: 3px !important;
+    row-gap: 2px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-meta span {
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 14px !important;
+    height: 14px !important;
+    padding: 1px 4px !important;
+    font-size: clamp(7px, .5vw, 9px) !important;
+    line-height: 12px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather #weatherPrecipRate {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+  }
+}

@@ -1,3 +1,9 @@
+## 2.7.20
+
+- Neerslagregel blijft zichtbaar in korte desktop-browservensters (`dashboard-fit-dense`).
+- Weermetadata gebruikt in die modus drie badges op regel 1 en neerslag op regel 2.
+- Compactere temperatuur- en metadata-afmetingen voorkomen verticale clipping.
+
 # Nightglass wijzigingen
 
 ## 2.7.10
