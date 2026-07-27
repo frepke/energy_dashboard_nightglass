@@ -2836,6 +2836,7 @@ body.dashboard-fit-micro .weather-desc {
 }
 
 body.dashboard-fit-micro .weather-meta {
+  flex-wrap: nowrap !important;
   gap: 2px !important;
   margin-top: 1px !important;
 }
