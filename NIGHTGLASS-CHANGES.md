@@ -1,3 +1,12 @@
+## 2.8.0
+
+- Hoofdpanelen gebruiken inhoudgestuurde hoogtes en groeien mee met extra regels of langere teksten.
+- Het dashboard vult minimaal de viewport, maar schakelt bij te weinig hoogte over op normale verticale pagina-scroll in plaats van inhoud af te knippen.
+- Weermetadata gebruikt flexibele rijen; neerslag blijft op een eigen tweede regel met dynamische ondermarge.
+- Vaste micro-, dense-, compact- en cozy-hoogtes voor weer, advies, energiekaarten en prijspaneel worden door inhoudgestuurde minima vervangen.
+- Advies-, kaart- en badge-inhoud mag wrappen wanneer de beschikbare ruimte kleiner is.
+- Cacheversies verhoogd naar 2.8.0.
+
 ## 2.7.21
 
 - Neerslagregel blijft zichtbaar in cozy, compact, dense en micro desktopweergaven.

@@ -1,16 +1,5 @@
-Nightglass Energy Dashboard 2.7.10
+Nightglass Energy Dashboard 2.8.0
 
-Automatische unit-/integratietests: 413 geslaagd
-Testbestanden: 23 geslaagd
-ESLint: 0 fouten, 0 waarschuwingen
-
-Gerichte 2.7.10-controles:
-- iPhone-portraitflow gebruikt eigen compacte keyframes voor beide richtingen
-- partikels blijven het grootste deel van de cyclus binnen de korte connector
-- drie partikels worden per actieve verbinding behouden
-- verminderde beweging toont statische energiemarkers
-- bestaande live-flowlogica en desktopanimaties blijven ongewijzigd
-
-De gerichte Playwright-browsertest is toegevoegd, maar kon in deze
-uitvoeromgeving niet worden gestart omdat de Playwright Chromium-binary niet
-is geinstalleerd. De unit-/integratietests en ESLint zijn volledig uitgevoerd.
+Responsive inhoudsgestuurde lay-out toegevoegd.
+Hoofdpanelen groeien met de getoonde data; bij onvoldoende viewporthoogte wordt verticaal gescrold in plaats van geclipt.
+Gerichte viewportcontrole wordt uitgevoerd voor de nieuwe release.

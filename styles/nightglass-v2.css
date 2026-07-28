@@ -6430,3 +6430,226 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     justify-self: start !important;
   }
 }
+
+/* ========================================================================== 
+   V2.8.0 — Content-aware viewport layout
+   --------------------------------------------------------------------------
+   Landscape dashboards keep filling the viewport while every main panel is
+   allowed to grow with its rendered content. If the available height becomes
+   too small, the document scrolls vertically instead of clipping data.
+   ========================================================================== */
+@media (min-width: 900px) and (orientation: landscape) {
+  html,
+  body {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body {
+    min-height: 100dvh !important;
+  }
+
+  .dashboard {
+    height: auto !important;
+    min-height: 100dvh !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    overflow: visible !important;
+  }
+
+  .topbar {
+    height: auto !important;
+    min-height: 40px !important;
+  }
+
+  .dashboard-content,
+  body.dashboard-fit-cozy .dashboard-content,
+  body.dashboard-fit-compact .dashboard-content,
+  body.dashboard-fit-dense .dashboard-content,
+  body.dashboard-fit-micro .dashboard-content {
+    grid-template-rows:
+      auto
+      auto
+      auto
+      minmax(clamp(168px, 24dvh, 320px), 1fr) !important;
+    align-content: stretch !important;
+    overflow: visible !important;
+  }
+
+  .panel {
+    min-height: min-content !important;
+  }
+
+  .weather-hero,
+  body.dashboard-fit-cozy .weather-hero,
+  body.dashboard-fit-compact .weather-hero,
+  body.dashboard-fit-dense .weather-hero,
+  body.dashboard-fit-micro .weather-hero {
+    height: auto !important;
+    min-height: min-content !important;
+    grid-auto-rows: minmax(min-content, auto) !important;
+    align-items: stretch !important;
+  }
+
+  .command-zone,
+  .celestial-module,
+  body.dashboard-fit-micro .command-zone,
+  body.dashboard-fit-micro .celestial-module {
+    height: auto !important;
+    min-height: min-content !important;
+    align-self: stretch !important;
+  }
+
+  .moon-body,
+  body.dashboard-fit-micro .moon-body,
+  .weather-now,
+  body.dashboard-fit-micro .weather-now {
+    height: auto !important;
+    min-height: min-content !important;
+  }
+
+  .moon-events > div,
+  body.dashboard-fit-micro .moon-events > div {
+    height: auto !important;
+    min-height: min-content !important;
+  }
+
+  .command-zone--weather {
+    grid-template-rows: auto minmax(min-content, 1fr) !important;
+  }
+
+  .weather-now-copy,
+  body.dashboard-fit-cozy .command-zone--weather .weather-now-copy,
+  body.dashboard-fit-compact .command-zone--weather .weather-now-copy,
+  body.dashboard-fit-dense .command-zone--weather .weather-now-copy,
+  body.dashboard-fit-micro .command-zone--weather .weather-now-copy {
+    min-height: min-content !important;
+    align-content: center !important;
+    gap: clamp(3px, .42vh, 6px) !important;
+  }
+
+  .command-zone--weather .weather-meta,
+  body.dashboard-fit-cozy .command-zone--weather .weather-meta,
+  body.dashboard-fit-compact .command-zone--weather .weather-meta,
+  body.dashboard-fit-dense .command-zone--weather .weather-meta,
+  body.dashboard-fit-micro .command-zone--weather .weather-meta {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, max-content)) !important;
+    grid-auto-rows: auto !important;
+    align-items: center !important;
+    justify-content: start !important;
+    column-gap: clamp(2px, .26vw, 5px) !important;
+    row-gap: clamp(3px, .36vh, 6px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-bottom: clamp(2px, .35vh, 6px) !important;
+    overflow: visible !important;
+  }
+
+  .command-zone--weather .weather-meta span,
+  body.dashboard-fit-cozy .command-zone--weather .weather-meta span,
+  body.dashboard-fit-compact .command-zone--weather .weather-meta span,
+  body.dashboard-fit-dense .command-zone--weather .weather-meta span,
+  body.dashboard-fit-micro .command-zone--weather .weather-meta span {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: clamp(2px, .28vh, 4px) clamp(4px, .38vw, 7px) !important;
+    font-size: clamp(6px, .55vw, 10px) !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .command-zone--weather #weatherPrecipRate,
+  body.dashboard-fit-cozy .command-zone--weather #weatherPrecipRate,
+  body.dashboard-fit-compact .command-zone--weather #weatherPrecipRate,
+  body.dashboard-fit-dense .command-zone--weather #weatherPrecipRate,
+  body.dashboard-fit-micro .command-zone--weather #weatherPrecipRate {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .smart-insight,
+  body.dashboard-fit-micro .smart-insight {
+    height: auto !important;
+    min-height: min-content !important;
+  }
+
+  .smart-insight-text,
+  .smart-insight-context {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .smart-insight-meta {
+    flex-wrap: wrap !important;
+  }
+
+  .energy-panel,
+  body.dashboard-fit-cozy .energy-panel,
+  body.dashboard-fit-compact .energy-panel,
+  body.dashboard-fit-dense .energy-panel,
+  body.dashboard-fit-micro .energy-panel {
+    height: auto !important;
+    min-height: min-content !important;
+    grid-template-rows:
+      auto
+      minmax(clamp(86px, 12dvh, 150px), auto)
+      auto !important;
+    overflow: hidden !important;
+  }
+
+  .cards,
+  body.dashboard-fit-cozy .cards,
+  body.dashboard-fit-compact .cards,
+  body.dashboard-fit-dense .cards,
+  body.dashboard-fit-micro .cards {
+    height: auto !important;
+    min-height: min-content !important;
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)) !important;
+    overflow: visible !important;
+  }
+
+  .card,
+  body.dashboard-fit-cozy .card,
+  body.dashboard-fit-compact .card,
+  body.dashboard-fit-dense .card,
+  body.dashboard-fit-micro .card {
+    height: auto !important;
+    min-height: min-content !important;
+  }
+
+  .card h3,
+  .card-metric > small {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .prices-panel,
+  body.dashboard-fit-micro .prices-panel {
+    height: auto !important;
+    min-height: min-content !important;
+  }
+
+  .chart,
+  body.dashboard-fit-micro .panel[data-i18n-label="section-prices"] .chart {
+    height: auto !important;
+    min-height: clamp(150px, 22dvh, 310px) !important;
+  }
+
+  .badges {
+    flex-wrap: wrap !important;
+  }
+}
