@@ -758,12 +758,25 @@ export async function refreshWeather() {
 
     const precipRateEl = $('#weatherPrecipRate');
     if (precipRateEl) {
-      if (cc.preciprate !== undefined && cc.preciprate !== null) {
-        let precipText = '🌧 ' + formatNumber(Number(cc.preciprate).toFixed(1), 0) + ' mm/u';
-        if (cc.precipday !== undefined && cc.precipday !== null) {
-          precipText += ' · ' + formatNumber(Number(cc.precipday).toFixed(1), 0) + ' mm';
-        }
-        precipRateEl.textContent = precipText;
+      const provider = (CFG.weatherProvider || '').toLowerCase();
+      const isVierlingsbeek = provider === 'vierlingsbeek' || provider === 'vb';
+      const rate = Number(cc.preciprate);
+      const dayTotal = Number(cc.precipday);
+      const fallbackHour = Number(cc.precip);
+      const hasRate = Number.isFinite(rate);
+      const hasDayTotal = Number.isFinite(dayTotal);
+      const hasFallbackHour = Number.isFinite(fallbackHour);
+
+      // The Vierlingsbeek rain-rate sensor can be absent for a refresh while
+      // the station's hourly/daily counters are still valid. Keep the row
+      // visible and use those counters as a safe zero/rate fallback instead of
+      // hiding the complete precipitation line.
+      if (isVierlingsbeek || hasRate || hasDayTotal) {
+        const shownRate = hasRate ? rate : (hasFallbackHour ? fallbackHour : 0);
+        const shownDayTotal = hasDayTotal ? dayTotal : 0;
+        precipRateEl.textContent = '🌧 '
+          + formatNumber(shownRate.toFixed(1), 0) + ' mm/u · '
+          + formatNumber(shownDayTotal.toFixed(1), 0) + ' mm';
         precipRateEl.style.display = '';
       } else {
         precipRateEl.style.display = 'none';

@@ -223,8 +223,8 @@ export async function fetchWeatherData() {
     precipprob:  om?.precipprob,
 
     precip:      customValue(devices.rainHour) ?? 0,
-    precipday:   customValue(devices.rainToday),
-    preciprate:  customValue(devices.rainRate),
+    precipday:   customValue(devices.rainToday) ?? 0,
+    preciprate:  customValue(devices.rainRate) ?? customValue(devices.rainHour) ?? 0,
 
     windspeed:   wind.windspeed,
     windgust:    wind.windgust,

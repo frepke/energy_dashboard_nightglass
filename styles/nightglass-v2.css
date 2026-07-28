@@ -6326,33 +6326,26 @@ body.dashboard-fit-micro .history-watermark.is-visible {
 }
 
 /* ========================================================================== 
-   V2.7.20 — Rain metadata visible in short desktop browser windows
+   V2.7.21 — Precipitation row visible in every desktop density mode
    --------------------------------------------------------------------------
-   The previous correction only targeted dashboard-fit-micro. A maximized
-   browser at 125% display scaling is normally classified as dashboard-fit-dense,
-   where the precipitation badge wrapped below the card's clipped content box.
-   Compact the weather typography slightly and reserve an explicit second row
-   for precipitation in dense landscape mode.
+   The weather row must not depend on the current fit class. Browser zoom and
+   operating-system scaling can switch between cozy, compact and dense without
+   changing the screenshot dimensions. Reserve a second metadata row in every
+   landscape desktop mode; micro keeps its smaller measurements below.
    ========================================================================== */
 @media (min-width: 900px) and (orientation: landscape) {
-  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-now-copy {
+  body.dashboard-fit-cozy .command-zone--weather .weather-now-copy,
+  body.dashboard-fit-compact .command-zone--weather .weather-now-copy,
+  body.dashboard-fit-dense .command-zone--weather .weather-now-copy {
     align-self: center !important;
     align-content: center !important;
     gap: 2px !important;
     min-width: 0 !important;
   }
 
-  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-temp {
-    font-size: clamp(25px, 2.45vw, 36px) !important;
-    line-height: 1 !important;
-  }
-
-  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-desc {
-    font-size: clamp(8px, .7vw, 11px) !important;
-    line-height: 1.05 !important;
-  }
-
-  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-meta {
+  body.dashboard-fit-cozy .command-zone--weather .weather-meta,
+  body.dashboard-fit-compact .command-zone--weather .weather-meta,
+  body.dashboard-fit-dense .command-zone--weather .weather-meta {
     display: grid !important;
     grid-template-columns: repeat(3, max-content) !important;
     grid-auto-rows: 14px !important;
@@ -6366,7 +6359,9 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     overflow: visible !important;
   }
 
-  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather .weather-meta span {
+  body.dashboard-fit-cozy .command-zone--weather .weather-meta span,
+  body.dashboard-fit-compact .command-zone--weather .weather-meta span,
+  body.dashboard-fit-dense .command-zone--weather .weather-meta span {
     min-width: 0 !important;
     max-width: none !important;
     min-height: 14px !important;
@@ -6379,7 +6374,58 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     text-overflow: clip !important;
   }
 
-  body.dashboard-fit-dense:not(.dashboard-fit-micro) .command-zone--weather #weatherPrecipRate {
+  body.dashboard-fit-cozy .command-zone--weather #weatherPrecipRate,
+  body.dashboard-fit-compact .command-zone--weather #weatherPrecipRate,
+  body.dashboard-fit-dense .command-zone--weather #weatherPrecipRate {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+  }
+
+  body.dashboard-fit-dense .command-zone--weather .weather-temp {
+    font-size: clamp(25px, 2.45vw, 36px) !important;
+    line-height: 1 !important;
+  }
+
+  body.dashboard-fit-dense .command-zone--weather .weather-desc {
+    font-size: clamp(8px, .7vw, 11px) !important;
+    line-height: 1.05 !important;
+  }
+
+  body.dashboard-fit-micro .command-zone--weather .weather-now-copy {
+    align-self: center !important;
+    align-content: center !important;
+    gap: 1px !important;
+    min-width: 0 !important;
+  }
+
+  body.dashboard-fit-micro .command-zone--weather .weather-meta {
+    display: grid !important;
+    grid-template-columns: repeat(3, max-content) !important;
+    grid-auto-rows: 11px !important;
+    align-items: center !important;
+    justify-content: start !important;
+    column-gap: 2px !important;
+    row-gap: 1px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.dashboard-fit-micro .command-zone--weather .weather-meta span {
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 11px !important;
+    height: 11px !important;
+    padding: 0 3px !important;
+    font-size: 5.8px !important;
+    line-height: 11px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  body.dashboard-fit-micro .command-zone--weather #weatherPrecipRate {
     grid-column: 1 / -1 !important;
     justify-self: start !important;
   }

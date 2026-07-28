@@ -1,3 +1,9 @@
+## 2.7.21
+
+- Neerslagregel blijft zichtbaar in cozy, compact, dense en micro desktopweergaven.
+- Vierlingsbeek toont de neerslagregel ook wanneer de losse regenintensiteitssensor tijdelijk ontbreekt; uur- en dagwaarden worden als fallback gebruikt.
+- CSS- en JavaScript-cacheversies verhoogd naar 2.7.21.
+
 ## 2.7.20
 
 - Neerslagregel blijft zichtbaar in korte desktop-browservensters (`dashboard-fit-dense`).
