@@ -677,3 +677,76 @@
     inset 0 1px 0 rgba(255,255,255,.26),
     inset 0 -7px 13px rgba(0,0,0,.22) !important;
 }
+
+/* ============================================================
+   QUARTER-HOUR TOOLTIP — slot, buy tariff, feed-in tariff and window context
+   ============================================================ */
+.tooltip {
+  width: max-content;
+  height: auto;
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 5px;
+  padding-block: 9px;
+  white-space: normal;
+  overflow: visible;
+}
+
+.tooltip .dot {
+  grid-row: 1 / -1;
+  align-self: center;
+  flex: none;
+}
+
+.tip-header {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 8px;
+  min-width: 0;
+}
+
+.tip-date {
+  grid-column: 1 / -1;
+  color: rgba(255,255,255,.56);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.tip-time { color: rgba(255,255,255,.86); }
+.tip-note { align-self: center; }
+
+.tip-values {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 7px;
+  align-items: baseline;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255,255,255,.12);
+}
+
+.tip-label {
+  color: rgba(255,255,255,.48);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.tip-price,
+.tip-sell-price { justify-self: end; font-weight: 1000; }
+.tip-price { color: var(--tip-color, var(--green)); }
+.tip-sell-price { color: var(--blue-light, #78bfff); }
+
+.tip-window {
+  grid-column: 2 / -1;
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 850;
+}
+.tip-window[hidden] { display: none; }

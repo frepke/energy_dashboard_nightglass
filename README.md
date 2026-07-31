@@ -1,8 +1,8 @@
-# Nightglass Energy Dashboard 2.7
+# Nightglass Energy Dashboard 2.9
 
 Een zelfstandig fullscreen energiedashboard voor **Domoticz**, in de visuele taal van Nightglass. Het dashboard gebruikt alleen HTML, CSS en JavaScript: geen framework en geen buildstap voor productie.
 
-Versie 2.7 maakt de energietegels inhoudelijk rustiger en gebruikt de grafiekfunctie van Nightglass zoals bedoeld: als subtiele achtergrondwatermerken op basis van echte Domoticz-daghistorie. De dubbele dagtotalen in de drie grote live-tegels en de lokaal opgebouwde 60-minutenlijntjes zijn verwijderd.
+Versie 2.9 verwerkt de nieuwe Zonneplan-kwartierprijzen volledig: de grafiek, hoverinformatie, actuele prijs, slimme adviezen en selectie van het voordeligste venster werken op tijdsloten van 15 minuten. Uurprijzen blijven als terugval ondersteund.
 
 ## Functies
 
@@ -11,7 +11,7 @@ Versie 2.7 maakt de energietegels inhoudelijk rustiger en gebruikt de grafiekfun
 - zelfvoorziening en zelfconsumptie;
 - Nightglass-achtergrondgrafieken met echte Domoticz-daghistorie;
 - actuele stroom- en gasprijs;
-- Zonneplan-uurgrafiek met voordeligste aaneengesloten reeks;
+- Zonneplan-kwartiergrafiek met afname- en terugleverprijs en het voordeligste aaneengesloten venster;
 - slim verbruiks- en terugleveradvies;
 - tijd, datum, zonsopkomst, zonsondergang en daglengte;
 - prominente maanmodule met fase, verlichting, opkomst, ondergang, leeftijd, afstand en volgende volle/nieuwe maan;

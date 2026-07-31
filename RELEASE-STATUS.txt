@@ -1,5 +1,5 @@
-Nightglass Energy Dashboard 2.8.0
+Nightglass Energy Dashboard 2.9.0
 
-Responsive inhoudsgestuurde lay-out toegevoegd.
-Hoofdpanelen groeien met de getoonde data; bij onvoldoende viewporthoogte wordt verticaal gescrold in plaats van geclipt.
-Gerichte viewportcontrole wordt uitgevoerd voor de nieuwe release.
+Zonneplan-kwartierprijzen toegevoegd aan grafiek, actuele prijs en slimme adviezen.
+Hover toont tijdslot, afnameprijs en terugleverprijs; beste vensters worden in echte klokuren uit kwartieren berekend.
+Uurprijsdata blijft ondersteund als automatische terugval.

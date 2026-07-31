@@ -3,7 +3,7 @@
  */
 
 import { $, $$ }         from '../core/dom.js';
-import { isNum, fmt }    from '../core/formatters.js';
+import { isNum, fmt, activeLocale } from '../core/formatters.js';
 import { activeDecisionWindow } from '../domain/prices.js';
 import { t }             from '../i18n.js';
 
@@ -73,10 +73,40 @@ export function colorFor(v, min, max) {
 }
 
 function relLabel(ts, now) {
-  const d = Math.round((ts - now) / 3600000);
-  if (d === 0)  return t('time-now');
-  if (d > 0)    return t('time-in-h').replace('{h}', d);
-  return t('time-h-ago').replace('{h}', Math.abs(d));
+  const minutes = Math.round((ts - now) / 60000);
+  if (minutes === 0) return t('time-now');
+  if (Math.abs(minutes) < 60) {
+    return (minutes > 0 ? t('time-in-min') : t('time-min-ago'))
+      .replace('{m}', Math.abs(minutes));
+  }
+  const hours = Math.round(minutes / 60);
+  if (hours > 0) return t('time-in-h').replace('{h}', hours);
+  return t('time-h-ago').replace('{h}', Math.abs(hours));
+}
+
+function clockTime(value) {
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '--:--';
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function slotDurationMs(item) {
+  const explicit = Number(item?.endTs) - Number(item?.ts);
+  if (Number.isFinite(explicit) && explicit > 0) return explicit;
+  const minutes = Number(item?.intervalMinutes);
+  return (Number.isFinite(minutes) && minutes > 0 ? minutes : 60) * 60000;
+}
+
+function shortDate(value) {
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(activeLocale(), { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
+function fillText(key, values = {}) {
+  let text = t(key);
+  Object.entries(values).forEach(([name, value]) => { text = text.replaceAll(`{${name}}`, String(value)); });
+  return text;
 }
 
 // ---- Colour utilities ----
@@ -150,6 +180,35 @@ function refreshUsageWindowSelectorState() {
     const isActive = normalizeUsageWindowHours(btn.dataset.usageWindow) === activeHours;
     btn.classList.toggle('active', isActive);
     btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+}
+
+function refreshUsageWindowDetails() {
+  const selector = $('#usageWindowSelector');
+  if (!selector) return;
+
+  $$('[data-usage-window]', selector).forEach(btn => {
+    const requested = normalizeUsageWindowHours(btn.dataset.usageWindow);
+    const block = activeDecisionWindow(requested);
+    if (!block) {
+      btn.title = '';
+      return;
+    }
+
+    if (requested === 'all') {
+      btn.title = fillText('usage-window-all-detail', { slots: block.highlightedSlots || block.items?.length || 0 });
+      return;
+    }
+
+    btn.title = fillText('usage-window-detail', {
+      hours: requested,
+      date: shortDate(block.start),
+      start: clockTime(block.start),
+      end: clockTime(block.end),
+      average: fmt.ctValue(block.avg),
+      saving: fmt.ctValue(block.savingCt || 0),
+      slots: block.highlightedSlots || block.items?.length || 0,
+    });
   });
 }
 
@@ -242,7 +301,7 @@ function assignDayMarkers(items, nowTs) {
 }
 
 function getFutureFlagItems(items, nowTs) {
-  // Chart flags should only look forward. The current hour has its own state
+  // Chart flags should only look forward. The current price slot has its own state
   // and must not be mixed into the upcoming cheap/expensive context.
   return items.filter(x => x.ts >= nowTs && isNum(x.p));
 }
@@ -331,17 +390,34 @@ function setBarMetrics(w, x, min, max, c) {
 }
 
 function setBarDataset(w, x, nowTs, c) {
-  const tm = String(x.d.getHours()).padStart(2, '0') + ':00';
+  const endTs = Number(x.endTs) || Number(x.ts) + slotDurationMs(x);
+  const tm = clockTime(x.d);
+  const range = tm + '–' + clockTime(endTs);
 
-  w.dataset.time  = tm;
+  w.dataset.time  = range;
+  w.dataset.startTime = tm;
+  w.dataset.date = shortDate(x.d);
   w.dataset.price = isNum(x.p) ? fmt.ct(x.p) : t('price-unknown');
-  w.dataset.note  = x.placeholder ? t('price-not-yet-known') : relLabel(x.ts, nowTs);
+  w.dataset.sellPrice = isNum(x.sell) ? fmt.ct(x.sell) : t('price-unknown');
+  w.dataset.intervalMinutes = String(Math.round(slotDurationMs(x) / 60000));
+  w.dataset.note  = x.placeholder
+    ? t('price-not-yet-known')
+    : (x.ts === nowTs
+        ? t(Number(w.dataset.intervalMinutes) < 60 ? 'price-current-slot' : 'price-current-hour')
+        : relLabel(x.ts, nowTs));
   w.dataset.color = c;
 
-  // Accessible label: "17:00 — 23.63 ct" so screen readers can navigate price bars.
+  // Accessible label includes the complete slot and both tariffs.
   const priceLabel = isNum(x.p) ? fmt.ct(x.p) : t('price-unknown');
+  const sellLabel  = isNum(x.sell) ? fmt.ct(x.sell) : t('price-unknown');
   const noteLabel  = x.placeholder ? t('price-not-yet-known') : relLabel(x.ts, nowTs);
-  w.setAttribute('aria-label', tm + ' — ' + priceLabel + (noteLabel ? ', ' + noteLabel : ''));
+  w.setAttribute('aria-label', fillText('price-slot-aria', {
+    date: w.dataset.date,
+    range,
+    buy: priceLabel,
+    sell: sellLabel,
+    note: noteLabel,
+  }));
 }
 
 function updateDayMarker(w, x, hasFlag) {
@@ -388,16 +464,19 @@ function updateBarFill(w, x, c) {
   bar.style.setProperty('--glow', pal.glow);
 }
 
-function shouldShowTimeLabel(hour, labelDensity, ts, nowTs) {
+function shouldShowTimeLabel(item, labelDensity, nowTs) {
+  if (item.ts === nowTs) return true;
+  const hour = item.d.getHours();
+  const minute = item.d.getMinutes();
+  if (minute !== 0) return false;
   if (labelDensity === 'full') return hour % 2 === 0;
   if (labelDensity === 'medium') return hour % 4 === 0;
-  return hour % 6 === 0 || ts === nowTs;
+  return hour % 6 === 0;
 }
 
 function updateTimeLabel(w, x, labelDensity, nowTs) {
   const time = $('.time', w);
-  const hour = x.d.getHours();
-  time.textContent = shouldShowTimeLabel(hour, labelDensity, x.ts, nowTs) ? w.dataset.time : '';
+  time.textContent = shouldShowTimeLabel(x, labelDensity, nowTs) ? w.dataset.startTime : '';
 }
 
 function updateBarWrap(w, x, nowTs, min, max, cheapest, expensive, labelDensity) {
@@ -417,13 +496,15 @@ function updateBarWrap(w, x, nowTs, min, max, cheapest, expensive, labelDensity)
  * Renders or updates all price bars.
  *
  * @param {Array}  items - [{ d: Date, ts: number, p: number, placeholder: boolean, dayMarker: string }]
- * @param {number} nowTs - Timestamp of the current hour (floored)
+ * @param {number} nowTs - Timestamp of the current price slot
  * @param {number} min   - Minimum price in the visible range
  * @param {number} max   - Maximum price in the visible range
  */
 export function renderBars(items, nowTs, min, max) {
   const el = $('#bars');
   el.style.setProperty('--bar-count', items.length);
+  const firstInterval = items.find(x => x && !x.placeholder);
+  el.dataset.intervalMinutes = String(Math.round(slotDurationMs(firstInterval) / 60000));
 
   const chartWidth = el.getBoundingClientRect?.().width || globalThis.window?.innerWidth || 1600;
   const labelDensity = getLabelDensity(items.length, chartWidth);
@@ -478,6 +559,12 @@ export function markBestWindowBars() {
     hasFocusWindow = hasFocusWindow || inWindow;
     w.classList.toggle('is-best-window', inWindow);
     w.classList.toggle('is-best-edge', inWindow && (ts === edgeStart || ts === edgeEnd));
+    w.dataset.window = inWindow
+      ? fillText('tooltip-best-window', {
+          hours: block.requestedHours,
+          average: fmt.ctValue(block.avg),
+        })
+      : '';
   });
 
   const barContainers = $$('.bars');
@@ -487,6 +574,7 @@ export function markBestWindowBars() {
     bars.classList.toggle('has-focus-window', hasFocusWindow);
     bars.classList.toggle('has-all-window', isAllWindow);
   });
+  refreshUsageWindowDetails();
 }
 
 // ---- Tooltip ----
@@ -501,12 +589,31 @@ export function setupTooltip() {
   dot.className = 'dot';
   const tipTime = document.createElement('span');
   tipTime.className = 'tip-time';
+  const tipDate = document.createElement('span');
+  tipDate.className = 'tip-date';
   const tipNote = document.createElement('span');
   tipNote.className = 'tip-note';
+  const tipBuyLabel = document.createElement('span');
+  tipBuyLabel.className = 'tip-label tip-buy-label';
+  tipBuyLabel.textContent = t('tooltip-buy');
   const tipPrice = document.createElement('span');
   tipPrice.className = 'tip-price';
+  const tipSellLabel = document.createElement('span');
+  tipSellLabel.className = 'tip-label tip-sell-label';
+  tipSellLabel.textContent = t('tooltip-sell');
+  const tipSellPrice = document.createElement('span');
+  tipSellPrice.className = 'tip-sell-price';
+  const tipWindow = document.createElement('span');
+  tipWindow.className = 'tip-window';
 
-  tip.append(dot, tipTime, tipNote, tipPrice);
+  const tipHeader = document.createElement('span');
+  tipHeader.className = 'tip-header';
+  tipHeader.append(tipDate, tipTime, tipNote);
+  const tipValues = document.createElement('span');
+  tipValues.className = 'tip-values';
+  tipValues.append(tipBuyLabel, tipPrice, tipSellLabel, tipSellPrice);
+
+  tip.append(dot, tipHeader, tipValues, tipWindow);
   line.className = 'hoverline is-hidden';
   document.body.append(tip, line);
 
@@ -549,9 +656,14 @@ export function setupTooltip() {
     const c = w.dataset.color || '#00c9a7';
 
     tip.style.setProperty('--tip-color', c);
+    $('.tip-date',  tip).textContent = w.dataset.date  || '';
     $('.tip-time',  tip).textContent = w.dataset.time  || 'hour';
     $('.tip-note',  tip).textContent = w.dataset.note  || '';
     $('.tip-price', tip).textContent = w.dataset.price || '';
+    $('.tip-sell-price', tip).textContent = w.dataset.sellPrice || t('price-unknown');
+    const windowInfo = w.dataset.window || '';
+    $('.tip-window', tip).textContent = windowInfo;
+    $('.tip-window', tip).hidden = !windowInfo;
 
     const useTouchFixed = !!options.touchFixed;
     const forceTouchPrime = !!options.forceTouchPrime;

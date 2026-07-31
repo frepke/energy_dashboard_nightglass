@@ -23,7 +23,7 @@ function fmtCtValue(value) {
 
 function fmtHour(ts) {
   const d = new Date(ts);
-  return String(d.getHours()).padStart(2, '0') + ':00';
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 }
 
 function setPill(el, value, cls) {

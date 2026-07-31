@@ -22,7 +22,7 @@ import { isNum }        from '../core/formatters.js';
 import { CONTRACT_CFG } from '../config/resolveConfig.js';
 import {
   classifyPrice, getZonnebonusContext,
-  activeDecisionWindow, getDynamicThresholds,
+  activeDecisionWindow, getDynamicThresholds, currentPriceSlotTs,
 } from './prices.js';
 
 // Minimum export advantage (ct/kWh) for EXPORT NOW to override load scheduling
@@ -62,20 +62,14 @@ export function buildInsightContext() {
   const bestAvg   = bestBlock && isNum(bestBlock.avg) ? bestBlock.avg : null;
 
   const nowTs         = Date.now();
-  const currentHour   = new Date(nowTs);
-  currentHour.setMinutes(0, 0, 0);
-  const currentHourTs = currentHour.getTime();
+  const currentSlotTs = currentPriceSlotTs(LIVE_STATE.priceForecast, nowTs);
   const bestStart     = bestBlock ? (bestBlock.highlightStart || bestBlock.start) : null;
   const bestEnd       = bestBlock ? (bestBlock.highlightEnd   || bestBlock.end)   : null;
-  const bestStartHourTs = isNum(bestStart)
-    ? (() => { const d = new Date(bestStart); d.setMinutes(0, 0, 0); return d.getTime(); })()
-    : null;
-  const bestEndHourTs = isNum(bestEnd)
-    ? (() => { const d = new Date(bestEnd); d.setMinutes(0, 0, 0); return d.getTime(); })()
-    : null;
+  const bestStartSlotTs = isNum(bestStart) ? Number(bestStart) : null;
+  const bestEndSlotTs = isNum(bestEnd) ? Number(bestEnd) : null;
 
-  const inBestWindow = !!bestBlock && isNum(bestStartHourTs) && isNum(bestEndHourTs)
-                     && currentHourTs >= bestStartHourTs && currentHourTs < bestEndHourTs
+  const inBestWindow = !!bestBlock && isNum(bestStartSlotTs) && isNum(bestEndSlotTs)
+                     && currentSlotTs >= bestStartSlotTs && currentSlotTs < bestEndSlotTs
                      && isNum(priceCt) && isNum(bestAvg)
                      && priceCt <= bestAvg + NEAR_BEST_THRESHOLD_CT;
   const laterWindow  = !!bestBlock && isNum(bestStart)
@@ -96,7 +90,7 @@ export function buildInsightContext() {
   // Day boundary for today/tomorrow distinction
   const tomorrowStartTs = (() => { const d = new Date(nowTs); d.setHours(24, 0, 0, 0); return d.getTime(); })();
 
-  // Is the current hour the cheapest of today's remaining forecast hours?
+  // Is the current slot the cheapest of today's remaining forecast slots?
   const todayForecastHours = (LIVE_STATE.priceForecast || [])
     .filter(x => x && isNum(x.ts) && isNum(x.ct) && x.ts >= nowTs - 30 * 60000 && x.ts < tomorrowStartTs);
   const todayMinCt = todayForecastHours.length > 0

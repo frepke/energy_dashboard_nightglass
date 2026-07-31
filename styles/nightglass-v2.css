@@ -6653,3 +6653,27 @@ body.dashboard-fit-micro .history-watermark.is-visible {
     flex-wrap: wrap !important;
   }
 }
+
+/* V2.9 quarter-hour price chart: compact 15-minute bars and complete tariff tooltip. */
+.panel[data-i18n-label="section-prices"] .bars[data-interval-minutes="15"] {
+  gap: clamp(1px, .14vw, 3px) !important;
+}
+
+.tooltip {
+  max-width: min(460px, calc(100vw - 20px));
+}
+
+@media (max-width: 560px) {
+  .tooltip {
+    max-width: calc(100vw - 16px);
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .tip-values {
+    grid-column: 2;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .tip-window { grid-column: 2; }
+}

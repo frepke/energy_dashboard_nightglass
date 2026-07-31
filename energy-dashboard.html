@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="styles/chart.css">
   <link rel="stylesheet" href="styles/insights.css">
   <link rel="stylesheet" href="styles/weather-art.css">
-  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.8.0">
+  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.9.0">
 
   <script>
     // Nieuwe installaties starten in het Nederlands. Bestaande voorkeuren blijven behouden.
@@ -29,7 +29,7 @@
 </head>
 
 <body>
-<main class="dashboard" data-dashboard-version="nightglass-v2.8.0">
+<main class="dashboard" data-dashboard-version="nightglass-v2.9.0">
   <header class="topbar">
     <div class="topbar-left">
       <div class="brand-lockup" aria-label="Nightglass Energy">
@@ -352,11 +352,11 @@
       </div>
     </section>
 
-    <!-- Uurprijzen -->
+    <!-- Kwartierprijzen -->
     <section class="prices-panel panel" aria-label="Energieprijzen" data-i18n-label="section-prices">
       <div class="pricesHeader">
-        <div class="usage-window-selector" id="usageWindowSelector" aria-label="Voordeligste reeks uren" data-i18n-label="usage-window-aria">
-          <span class="usage-window-label" data-i18n="usage-window-label">Voordeligste reeks</span>
+        <div class="usage-window-selector" id="usageWindowSelector" aria-label="Beste prijsvenster" data-i18n-label="usage-window-aria">
+          <span class="usage-window-label" data-i18n="usage-window-label">Beste venster</span>
           <button type="button" data-usage-window="all" aria-label="Alle uren" data-i18n="usage-window-all-btn" data-i18n-aria="usage-window-all-aria">Alle</button>
           <button type="button" data-usage-window="1" aria-label="1 uur" data-i18n="usage-window-1-btn" data-i18n-aria="usage-window-1-aria">1u</button>
           <button type="button" data-usage-window="2" aria-label="2 uur" data-i18n="usage-window-2-btn" data-i18n-aria="usage-window-2-aria">2u</button>
@@ -383,7 +383,7 @@
         </div>
       </div>
 
-      <div class="chart" id="chart" role="img" aria-label="Grafiek met uurlijkse elektriciteitsprijzen" data-i18n-label="chart-aria">
+      <div class="chart" id="chart" role="img" aria-label="Grafiek met elektriciteitsprijzen per kwartier" data-i18n-label="chart-aria">
         <div class="gridlines" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
         <div class="bars" id="bars" role="list" aria-label="Prijsbalken" data-i18n-label="price-bars-aria"></div>
       </div>
@@ -392,6 +392,6 @@
 </main>
 
 <script src="config.js" onerror="console.warn('config.js ontbreekt — gebruik config.example.js als basis.')"></script>
-<script type="module" src="scripts/main.js?v=2.8.0"></script>
+<script type="module" src="scripts/main.js?v=2.9.0"></script>
 </body>
 </html>

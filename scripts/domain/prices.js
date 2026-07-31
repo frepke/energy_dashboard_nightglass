@@ -8,8 +8,11 @@ import { LIVE_STATE, priceHistoryBuffer, insightState, STABLE_TICKS } from '../c
 import { isNum } from '../core/formatters.js';
 import { CONTRACT_CFG, CFG } from '../config/resolveConfig.js';
 
-const PRICE_HISTORY_MAX = 168; // 7 days × 24 h
+const PRICE_HISTORY_MAX = 672; // 7 days × 96 quarter-hour slots
+const LEGACY_PRICE_HISTORY_MAX = 168; // Untimestamped callers retain the historic 7 × 24 limit.
 const HOUR_MS = 3600000;
+const MINUTE_MS = 60000;
+const DEFAULT_SLOT_MS = HOUR_MS;
 const CONTINUOUS_TOLERANCE_MS = 120000;
 
 /** @type {Map<number, number>} Timestamped rolling price history (ts -> ct). */
@@ -30,7 +33,7 @@ function syncTimestampedHistoryBuffer() {
 /**
  * Appends forecast prices to the rolling history buffer.
  *
- * Entries with a timestamp are de-duplicated by hour, so a 1-second dashboard
+ * Entries with a timestamp are de-duplicated by price slot, so a fast dashboard
  * refresh cannot fill the 7-day history with repeated copies of the same
  * forecast. Untimestamped entries keep the old append-only behaviour for
  * backwards compatibility with tests and utility callers.
@@ -56,9 +59,61 @@ export function pushPriceHistory(forecast) {
   forecast.forEach(x => {
     if (x && isNum(x.ct)) priceHistoryBuffer.push(Number(x.ct));
   });
-  if (priceHistoryBuffer.length > PRICE_HISTORY_MAX) {
-    priceHistoryBuffer.splice(0, priceHistoryBuffer.length - PRICE_HISTORY_MAX);
+  if (priceHistoryBuffer.length > LEGACY_PRICE_HISTORY_MAX) {
+    priceHistoryBuffer.splice(0, priceHistoryBuffer.length - LEGACY_PRICE_HISTORY_MAX);
   }
+}
+
+function validForecastItems(items = LIVE_STATE.priceForecast) {
+  return (items || [])
+    .filter(x => x && isNum(x.ts) && isNum(x.ct))
+    .sort((a, b) => Number(a.ts) - Number(b.ts));
+}
+
+/** Infers the active price-slot duration (15 minutes for quarter prices, 60 for legacy data). */
+export function inferPriceIntervalMs(items = LIVE_STATE.priceForecast) {
+  const sorted = validForecastItems(items);
+  const explicit = sorted
+    .map(x => Number(x.intervalMinutes) * MINUTE_MS)
+    .filter(ms => Number.isFinite(ms) && ms >= 5 * MINUTE_MS && ms <= 2 * HOUR_MS);
+
+  if (explicit.length) {
+    explicit.sort((a, b) => a - b);
+    return explicit[Math.floor(explicit.length / 2)];
+  }
+
+  const diffs = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const diff = Number(sorted[i].ts) - Number(sorted[i - 1].ts);
+    // Larger differences are forecast gaps, not slot durations.
+    if (diff >= 5 * MINUTE_MS && diff <= 90 * MINUTE_MS) diffs.push(diff);
+  }
+  if (!diffs.length) return DEFAULT_SLOT_MS;
+  diffs.sort((a, b) => a - b);
+  return diffs[Math.floor(diffs.length / 2)];
+}
+
+function itemDurationMs(item, fallbackMs) {
+  const explicitEnd = Number(item?.endTs) - Number(item?.ts);
+  if (Number.isFinite(explicitEnd) && explicitEnd > 0 && explicitEnd <= 2 * HOUR_MS) return explicitEnd;
+  const explicitMinutes = Number(item?.intervalMinutes) * MINUTE_MS;
+  if (Number.isFinite(explicitMinutes) && explicitMinutes > 0 && explicitMinutes <= 2 * HOUR_MS) return explicitMinutes;
+  return fallbackMs;
+}
+
+/** Returns the timestamp of the slot containing `nowTs`. */
+export function currentPriceSlotTs(items = LIVE_STATE.priceForecast, nowTs = Date.now()) {
+  const sorted = validForecastItems(items);
+  const fallbackMs = inferPriceIntervalMs(sorted);
+  const active = sorted.find(x => {
+    const end = Number(x.ts) + itemDurationMs(x, fallbackMs);
+    return Number(x.ts) <= nowTs && nowTs < end;
+  });
+  if (active) return Number(active.ts);
+
+  const beforeNow = sorted.filter(x => Number(x.ts) <= nowTs).pop();
+  if (beforeNow) return Number(beforeNow.ts);
+  return Math.floor(nowTs / fallbackMs) * fallbackMs;
 }
 
 /**
@@ -152,49 +207,60 @@ export function classifyPrice(priceCt) {
 }
 
 /**
- * Finds the cheapest consecutive window of `hoursNeeded` hours in the forecast.
+ * Finds the cheapest consecutive window of `hoursNeeded` clock-hours in the forecast.
+ * With quarter-hour prices, one requested hour therefore contains four slots.
  * Returns null when no suitable window exists.
  */
 export function bestWindow(hoursNeeded = 2) {
-  const n = Number.isFinite(Number(hoursNeeded))
+  const requestedHours = Number.isFinite(Number(hoursNeeded))
     ? Math.max(1, Math.min(24, Math.round(Number(hoursNeeded))))
     : 2;
-
-  const currentHour = new Date();
-  currentHour.setMinutes(0, 0, 0);
-  const currentHourTs = currentHour.getTime();
-
-  const future = (LIVE_STATE.priceForecast || [])
-    .filter(x => x && isNum(x.ts) && isNum(x.ct) && x.ts >= currentHourTs)
-    .sort((a, b) => a.ts - b.ts);
-
-  if (!future.length || future.length < n) return null;
+  const targetDurationMs = requestedHours * HOUR_MS;
+  const all = validForecastItems();
+  const slotMs = inferPriceIntervalMs(all);
+  const currentSlotTs = currentPriceSlotTs(all);
+  const future = all.filter(x => Number(x.ts) >= currentSlotTs);
+  if (!future.length) return null;
 
   let best = null;
 
-  for (let i = 0; i <= future.length - n; i++) {
-    const block = future.slice(i, i + n);
-    if (block.length < n) continue;
+  for (let i = 0; i < future.length; i++) {
+    const block = [];
+    let durationMs = 0;
+    let expectedTs = Number(future[i].ts);
 
-    const continuous = block.every((x, idx) => {
-      if (idx === 0) return true;
-      return Math.abs(x.ts - block[idx - 1].ts - HOUR_MS) < CONTINUOUS_TOLERANCE_MS;
-    });
+    for (let j = i; j < future.length; j++) {
+      const item = future[j];
+      if (Math.abs(Number(item.ts) - expectedTs) >= CONTINUOUS_TOLERANCE_MS) break;
 
-    if (!continuous) continue;
+      const duration = itemDurationMs(item, slotMs);
+      if (durationMs + duration > targetDurationMs + CONTINUOUS_TOLERANCE_MS) break;
+      block.push(item);
+      durationMs += duration;
+      expectedTs = Number(item.ts) + duration;
 
-    const avg = block.reduce((a, x) => a + x.ct, 0) / block.length;
-
-    if (!best || avg < best.avg) {
-      best = {
-        start: block[0].ts,
-        end: block[block.length - 1].ts + HOUR_MS,
-        avg,
-        items: block
-      };
+      if (Math.abs(durationMs - targetDurationMs) < CONTINUOUS_TOLERANCE_MS) {
+        const avg = block.reduce((a, x) => a + Number(x.ct), 0) / block.length;
+        if (!best || avg < best.avg) {
+          best = {
+            start: Number(block[0].ts),
+            end: expectedTs,
+            avg,
+            items: [...block],
+            intervalMinutes: Math.round(slotMs / MINUTE_MS),
+            slotCount: block.length,
+          };
+        }
+        break;
+      }
     }
   }
 
+  if (best) {
+    const referenceAvg = future.reduce((sum, x) => sum + Number(x.ct), 0) / future.length;
+    best.referenceAvg = referenceAvg;
+    best.savingCt = Math.max(0, referenceAvg - best.avg);
+  }
   return best;
 }
 
@@ -217,6 +283,7 @@ export function expandCheapPlateau(block) {
     .sort((a, b) => a.ts - b.ts);
 
   if (!future.length) return block;
+  const slotMs = inferPriceIntervalMs(future);
 
   const prices = future.map(x => x.ct);
   const sorted = [...prices].sort((a, b) => a - b);
@@ -244,7 +311,7 @@ export function expandCheapPlateau(block) {
   while (left > 0) {
     const prev = future[left - 1];
     const current = future[left];
-    const continuous = Math.abs(current.ts - prev.ts - HOUR_MS) < CONTINUOUS_TOLERANCE_MS;
+    const continuous = Math.abs(current.ts - prev.ts - itemDurationMs(prev, slotMs)) < CONTINUOUS_TOLERANCE_MS;
 
     if (!continuous || prev.ct > maxPlateauCt) break;
     left--;
@@ -253,7 +320,7 @@ export function expandCheapPlateau(block) {
   while (right < future.length - 1) {
     const current = future[right];
     const next = future[right + 1];
-    const continuous = Math.abs(next.ts - current.ts - HOUR_MS) < CONTINUOUS_TOLERANCE_MS;
+    const continuous = Math.abs(next.ts - current.ts - itemDurationMs(current, slotMs)) < CONTINUOUS_TOLERANCE_MS;
 
     if (!continuous || next.ct > maxPlateauCt) break;
     right++;
@@ -264,7 +331,7 @@ export function expandCheapPlateau(block) {
 
   return Object.assign({}, block, {
     start: items[0].ts,
-    end: items[items.length - 1].ts + HOUR_MS,
+    end: items[items.length - 1].ts + itemDurationMs(items[items.length - 1], slotMs),
     avg,
     items,
     plateauLength: items.length,
@@ -280,28 +347,30 @@ export function expandCheapPlateau(block) {
  * That means usageWindowHours: 3 highlights exactly 3 bars.
  */
 export function activeDecisionWindow(hoursNeeded = CFG.usageWindowHours) {
-  const currentHour = new Date();
-  currentHour.setMinutes(0, 0, 0);
-  const currentHourTs = currentHour.getTime();
+  const all = validForecastItems();
+  const slotMs = inferPriceIntervalMs(all);
+  const currentSlotTs = currentPriceSlotTs(all);
 
   if (String(hoursNeeded).toLowerCase().trim() === 'all') {
-    const future = (LIVE_STATE.priceForecast || [])
-      .filter(x => x && isNum(x.ts) && isNum(x.ct) && x.ts >= currentHourTs)
-      .sort((a, b) => a.ts - b.ts);
+    const future = all.filter(x => Number(x.ts) >= currentSlotTs);
 
     if (!future.length) return null;
 
     const avg = future.reduce((a, x) => a + x.ct, 0) / future.length;
     return {
       start: future[0].ts,
-      end: future[future.length - 1].ts + HOUR_MS,
+      end: future[future.length - 1].ts + itemDurationMs(future[future.length - 1], slotMs),
       avg,
+      referenceAvg: avg,
+      savingCt: 0,
       items: future,
       highlightStart: future[0].ts,
-      highlightEnd: future[future.length - 1].ts + HOUR_MS,
+      highlightEnd: future[future.length - 1].ts + itemDurationMs(future[future.length - 1], slotMs),
       requestedHours: 'all',
-      highlightedHours: future.length,
-      currentHourTs,
+      highlightedHours: (future[future.length - 1].ts + itemDurationMs(future[future.length - 1], slotMs) - future[0].ts) / HOUR_MS,
+      highlightedSlots: future.length,
+      intervalMinutes: Math.round(slotMs / MINUTE_MS),
+      currentSlotTs,
       currentIsInsideHighlight: true
     };
   }
@@ -314,17 +383,19 @@ export function activeDecisionWindow(hoursNeeded = CFG.usageWindowHours) {
   if (!block) return null;
 
   // Highlight exactly the configured usage window. Do not pull the current
-  // hour into the highlight just because the best window starts soon; for a
-  // 1-hour window that would incorrectly mark two bars. If the current hour
+  // slot into the highlight just because the best window starts soon; for a
+  // 1-hour window that would add an extra slot. If the current slot
   // is actually part of the best window, it is included naturally because
   // block.start <= currentHourTs < block.end.
   return Object.assign({}, block, {
     highlightStart: block.start,
     highlightEnd: block.end,
     requestedHours: n,
-    highlightedHours: Math.round((block.end - block.start) / HOUR_MS),
-    currentHourTs,
-    currentIsInsideHighlight: currentHourTs >= block.start && currentHourTs < block.end
+    highlightedHours: (block.end - block.start) / HOUR_MS,
+    highlightedSlots: block.items.length,
+    intervalMinutes: block.intervalMinutes || Math.round(slotMs / MINUTE_MS),
+    currentSlotTs,
+    currentIsInsideHighlight: currentSlotTs >= block.start && currentSlotTs < block.end
   });
 }
 

@@ -29,8 +29,44 @@ import {
 } from '../ui/chart.js';
 import { t } from '../i18n.js';
 
-// How many past hours to include in the price chart (excluding the current hour).
+// How many past clock-hours to include in the price chart.
 const HISTORY_HOURS = 4;
+const MINUTE_MS = 60000;
+
+function parseForecastDate(raw) {
+  if (!raw) return null;
+  const d = new Date(String(raw).replace(' ', 'T'));
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function normalizeIntervalMinutes(value, fallback = 60) {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 5 && n <= 120 ? Math.round(n) : fallback;
+}
+
+function floorToPriceSlot(timestamp, intervalMinutes) {
+  const intervalMs = normalizeIntervalMinutes(intervalMinutes, 15) * MINUTE_MS;
+  return Math.floor(Number(timestamp) / intervalMs) * intervalMs;
+}
+
+function inferForecastIntervalMinutes(forecast, fallback = 15) {
+  const rows = Array.isArray(forecast?.hours) ? forecast.hours : [];
+  const explicit = normalizeIntervalMinutes(
+    forecast?.interval_minutes,
+    normalizeIntervalMinutes(rows[0]?.interval_minutes, 0),
+  );
+  if (explicit) return explicit;
+
+  const timestamps = rows.map(safeDate).filter(Boolean).map(d => d.getTime()).sort((a, b) => a - b);
+  const diffs = [];
+  for (let i = 1; i < timestamps.length; i++) {
+    const minutes = (timestamps[i] - timestamps[i - 1]) / MINUTE_MS;
+    if (minutes >= 5 && minutes <= 90) diffs.push(minutes);
+  }
+  if (!diffs.length) return normalizeIntervalMinutes(fallback, 15);
+  diffs.sort((a, b) => a - b);
+  return normalizeIntervalMinutes(diffs[Math.floor(diffs.length / 2)], fallback);
+}
 
 function priceFromDevice(d) {
   const raw = Number.parseFloat(d && d.price);
@@ -66,8 +102,10 @@ export function createRefreshController(setStatus) {
   let lastPriceView = null;
   let lastGasNow = null;
   let lastForecastUpdated = null;
-  /** Hour timestamp (ms) at which prices were last fetched; 0 = never. */
-  let lastPriceFetchHourTs = 0;
+  /** Price-slot timestamp (ms) at which prices were last fetched; 0 = never. */
+  let lastPriceFetchSlotTs = 0;
+  let lastPriceFetchAt = 0;
+  let priceIntervalMinutes = 15;
 
   function renderUpdatedLabel() {
     const el = $('#updated');
@@ -202,27 +240,53 @@ export function createRefreshController(setStatus) {
     }
     if (!Array.isArray(forecast.hours)) return;
 
-    const now = new Date();
-    now.setMinutes(0, 0, 0);
-    const nowTs = now.getTime();
+    const nowActualTs = new Date().getTime();
+    priceIntervalMinutes = inferForecastIntervalMinutes(forecast, priceIntervalMinutes);
 
     const liveItems = forecast.hours
       .map(h => {
         const d = safeDate(h);
         const price = parsePriceEuro(h && h.price);
-        return d && isNum(price)
-          ? { d, ts: d.getTime(), p: Number(price), placeholder: false }
-          : null;
+        if (!d || !isNum(price)) return null;
+
+        const intervalMinutes = normalizeIntervalMinutes(h?.interval_minutes, priceIntervalMinutes);
+        const explicitEnd = parseForecastDate(h?.local_end_datetime || h?.end_datetime);
+        const endTs = explicitEnd && explicitEnd.getTime() > d.getTime()
+          ? explicitEnd.getTime()
+          : d.getTime() + intervalMinutes * MINUTE_MS;
+        const sell = parsePriceEuro(h?.sell_price_ex_tax);
+
+        return {
+          d,
+          ts: d.getTime(),
+          endTs,
+          intervalMinutes,
+          p: Number(price),
+          sell: isNum(sell) ? Number(sell) : null,
+          isCurrent: h?.is_current === true,
+          placeholder: false,
+        };
       })
       .filter(Boolean)
       .sort((a, b) => a.ts - b.ts);
+
+    const currentLive = liveItems.find(x => x.isCurrent || (x.ts <= nowActualTs && nowActualTs < x.endTs));
+    const nowTs = currentLive?.ts ?? floorToPriceSlot(nowActualTs, priceIntervalMinutes);
 
     const historyStartTs = nowTs - HISTORY_HOURS * 3600000;
 
     let cachedItems;
     try {
       cachedItems = JSON.parse(localStorage.getItem(PRICE_HISTORY_KEY) || '[]')
-        .map(x => ({ d: new Date(x.ts), ts: Number(x.ts), p: Number(x.p), placeholder: false }))
+        .map(x => ({
+          d: new Date(x.ts),
+          ts: Number(x.ts),
+          endTs: Number(x.endTs) || Number(x.ts) + normalizeIntervalMinutes(x.intervalMinutes, priceIntervalMinutes) * MINUTE_MS,
+          intervalMinutes: normalizeIntervalMinutes(x.intervalMinutes, priceIntervalMinutes),
+          p: Number(x.p),
+          sell: isNum(x.sell) ? Number(x.sell) : null,
+          placeholder: false,
+        }))
         .filter(x => isNum(x.ts) && isNum(x.p) && !Number.isNaN(x.d));
     } catch {
       cachedItems = [];
@@ -237,7 +301,13 @@ export function createRefreshController(setStatus) {
       .sort((a, b) => a.ts - b.ts);
 
     try {
-      localStorage.setItem(PRICE_HISTORY_KEY, JSON.stringify(items.map(x => ({ ts: x.ts, p: x.p })).slice(-120)));
+      localStorage.setItem(PRICE_HISTORY_KEY, JSON.stringify(items.map(x => ({
+        ts: x.ts,
+        endTs: x.endTs,
+        intervalMinutes: x.intervalMinutes,
+        p: x.p,
+        sell: x.sell,
+      })).slice(-480)));
     } catch {
       // storage unavailable
     }
@@ -247,17 +317,26 @@ export function createRefreshController(setStatus) {
     const vals = slice.map(x => x.p).filter(isNum);
     const min = vals.length ? Math.min(...vals) : 0;
     const max = vals.length ? Math.max(...vals) : 1;
-    const current = slice.find(x => x.ts === nowTs);
+    const current = currentLive
+      || slice.find(x => x.ts === nowTs)
+      || [...liveItems].reverse().find(x => x.ts <= nowActualTs)
+      || null;
 
     const priceForecast = slice
-      .filter(x => x && isNum(x.ts) && isNum(x.p) && x.ts >= nowTs)
-      .map(x => ({ ts: x.ts, ct: Number(x.p) * 100 }));
+      .filter(x => x && isNum(x.ts) && isNum(x.p) && (Number(x.endTs) || x.ts) > nowActualTs)
+      .map(x => ({
+        ts: x.ts,
+        endTs: x.endTs,
+        intervalMinutes: x.intervalMinutes,
+        ct: Number(x.p) * 100,
+        sellCt: isNum(x.sell) ? Number(x.sell) * 100 : null,
+      }));
     const cheapestFuture = priceForecast.reduce((best, item) => {
       if (!best || item.ct < best.ct) return item;
       return best;
     }, null);
 
-    const sig = slice.map(x => x.ts + ':' + (isNum(x.p) ? x.p : 'x')).join('|') + '|' + nowTs;
+    const sig = slice.map(x => [x.ts, x.endTs, isNum(x.p) ? x.p : 'x', isNum(x.sell) ? x.sell : 'x'].join(':')).join('|') + '|' + nowTs;
     if (sig !== lastForecastSignature) {
       pushPriceHistory(priceForecast);
     }
@@ -278,7 +357,7 @@ export function createRefreshController(setStatus) {
       setElecBadge(current.p, colorFor(current.p, min, max));
     }
 
-    lastForecastUpdated = forecast.updated || null;
+    lastForecastUpdated = fd.LastUpdate || forecast.updated || null;
     renderUpdatedLabel();
     if (isNum(forecast.gas_now)) {
       lastGasNow = forecast.gas_now;
@@ -301,19 +380,23 @@ export function createRefreshController(setStatus) {
         msg.push(e.message);
       }
 
-      // Only fetch the pricing forecast when the current hour has changed since
+      // Only fetch the pricing forecast when the current price slot has changed since
       // the last successful fetch.  This avoids redundant API calls on every
       // fast-cadence poll tick while still updating the chart when a new price
-      // hour begins (or on the very first run / after a forced 'ws' push).
-      const now = new Date();
-      now.setMinutes(0, 0, 0);
-      const currentHourTs = now.getTime();
-      const shouldFetchPrices = reason === 'ws' || lastPriceFetchHourTs !== currentHourTs;
+      // slot begins (or on the very first run / after a forced 'ws' push).
+      const priceClockTs = Date.now();
+      const currentSlotTs = floorToPriceSlot(priceClockTs, priceIntervalMinutes);
+      const nearSlotBoundary = priceClockTs - currentSlotTs < 2 * MINUTE_MS;
+      const boundaryRetryDue = nearSlotBoundary && priceClockTs - lastPriceFetchAt >= 20_000;
+      const shouldFetchPrices = reason === 'ws'
+        || lastPriceFetchSlotTs !== currentSlotTs
+        || boundaryRetryDue;
 
       if (shouldFetchPrices) {
         try {
           await refreshPrices();
-          lastPriceFetchHourTs = currentHourTs;
+          lastPriceFetchSlotTs = currentSlotTs;
+          lastPriceFetchAt = priceClockTs;
           if (forecastDeviceId) msg.push('prijzen');
         } catch (e) {
           ok = false;

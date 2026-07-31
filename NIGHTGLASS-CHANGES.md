@@ -1,3 +1,14 @@
+## 2.9.0
+
+- de Zonneplan-grafiek verwerkt de nieuwe kwartierprijzen uit Forecast JSON zonder tijden op hele uren af te ronden;
+- tijdlabels verschijnen alleen op zinvolle hele-uurpunten, plus op het actuele kwartier, zodat labels niet meer viermaal over elkaar staan;
+- hoverinformatie toont datum, begin- en eindtijd, afnameprijs, terugleverprijs exclusief belasting en het actieve beste venster;
+- de selectie `Alle / 1u / 2u / 3u / 4u / 6u` berekent voortaan echte klokuren uit aaneengesloten kwartieren (bijvoorbeeld vier kwartieren voor 1u);
+- iedere vensterknop toont bij aanwijzen begin/einde, gemiddelde prijs, voordeel ten opzichte van het beschikbare gemiddelde en het aantal kwartieren;
+- prijsdata wordt bij ieder nieuw kwartier opgehaald; uurdata blijft als terugval ondersteund;
+- advies- en prijsvenstertijden tonen nu ook minuten (`:15`, `:30`, `:45`);
+- 414 geautomatiseerde tests slagen, inclusief gerichte kwartierprijs-, kwartiergrens- en tooltiptests.
+
 ## 2.8.0
 
 - Hoofdpanelen gebruiken inhoudgestuurde hoogtes en groeien mee met extra regels of langere teksten.
