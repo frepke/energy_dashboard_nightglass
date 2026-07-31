@@ -11,7 +11,12 @@ import { WEATHER_TTL as WEATHER_TTL_VC }  from './services/visualCrossingService
 import { WEATHER_TTL as WEATHER_TTL_OM }  from './services/openMeteoService.js';
 import { WEATHER_TTL as WEATHER_TTL_VB }  from './services/vierlingsbeekService.js';
 import { updateSmartInsight } from './ui/smartInsight.js';
-import { markBestWindowBars, setupTooltip, setupUsageWindowSelector } from './ui/chart.js';
+import {
+  markBestWindowBars,
+  retranslateTooltipLabels,
+  setupTooltip,
+  setupUsageWindowSelector,
+} from './ui/chart.js';
 import { setupHistoryCards } from './ui/historyModal.js';
 import { initDashboardFitAndKiosk } from './ui/kiosk.js';
 import { setupWidthToggle } from './ui/widthToggle.js';
@@ -119,6 +124,7 @@ const websocketController = createWebSocketController({
 initThemeToggle();
 initNightglassThemeSync();
 initLanguageToggle(() => {
+  retranslateTooltipLabels();
   retranslateWeatherLabels();
   retranslateDeviceHistoryWatermarks();
   updateDomoticzIndicator();

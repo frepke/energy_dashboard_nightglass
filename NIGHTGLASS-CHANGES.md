@@ -184,3 +184,7 @@ Beschikbare iconen: `bolt`, `grid`, `plug`, `home`, `solar`, `panel`, `flame`, `
 - De drie live knooppunten vormen één compacte visual zonder afzonderlijke kaartvlakken.
 - Horizontale flowanimaties blijven correct na draaien tussen portrait en landscape.
 - De maan en decoratieve baan schalen nu ten opzichte van de maanmodule en worden begrensd door de beschikbare hoogte, zodat korte of afwijkende resoluties niet meer afkappen.
+# Nightglass v2.9.1
+
+- Hoverinformatie wisselt nu direct mee tussen Nederlands en Engels.
+- De dynamisch aangemaakte labels voor afname en teruglevering blijven niet meer in de vorige taal staan.

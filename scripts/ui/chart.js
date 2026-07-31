@@ -579,6 +579,16 @@ export function markBestWindowBars() {
 
 // ---- Tooltip ----
 
+/** Re-applies language-sensitive labels in the dynamically-created tooltip. */
+export function retranslateTooltipLabels() {
+  const tip = document.querySelector('.tooltip');
+  if (!tip) return;
+  const buyLabel = $('.tip-buy-label', tip);
+  const sellLabel = $('.tip-sell-label', tip);
+  if (buyLabel) buyLabel.textContent = t('tooltip-buy');
+  if (sellLabel) sellLabel.textContent = t('tooltip-sell');
+}
+
 /** Creates and attaches the hover tooltip to the price chart. */
 export function setupTooltip() {
   const tip  = document.createElement('div');
@@ -656,6 +666,11 @@ export function setupTooltip() {
     const c = w.dataset.color || '#00c9a7';
 
     tip.style.setProperty('--tip-color', c);
+    // These labels live in a dynamically-created tooltip and are therefore not
+    // covered by applyLang(), which only updates elements with data-i18n
+    // attributes. Refresh them whenever the tooltip is populated so a language
+    // switch takes effect immediately without rebuilding the tooltip.
+    retranslateTooltipLabels();
     $('.tip-date',  tip).textContent = w.dataset.date  || '';
     $('.tip-time',  tip).textContent = w.dataset.time  || 'hour';
     $('.tip-note',  tip).textContent = w.dataset.note  || '';
