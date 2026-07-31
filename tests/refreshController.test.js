@@ -132,6 +132,7 @@ function setupDom() {
 
 describe('parseLimitPct branches', () => {
   beforeEach(() => {
+    vi.useRealTimers();
     setupDom();
     vi.clearAllMocks();
   });
@@ -375,6 +376,43 @@ describe('refreshPrices', () => {
     expect(setElecBadge).toHaveBeenCalled();
   });
 
+  it('keeps quarter-hour slot metadata and feed-in prices from Forecast JSON', async () => {
+    renderBars.mockClear();
+    mockFindForecast.mockResolvedValue('42');
+    const start = new Date();
+    start.setSeconds(0, 0);
+    start.setMinutes(Math.floor(start.getMinutes() / 15) * 15);
+    const rows = Array.from({ length: 4 }, (_, i) => {
+      const d = new Date(start.getTime() + i * 15 * 60000);
+      const end = new Date(d.getTime() + 15 * 60000);
+      return {
+        local_datetime: d.toISOString(),
+        local_end_datetime: end.toISOString(),
+        interval_minutes: 15,
+        price: 0.3397908 + i * 0.001,
+        sell_price_ex_tax: 0.2289427 + i * 0.001,
+        is_current: i === 0,
+      };
+    });
+    mockApiLive.mockResolvedValue(makeForecast(rows, { interval_minutes: 15, source: 'quarter-hourly' }));
+
+    const { ctrl } = makeController();
+    await ctrl.refreshAll('poll');
+
+    const [items, nowTs] = renderBars.mock.calls.at(-1);
+    expect(nowTs).toBe(start.getTime());
+    expect(items[0]).toMatchObject({
+      intervalMinutes: 15,
+      endTs: start.getTime() + 15 * 60000,
+      sell: 0.2289427,
+    });
+    expect(LIVE_STATE.priceForecast[0]).toMatchObject({
+      intervalMinutes: 15,
+      sellCt: 22.89427,
+    });
+    expect(setElecBadge).toHaveBeenCalledWith(rows[0].price, '#00e0ba');
+  });
+
   it('skips forecast rows with invalid prices instead of treating them as 0', async () => {
     renderBars.mockClear();
     mockFindForecast.mockResolvedValue('42');
@@ -462,18 +500,37 @@ describe('refreshPrices', () => {
     expect(renderBars).toHaveBeenCalled();
   });
 
-  it('skips refreshPrices on subsequent poll ticks within the same hour', async () => {
+  it('skips refreshPrices on immediate subsequent poll ticks within the same price slot', async () => {
     mockFindForecast.mockResolvedValue('42');
     mockApiLive.mockResolvedValue(makeForecast([makeHour(0, 0.25)]));
     const { ctrl } = makeController();
 
-    // First poll: prices fetched because lastPriceFetchHourTs === 0.
+    // First poll: prices fetched because no slot has been loaded yet.
     await ctrl.refreshAll('poll');
     expect(mockApiLive).toHaveBeenCalledTimes(1);
 
-    // Second poll in the same hour: prices should be skipped.
+    // Second poll in the same slot: prices should be skipped.
     await ctrl.refreshAll('poll');
     expect(mockApiLive).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-fetches prices when the next quarter-hour starts', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-01T10:07:00Z'));
+    try {
+      mockFindForecast.mockResolvedValue('42');
+      mockApiLive.mockResolvedValue(makeForecast([makeHour(0, 0.25)], { interval_minutes: 15 }));
+      const { ctrl } = makeController();
+
+      await ctrl.refreshAll('poll');
+      expect(mockApiLive).toHaveBeenCalledTimes(1);
+
+      vi.setSystemTime(new Date('2026-08-01T10:15:01Z'));
+      await ctrl.refreshAll('poll');
+      expect(mockApiLive).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('re-fetches prices when a WebSocket push arrives regardless of hour boundary', async () => {

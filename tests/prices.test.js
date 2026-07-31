@@ -219,6 +219,26 @@ describe('bestWindow', () => {
     // Gap is exactly 2 h which is > 120_000 ms tolerance → no continuous pair
     expect(w).toBeNull();
   });
+
+  it('treats one requested hour as four consecutive quarter-hour slots', () => {
+    vi.useFakeTimers();
+    const now = Date.UTC(2026, 7, 1, 10, 7);
+    const slotStart = Date.UTC(2026, 7, 1, 10, 0);
+    vi.setSystemTime(now);
+    LIVE_STATE.priceForecast = Array.from({ length: 12 }, (_, i) => ({
+      ts: slotStart + i * 15 * 60000,
+      endTs: slotStart + (i + 1) * 15 * 60000,
+      intervalMinutes: 15,
+      ct: i >= 4 && i < 8 ? 5 : 20,
+    }));
+
+    const w = bestWindow(1);
+    expect(w.items).toHaveLength(4);
+    expect(w.start).toBe(slotStart + 4 * 15 * 60000);
+    expect(w.end).toBe(slotStart + 8 * 15 * 60000);
+    expect(w.avg).toBe(5);
+    vi.useRealTimers();
+  });
 });
 
 

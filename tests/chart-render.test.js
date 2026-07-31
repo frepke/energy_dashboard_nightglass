@@ -47,7 +47,7 @@ describe('chart DOM rendering', () => {
     expect(current.classList.contains('now')).toBe(true);
     expect(current.classList.contains('negative-now')).toBe(true);
     expect(current.classList.contains('has-zero')).toBe(true);
-    expect(current.dataset.note).toBe('now');
+    expect(current.dataset.note).toBe('current hour');
     expect(current.querySelector('.bar').classList.contains('negative')).toBe(true);
 
     const tomorrow = bars.children[3];
@@ -158,12 +158,33 @@ describe('chart DOM rendering', () => {
     const line = document.querySelector('.hoverline');
     expect(tip.classList.contains('is-visible')).toBe(true);
     expect(line.classList.contains('is-visible')).toBe(true);
-    expect(tip.querySelector('.tip-time').textContent).toBe('10:00');
+    expect(tip.querySelector('.tip-time').textContent).toBe('10:00–11:00');
     expect(tip.querySelector('.tip-price').textContent).toContain('ct');
 
     bars.dispatch('pointerout', { target: wrap, relatedTarget: null });
     expect(tip.classList.contains('is-visible')).toBe(false);
     expect(line.classList.contains('is-visible')).toBe(false);
+  });
+
+  it('shows quarter-hour range, buy tariff and feed-in tariff in the tooltip', async () => {
+    const { renderBars, setupTooltip } = await import('../scripts/ui/chart.js');
+    const now = new Date(2026, 7, 1, 10, 15).getTime();
+    renderBars([
+      makeHour(now, 0.3397908, {
+        endTs: now + 15 * 60000,
+        intervalMinutes: 15,
+        sell: 0.2289427,
+      }),
+    ], now, 0.2, 0.4);
+
+    setupTooltip();
+    const wrap = document.getElementById('bars').children[0];
+    document.getElementById('bars').dispatch('pointerover', { target: wrap });
+
+    const tip = document.querySelector('.tooltip');
+    expect(tip.querySelector('.tip-time').textContent).toBe('10:15–10:30');
+    expect(tip.querySelector('.tip-price').textContent).toContain('33.98');
+    expect(tip.querySelector('.tip-sell-price').textContent).toContain('22.89');
   });
 
   it('pins tooltip on touchend and dismisses on tap outside', async () => {
@@ -236,7 +257,7 @@ describe('chart DOM rendering', () => {
     bars.dispatch('touchend', {});
 
     const tip = document.querySelector('.tooltip');
-    expect(tip.querySelector('.tip-time').textContent).toBe('10:00');
+    expect(tip.querySelector('.tip-time').textContent).toBe('10:00–11:00');
 
     // Tap bar 2 → tooltip moves
     document.elementFromPoint = () => wrap2;
@@ -247,7 +268,7 @@ describe('chart DOM rendering', () => {
     bars.dispatch('touchend', {});
 
     expect(tip.classList.contains('is-visible')).toBe(true);
-    expect(tip.querySelector('.tip-time').textContent).toBe('11:00');
+    expect(tip.querySelector('.tip-time').textContent).toBe('11:00–12:00');
   });
 
   it('dismisses pinned tooltip when tapping empty chart area', async () => {
