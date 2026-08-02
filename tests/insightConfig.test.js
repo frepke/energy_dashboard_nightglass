@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 async function loadConfig({ search = '', config = {} } = {}) {
@@ -29,5 +31,15 @@ describe('Smart Insight configuration', () => {
   it('allows a temporary URL override', async () => {
     const { INSIGHT_CFG } = await loadConfig({ search: '?insight=1' });
     expect(INSIGHT_CFG.enabled).toBe(true);
+  });
+
+  it('keeps the energy-flow panel on its own grid row when Insight is disabled', () => {
+    const html = readFileSync(resolve(process.cwd(), 'energy-dashboard.html'), 'utf8');
+    const css = readFileSync(resolve(process.cwd(), 'styles/energy-advice.css'), 'utf8')
+      .replace(/\s+/g, ' ');
+
+    expect(html).toContain('<body class="insight-disabled">');
+    expect(css).toContain('body.insight-disabled .dashboard-content,');
+    expect(css).toContain('grid-template-rows: auto auto auto minmax(clamp(168px, 24dvh, 320px), 1fr) !important;');
   });
 });
