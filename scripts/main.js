@@ -52,7 +52,9 @@ function updateSmartInsightIfEnabled() {
 
 function applySmartInsightVisibility() {
   const panel = $('#smartInsight');
-  if (panel) panel.hidden = !CFG.insightEnabled;
+  const insightDisabled = !CFG.insightEnabled;
+  if (panel) panel.hidden = insightDisabled;
+  document.body?.classList.toggle('insight-disabled', insightDisabled);
 }
 
 

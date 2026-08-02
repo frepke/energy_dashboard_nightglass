@@ -275,6 +275,17 @@
   body.dashboard-fit-micro .dashboard-content {
     grid-template-rows: auto auto auto auto minmax(clamp(168px, 24dvh, 320px), 1fr) !important;
   }
+
+  /* Insight is removed from grid layout when disabled. Keep the remaining
+     four panels on their intended rows instead of shifting Energiestroom into
+     the former compact Insight row. */
+  body.insight-disabled .dashboard-content,
+  body.insight-disabled.dashboard-fit-cozy .dashboard-content,
+  body.insight-disabled.dashboard-fit-compact .dashboard-content,
+  body.insight-disabled.dashboard-fit-dense .dashboard-content,
+  body.insight-disabled.dashboard-fit-micro .dashboard-content {
+    grid-template-rows: auto auto auto minmax(clamp(168px, 24dvh, 320px), 1fr) !important;
+  }
 }
 
 @media (min-width: 900px) and (max-width: 1260px) {
@@ -289,6 +300,7 @@
 
 @media (max-width: 899px), (orientation: portrait) and (max-width: 1180px) {
   .dashboard-content { grid-template-rows: auto auto auto auto auto !important; }
+  body.insight-disabled .dashboard-content { grid-template-rows: auto auto auto auto !important; }
   .energy-advice { overflow: visible; padding: 11px !important; }
   .energy-advice__header { align-items: flex-start; }
   .energy-advice__body { grid-template-columns: 1fr 1fr; }

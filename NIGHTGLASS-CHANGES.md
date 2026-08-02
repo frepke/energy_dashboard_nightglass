@@ -1,3 +1,9 @@
+## 2.10.2
+
+- Herstelt de volledige live Energiestroom-weergave wanneer Insight uit staat.
+- De dashboard-grid gebruikt dan vier echte inhoudsrijen; Energiestroom neemt niet langer per ongeluk de oude, lage Insight-rij over.
+- Insight blijft standaard uit en de aparte passieve energy-loggerkaart blijft actief.
+
 ## 2.10.1
 
 - De oude Smart Insight-balk is voorlopig standaard uitgeschakeld en wordt niet meer bijgewerkt.
