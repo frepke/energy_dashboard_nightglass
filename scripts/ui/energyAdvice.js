@@ -47,20 +47,37 @@ function formatCt(valueEur) {
   return n === null ? '--' : `${formatNumber(n * 100, 2)} ct/kWh`;
 }
 
-function formatLocalDateTime(value, options) {
-  const d = new Date(value);
+function dateFromLocalWallClock(value) {
+  const match = String(value || '').match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})?$/,
+  );
+  if (!match) return null;
+  return new Date(Date.UTC(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5]),
+    Number(match[6] || 0),
+  ));
+}
+
+function formatLocalDateTime(value, options, preserveWallClock = false) {
+  const d = preserveWallClock ? dateFromLocalWallClock(value) : new Date(value);
+  if (!d) return '--';
   if (Number.isNaN(d.getTime())) return '--';
-  return d.toLocaleString(activeLocale(), options);
+  return d.toLocaleString(activeLocale(), preserveWallClock ? { ...options, timeZone: 'UTC' } : options);
 }
 
 function formatWindow(window) {
-  const start = window?.start_local || window?.start_utc;
-  const end = window?.end_local || window?.end_utc;
+  const hasLocalTimes = Boolean(window?.start_local && window?.end_local);
+  const start = hasLocalTimes ? window.start_local : window?.start_utc;
+  const end = hasLocalTimes ? window.end_local : window?.end_utc;
   if (!start || !end) return { day: '--', time: '--' };
 
   return {
-    day: formatLocalDateTime(start, { weekday: 'short', day: 'numeric', month: 'short' }),
-    time: `${formatLocalDateTime(start, { hour: '2-digit', minute: '2-digit' })}–${formatLocalDateTime(end, { hour: '2-digit', minute: '2-digit' })}`,
+    day: formatLocalDateTime(start, { weekday: 'short', day: 'numeric', month: 'short' }, hasLocalTimes),
+    time: `${formatLocalDateTime(start, { hour: '2-digit', minute: '2-digit' }, hasLocalTimes)}–${formatLocalDateTime(end, { hour: '2-digit', minute: '2-digit' }, hasLocalTimes)}`,
   };
 }
 

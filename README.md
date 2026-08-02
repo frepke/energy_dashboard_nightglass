@@ -1,4 +1,4 @@
-# Nightglass Energy Dashboard 2.10.6
+# Nightglass Energy Dashboard 2.10.7
 
 Een zelfstandig fullscreen energiedashboard voor **Domoticz**, in de visuele taal van Nightglass. Het dashboard gebruikt alleen HTML, CSS en JavaScript: geen framework en geen buildstap voor productie.
 
@@ -7,6 +7,8 @@ Versie 2.10 maakt daarnaast de passieve voorspellingen van energy-logger v1.3+ z
 Versie 2.10.5 laat elke liggende venstergrootte op natuurlijke inhoudshoogte werken. Zodra de inhoud niet past, kan het venster verticaal scrollen in plaats van de Energiestroom-kaarten af te knippen. Op een hoog fullscreenscherm past dezelfde inhoud zonder scrollbar en de tijdlabels van de prijsgrafiek houden onderaan hun veilige marge. De oude Smart Insight-balk blijft standaard uitgeschakeld.
 
 Versie 2.10.6 koppelt de duurkeuze in de prijsgrafiek aan het passieve energieadvies. De grote advieskaart, de actieve venstertegel en de gemarkeerde kwartieren tonen daardoor steeds hetzelfde energy-loggervenster. De venstertegels zijn ook rechtstreeks aanklikbaar.
+
+Versie 2.10.7 bewaart de lokale tijden uit de energy-logger-API zonder ze nogmaals naar de tijdzone van de browser of CI-runner om te rekenen.
 
 ## Functies
 

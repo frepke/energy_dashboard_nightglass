@@ -232,3 +232,7 @@ Beschikbare iconen: `bolt`, `grid`, `plug`, `home`, `solar`, `panel`, `flame`, `
 - De bijbehorende energy-loggervenstertegel krijgt dezelfde actieve markering.
 - De prijsgrafiek markeert exact het begin en einde van het gekozen energy-loggervenster.
 - De vijf venstertegels zijn aanklikbaar en bedienen dezelfde centrale duurkeuze.
+# Nightglass v2.10.7
+
+- `start_local` en `end_local` uit de energy-logger worden als lokale wandkloktijden getoond en niet opnieuw omgerekend naar de tijdzone van de browser of CI-runner.
+- De geselecteerde `4u`-kaart toont daardoor overal het verwachte tijdvak `13:00–17:00`, ook wanneer de tests onder UTC draaien.
