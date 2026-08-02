@@ -1,3 +1,8 @@
+## 2.10.5
+
+- Alle liggende venstergroottes gebruiken nu natuurlijke inhoudshoogte; als de beschikbare hoogte te klein is, scrolt het document zonder Energiestroom samen te drukken.
+- Fullscreen houdt de bestaande veilige ondermarge voor de tijdas.
+
 ## 2.10.4
 
 - Korte landscape-vensters gebruiken weer normale verticale scrolling, zodat Energiestroom, het passieve energieadvies en de prijsgrafiek niet buiten beeld worden afgesneden.

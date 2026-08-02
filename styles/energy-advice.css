@@ -329,16 +329,24 @@
 }
 
 /* ========================================================================== 
-   V2.10.4 — window scrolling and fullscreen bottom safety
+   V2.10.5 — content-safe window and fullscreen layout
    --------------------------------------------------------------------------
-   A short landscape browser window uses the micro composition. It must remain
-   vertically scrollable so no panel content is hidden. Taller landscape modes
-   stay locked to the measured Visual Viewport, while the price chart reserves
-   a real bottom lane for its time labels.
+   Every landscape density uses natural document height. This is important for
+   ordinary browser windows: a compact/cozy window can be too short even when
+   it is not classified as micro. In that case the page scrolls instead of
+   shrinking the Energiestroom row. A tall fullscreen viewport still remains
+   scrollbar-free because the same natural content fits inside its min-height.
+   The price chart keeps a real bottom lane for its time labels.
    ========================================================================== */
 @media (min-width: 900px) and (orientation: landscape) {
   html.dashboard-fit-micro,
-  body.dashboard-fit-micro {
+  html.dashboard-fit-dense,
+  html.dashboard-fit-compact,
+  html.dashboard-fit-cozy,
+  body.dashboard-fit-micro,
+  body.dashboard-fit-dense,
+  body.dashboard-fit-compact,
+  body.dashboard-fit-cozy {
     height: auto !important;
     min-height: 100% !important;
     overflow-x: hidden !important;
@@ -347,51 +355,33 @@
     scrollbar-width: auto !important;
   }
 
-  body.dashboard-fit-micro {
+  body.dashboard-fit-micro,
+  body.dashboard-fit-dense,
+  body.dashboard-fit-compact,
+  body.dashboard-fit-cozy {
     position: static !important;
     inset: auto !important;
     min-height: var(--viewport-height, 100dvh) !important;
   }
 
-  body.dashboard-fit-micro .dashboard {
+  body.dashboard-fit-micro .dashboard,
+  body.dashboard-fit-dense .dashboard,
+  body.dashboard-fit-compact .dashboard,
+  body.dashboard-fit-cozy .dashboard {
     height: auto !important;
     min-height: var(--viewport-height, 100dvh) !important;
     max-height: none !important;
     overflow: visible !important;
+    grid-template-rows: auto auto !important;
   }
 
-  body.insight-disabled.dashboard-fit-micro .dashboard-content {
+  body.insight-disabled.dashboard-fit-micro .dashboard-content,
+  body.insight-disabled.dashboard-fit-dense .dashboard-content,
+  body.insight-disabled.dashboard-fit-compact .dashboard-content,
+  body.insight-disabled.dashboard-fit-cozy .dashboard-content {
     grid-template-rows: auto auto auto minmax(clamp(168px, 24dvh, 320px), 1fr) !important;
+    align-content: start !important;
     overflow: visible !important;
-  }
-
-  html.dashboard-fit-cozy,
-  html.dashboard-fit-compact,
-  html.dashboard-fit-dense,
-  body.dashboard-fit-cozy,
-  body.dashboard-fit-compact,
-  body.dashboard-fit-dense {
-    height: var(--viewport-height, 100dvh) !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    scrollbar-width: none !important;
-  }
-
-  body.dashboard-fit-cozy,
-  body.dashboard-fit-compact,
-  body.dashboard-fit-dense {
-    position: fixed !important;
-    inset: 0 !important;
-  }
-
-  body.dashboard-fit-cozy .dashboard,
-  body.dashboard-fit-compact .dashboard,
-  body.dashboard-fit-dense .dashboard {
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
-    overflow: hidden !important;
   }
 
   body:not(.dashboard-fit-micro) .prices-panel {

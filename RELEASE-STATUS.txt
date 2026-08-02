@@ -1,4 +1,4 @@
-Nightglass Energy Dashboard 2.10.4
+Nightglass Energy Dashboard 2.10.5
 
 Passieve energy-logger v1.3-prognose zichtbaar als eigen Nightglass-kaart.
 Toont beste vensters, verwachte energiestromen, netto kosten, modelkwaliteit en evaluatie.
