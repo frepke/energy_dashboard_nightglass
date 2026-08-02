@@ -2524,12 +2524,43 @@ body.kiosk-night .dashboard { filter: brightness(.84) saturate(.90); }
    ========================================================================== */
 
 @media (min-width: 900px) and (orientation: landscape) {
+  /* Some kiosk browsers keep the layout viewport a few pixels taller than
+     the actually visible viewport. If html/body remain at 100%, that hidden
+     difference creates a page scrollbar even though the dashboard itself
+     already uses --viewport-height. Lock the root canvas to the same measured
+     height and suppress only the landscape scrollbar chrome. */
+  html {
+    height: var(--viewport-height, 100dvh) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    scrollbar-width: none;
+  }
+
+  body {
+    position: fixed;
+    inset: 0;
+    height: var(--viewport-height, 100dvh) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
   .dashboard {
     --ng-pad-top: 10px;
     --ng-pad-right: 16px;
     --ng-pad-bottom: 14px;
     --ng-pad-left: 16px;
-    height: var(--viewport-height, 100dvh) !important;
+    height: 100% !important;
+    max-height: 100% !important;
     padding:
       calc(var(--ng-pad-top) + env(safe-area-inset-top, 0px) + var(--safe-top-extra, 0px))
       calc(var(--ng-pad-right) + env(safe-area-inset-right, 0px) + var(--safe-right-extra, 0px))

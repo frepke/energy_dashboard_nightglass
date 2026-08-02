@@ -1,3 +1,9 @@
+## 2.10.3
+
+- Landschap/fullscreen gebruikt voor `html`, `body` en het dashboard exact dezelfde gemeten Visual Viewport-hoogte.
+- De overbodige verticale browser-scrollbar is verwijderd zonder dashboardinhoud af te knippen.
+- Insight blijft standaard uit en Energiestroom plus het passieve energieadvies blijven volledig zichtbaar.
+
 ## 2.10.2
 
 - Herstelt de volledige live Energiestroom-weergave wanneer Insight uit staat.
