@@ -202,7 +202,7 @@ test.beforeEach(async ({ page }) => {
 // ── Full-page layout ──────────────────────────────────────────────────────────
 
 test('full dashboard layout keeps every primary panel visible and ordered', async ({ page }) => {
-  const selectors = ['.weather-hero', '.smart-insight', '.energy-panel', '#energyAdvice', '.prices-panel'];
+  const selectors = ['.weather-hero', '.energy-panel', '#energyAdvice', '.prices-panel'];
   const tops = [];
 
   for (const selector of selectors) {
@@ -228,10 +228,8 @@ test('weather header', async ({ page }, testInfo) => {
   );
 });
 
-test('smart insight bar', async ({ page }, testInfo) => {
-  await expect(page.locator('.smart-insight')).toHaveScreenshot(
-    `insight-bar-${testInfo.project.name}.png`, STRICT_SCREENSHOT,
-  );
+test('smart insight bar is disabled by default', async ({ page }) => {
+  await expect(page.locator('.smart-insight')).toBeHidden();
 });
 
 test('energy flow panel', async ({ page }, testInfo) => {
