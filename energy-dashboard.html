@@ -13,10 +13,10 @@
   <link rel="stylesheet" href="styles/flow.css">
   <link rel="stylesheet" href="styles/cards.css">
   <link rel="stylesheet" href="styles/chart.css">
-  <link rel="stylesheet" href="styles/insights.css?v=2.10.5">
+  <link rel="stylesheet" href="styles/insights.css?v=2.10.6">
   <link rel="stylesheet" href="styles/weather-art.css">
-  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.10.5">
-  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.5">
+  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.10.6">
+  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.6">
 
   <script>
     // Nieuwe installaties starten in het Nederlands. Bestaande voorkeuren blijven behouden.
@@ -30,7 +30,7 @@
 </head>
 
 <body class="insight-disabled">
-<main class="dashboard" data-dashboard-version="nightglass-v2.10.5">
+<main class="dashboard" data-dashboard-version="nightglass-v2.10.6">
   <header class="topbar">
     <div class="topbar-left">
       <div class="brand-lockup" aria-label="Nightglass Energy">
@@ -369,7 +369,7 @@
 
       <div class="energy-advice__body">
         <article class="energy-advice__best">
-          <span class="energy-advice__label" data-i18n="energy-advice-best-1h">Beste venster van 1 uur</span>
+          <span class="energy-advice__label" id="energyAdviceMainLabel">Beste venster van 1 uur</span>
           <strong id="energyAdviceMainTime">--:--</strong>
           <span><span id="energyAdviceMainDay">--</span><i aria-hidden="true">·</i><span id="energyAdviceMainPrice">--</span></span>
         </article>
@@ -433,6 +433,6 @@
 </main>
 
 <script src="config.js" onerror="console.warn('config.js ontbreekt — gebruik config.example.js als basis.')"></script>
-<script type="module" src="scripts/main.js?v=2.10.5"></script>
+<script type="module" src="scripts/main.js?v=2.10.6"></script>
 </body>
 </html>

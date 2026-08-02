@@ -160,6 +160,7 @@ function barPalette(base, negative) {
 
 const USAGE_WINDOW_STORAGE_KEY = 'usageWindowHours';
 let selectedUsageWindowHours = 3;
+let energyAdviceWindow = null;
 
 function normalizeUsageWindowHours(value, fallback = selectedUsageWindowHours) {
   if (String(value).toLowerCase().trim() === 'all') return 'all';
@@ -169,6 +170,42 @@ function normalizeUsageWindowHours(value, fallback = selectedUsageWindowHours) {
 
   if (String(fallback).toLowerCase().trim() === 'all') return 'all';
   return Math.max(1, Math.min(24, Math.round(Number(fallback) || 3)));
+}
+
+/** Uses the energy-logger's selected advice period as the chart focus. */
+export function setEnergyAdviceWindow(detail) {
+  const hours = normalizeUsageWindowHours(detail?.hours);
+  const start = new Date(detail?.start).getTime();
+  const end = new Date(detail?.end).getTime();
+  const averageEur = Number(detail?.averageMarginalPriceEurKwh);
+
+  if (hours === 'all' || !Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    energyAdviceWindow = null;
+    return;
+  }
+
+  energyAdviceWindow = {
+    requestedHours: hours,
+    start,
+    end,
+    highlightStart: start,
+    highlightEnd: end,
+    avg: Number.isFinite(averageEur) ? averageEur * 100 : null,
+    savingCt: 0,
+    highlightedHours: (end - start) / 3_600_000,
+    highlightedSlots: Math.round((end - start) / 900_000),
+    source: 'energy-logger',
+  };
+}
+
+function decisionWindowFor(hours = selectedUsageWindowHours) {
+  const requested = normalizeUsageWindowHours(hours);
+  if (requested !== 'all'
+      && energyAdviceWindow
+      && energyAdviceWindow.requestedHours === requested) {
+    return energyAdviceWindow;
+  }
+  return activeDecisionWindow(requested);
 }
 
 function refreshUsageWindowSelectorState() {
@@ -189,7 +226,7 @@ function refreshUsageWindowDetails() {
 
   $$('[data-usage-window]', selector).forEach(btn => {
     const requested = normalizeUsageWindowHours(btn.dataset.usageWindow);
-    const block = activeDecisionWindow(requested);
+    const block = decisionWindowFor(requested);
     if (!block) {
       btn.title = '';
       return;
@@ -530,7 +567,7 @@ export function renderBars(items, nowTs, min, max) {
 
 /** Highlights the bars that fall within the cheapest decision window. */
 export function markBestWindowBars() {
-  const block = activeDecisionWindow();
+  const block = decisionWindowFor();
   const wraps = $$('.barwrap');
   const isAllWindow = String(block?.requestedHours || '').toLowerCase().trim() === 'all';
 

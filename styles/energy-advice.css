@@ -230,6 +230,7 @@
 .energy-advice__windows:empty { display: none; }
 
 .energy-advice-window {
+  width: 100%;
   min-width: 0;
   min-height: 31px;
   padding: 5px 9px;
@@ -240,7 +241,25 @@
   border: 1px solid rgba(var(--muted-rgb), .12);
   border-radius: 10px;
   background: rgba(var(--page-rgb), .38);
+  color: inherit;
+  font: inherit;
+  text-align: left;
   font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  appearance: none;
+  transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.energy-advice-window:hover,
+.energy-advice-window:focus-visible {
+  border-color: rgba(var(--success-rgb), .48);
+  outline: none;
+}
+
+.energy-advice-window.is-active {
+  border-color: rgba(var(--success-rgb), .72);
+  background: rgba(var(--success-rgb), .12);
+  box-shadow: inset 0 0 0 1px rgba(var(--success-rgb), .16), 0 0 18px rgba(var(--success-rgb), .08);
 }
 
 .energy-advice-window__duration {

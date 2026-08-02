@@ -14,6 +14,7 @@ import { updateSmartInsight } from './ui/smartInsight.js';
 import {
   markBestWindowBars,
   retranslateTooltipLabels,
+  setEnergyAdviceWindow,
   setupTooltip,
   setupUsageWindowSelector,
 } from './ui/chart.js';
@@ -205,12 +206,17 @@ scheduleWeatherRefresh();
 
 setupTooltip();
 setupUsageWindowSelector();
-energyAdviceController.refresh();
-energyAdviceController.start();
-window.addEventListener('usage-window-hours-change', () => {
+window.addEventListener('energy-advice-window-change', event => {
+  setEnergyAdviceWindow(event.detail);
+  markBestWindowBars();
+});
+window.addEventListener('usage-window-hours-change', event => {
+  energyAdviceController.selectWindow(event.detail?.hours);
   markBestWindowBars();
   updateSmartInsightIfEnabled();
 });
+energyAdviceController.refresh();
+energyAdviceController.start();
 
 if (!initPlaywrightMock()) {
   refreshController.refreshAll('start');

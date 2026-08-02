@@ -2,11 +2,28 @@
 
 import { $ } from '../core/dom.js';
 import { activeLocale } from '../core/formatters.js';
-import { ENERGY_LOGGER_CFG } from '../config/resolveConfig.js';
+import { CFG, ENERGY_LOGGER_CFG } from '../config/resolveConfig.js';
 import { fetchEnergyAdvice } from '../services/energyLoggerService.js';
 import { t } from '../i18n.js';
 
 const WINDOW_KEYS = ['1h', '2h', '3h', '4h', '6h'];
+
+function normalizeWindowHours(value, fallback = 1) {
+  if (String(value).toLowerCase().trim() === 'all') return 'all';
+  const hours = Math.round(Number(value));
+  return WINDOW_KEYS.includes(`${hours}h`) ? hours : fallback;
+}
+
+function initialWindowHours() {
+  let hours = normalizeWindowHours(CFG?.usageWindowHours, 1);
+  try {
+    const saved = localStorage.getItem('usageWindowHours');
+    if (saved !== null) hours = normalizeWindowHours(saved, hours);
+  } catch {
+    // Storage is optional; use the configured duration.
+  }
+  return hours;
+}
 
 function finite(value) {
   const n = Number(value);
@@ -58,7 +75,7 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
-function renderWindowList(windows) {
+function renderWindowList(windows, selectedHours) {
   const container = $('#energyAdviceWindows');
   if (!container) return;
   container.replaceChildren();
@@ -67,19 +84,41 @@ function renderWindowList(windows) {
     const window = windows?.[key];
     if (!window) return;
     const label = formatWindow(window);
-    const item = document.createElement('div');
+    const hours = Number.parseInt(key, 10);
+    const item = document.createElement('button');
+    item.type = 'button';
     item.className = 'energy-advice-window';
+    item.dataset.adviceWindow = key;
+    const isActive = selectedHours !== 'all' && hours === selectedHours;
+    item.classList.toggle('is-active', isActive);
+    item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     item.innerHTML = `
       <span class="energy-advice-window__duration">${key}</span>
       <strong>${label.time}</strong>
       <small>${label.day}</small>
     `;
     item.title = `${key} · ${label.day} ${label.time} · ${formatCt(window.average_marginal_price_eur_kwh)}`;
+    item.addEventListener('click', () => {
+      const selectorButton = document.querySelector(`[data-usage-window="${hours}"]`);
+      if (selectorButton && typeof selectorButton.click === 'function') selectorButton.click();
+    });
     container.appendChild(item);
   });
 }
 
-export function renderEnergyAdvice(payload) {
+function selectedWindow(windows, selectedHours) {
+  const selected = selectedHours === 'all' ? null : windows?.[`${selectedHours}h`];
+  if (selected) return { key: `${selectedHours}h`, hours: selectedHours, window: selected };
+
+  const key = WINDOW_KEYS.find(candidate => windows?.[candidate]);
+  return key ? { key, hours: Number.parseInt(key, 10), window: windows[key] } : null;
+}
+
+function bestWindowLabel(hours) {
+  return t('energy-advice-best-window').replace('{hours}', String(hours));
+}
+
+export function renderEnergyAdvice(payload, selectedHours = initialWindowHours()) {
   const panel = $('#energyAdvice');
   if (!panel) return;
 
@@ -87,12 +126,14 @@ export function renderEnergyAdvice(payload) {
   const totals = payload.totals || {};
   const windows = payload.best_consumption_windows || {};
   const evaluation = payload.evaluation || {};
-  const primary = windows['1h'] || windows['2h'] || windows['3h'] || Object.values(windows)[0];
+  const selection = selectedWindow(windows, normalizeWindowHours(selectedHours));
+  const primary = selection?.window;
   const primaryLabel = formatWindow(primary);
   const horizonEnd = payload.forecast_horizon?.last_end_utc;
 
   panel.dataset.state = 'live';
   setText('energyAdviceState', t('energy-advice-live'));
+  setText('energyAdviceMainLabel', bestWindowLabel(selection?.hours || 1));
   setText('energyAdviceMainTime', primaryLabel.time);
   setText('energyAdviceMainDay', primaryLabel.day);
   setText('energyAdviceMainPrice', formatCt(primary?.average_marginal_price_eur_kwh));
@@ -113,7 +154,7 @@ export function renderEnergyAdvice(payload) {
     ? `${evaluated} ${t('energy-advice-quarters-evaluated')} · MAE ${formatKwh(mae)}`
     : t('energy-advice-not-evaluated'));
 
-  renderWindowList(windows);
+  renderWindowList(windows, normalizeWindowHours(selectedHours));
 }
 
 export function renderEnergyAdviceError(error) {
@@ -133,13 +174,34 @@ export function createEnergyAdviceController() {
   let timerId = null;
   let lastPayload = null;
   let busy = false;
+  let selectedHours = initialWindowHours();
+
+  function announceSelectedWindow() {
+    if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return;
+    const selection = selectedWindow(lastPayload?.best_consumption_windows || {}, selectedHours);
+    const source = selection?.window;
+    window.dispatchEvent(new CustomEvent('energy-advice-window-change', {
+      detail: selectedHours === 'all' || !source ? { hours: selectedHours } : {
+        hours: selection.hours,
+        start: source.start_local || source.start_utc,
+        end: source.end_local || source.end_utc,
+        averageMarginalPriceEurKwh: source.average_marginal_price_eur_kwh,
+      },
+    }));
+  }
+
+  function renderCurrent() {
+    if (!lastPayload) return;
+    renderEnergyAdvice(lastPayload, selectedHours);
+    announceSelectedWindow();
+  }
 
   async function refresh() {
     if (!ENERGY_LOGGER_CFG.enabled || busy) return;
     busy = true;
     try {
       lastPayload = await fetchEnergyAdvice();
-      renderEnergyAdvice(lastPayload);
+      renderCurrent();
     } catch (error) {
       renderEnergyAdviceError(error);
     } finally {
@@ -164,9 +226,14 @@ export function createEnergyAdviceController() {
   }
 
   function retranslate() {
-    if (lastPayload) renderEnergyAdvice(lastPayload);
+    if (lastPayload) renderCurrent();
     else if ($('#energyAdvice')?.dataset.state === 'error') renderEnergyAdviceError();
   }
 
-  return { refresh, start, stop, retranslate };
+  function selectWindow(hours) {
+    selectedHours = normalizeWindowHours(hours, selectedHours);
+    renderCurrent();
+  }
+
+  return { refresh, start, stop, retranslate, selectWindow };
 }

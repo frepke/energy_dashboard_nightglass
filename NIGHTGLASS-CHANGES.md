@@ -226,3 +226,9 @@ Beschikbare iconen: `bolt`, `grid`, `plug`, `home`, `solar`, `panel`, `flame`, `
 
 - Hoverinformatie wisselt nu direct mee tussen Nederlands en Engels.
 - De dynamisch aangemaakte labels voor afname en teruglevering blijven niet meer in de vorige taal staan.
+# Nightglass v2.10.6
+
+- De keuze `1u`, `2u`, `3u`, `4u` of `6u` werkt nu door in de grote passieve advieskaart.
+- De bijbehorende energy-loggervenstertegel krijgt dezelfde actieve markering.
+- De prijsgrafiek markeert exact het begin en einde van het gekozen energy-loggervenster.
+- De vijf venstertegels zijn aanklikbaar en bedienen dezelfde centrale duurkeuze.
