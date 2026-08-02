@@ -26,6 +26,7 @@ import {
   destroyDeviceHistoryWatermarks,
 } from './ui/deviceHistoryWatermarks.js';
 import { applyIconOverrides } from './ui/iconOverrides.js';
+import { createEnergyAdviceController } from './ui/energyAdvice.js';
 import { initI18n, t } from './i18n.js';
 
 import { createRefreshController } from './app/refreshController.js';
@@ -108,6 +109,7 @@ let weatherClockIntervalId = null;
 let weatherRefreshTimeoutId = null;
 
 const refreshController = createRefreshController(setStatus);
+const energyAdviceController = createEnergyAdviceController();
 const websocketController = createWebSocketController({
   refreshAll: refreshController.refreshAll,
   refreshDistribution: refreshController.refreshDistributionOnly,
@@ -131,6 +133,7 @@ initLanguageToggle(() => {
   updateSmartInsight();
   updateWeatherProviderTooltip();
   refreshController.retranslateLiveLabels();
+  energyAdviceController.retranslate();
   // Re-render cards and price bars so number/date formatting follows the
   // selected language immediately, not only after the next poll tick.
   refreshController.refreshAll('lang');
@@ -144,11 +147,14 @@ initVisibilityController({
   onHidden: () => {
     pageVisible = false;
     refreshController.stopPolling();
+    energyAdviceController.stop();
     destroyDeviceHistoryWatermarks();
   },
   onVisible: () => {
     pageVisible = true;
     refreshController.refreshAll('visible');
+    energyAdviceController.refresh();
+    energyAdviceController.start();
     initDeviceHistoryWatermarks();
     const wsStarted = websocketController.isStarted() || websocketController.startWebSocket();
     refreshController.startPolling(wsStarted ? wsHeartbeatSeconds() : CFG.refresh);
@@ -187,6 +193,8 @@ scheduleWeatherRefresh();
 
 setupTooltip();
 setupUsageWindowSelector();
+energyAdviceController.refresh();
+energyAdviceController.start();
 window.addEventListener('usage-window-hours-change', () => {
   markBestWindowBars();
   updateSmartInsight();
@@ -214,6 +222,7 @@ if (typeof window !== 'undefined') {
       weatherRefreshTimeoutId = null;
     }
     refreshController.stopPolling();
+    energyAdviceController.stop();
     destroyDeviceHistoryWatermarks();
   });
 }

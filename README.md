@@ -1,8 +1,8 @@
-# Nightglass Energy Dashboard 2.9
+# Nightglass Energy Dashboard 2.10
 
 Een zelfstandig fullscreen energiedashboard voor **Domoticz**, in de visuele taal van Nightglass. Het dashboard gebruikt alleen HTML, CSS en JavaScript: geen framework en geen buildstap voor productie.
 
-Versie 2.9 verwerkt de nieuwe Zonneplan-kwartierprijzen volledig: de grafiek, hoverinformatie, actuele prijs, slimme adviezen en selectie van het voordeligste venster werken op tijdsloten van 15 minuten. Uurprijzen blijven als terugval ondersteund.
+Versie 2.10 maakt daarnaast de passieve voorspellingen van energy-logger v1.3+ zichtbaar. Het dashboard toont beste verbruiksvensters, verwachte energiestromen, kosten en modelkwaliteit, maar bevat geen aansturing.
 
 ## Functies
 
@@ -13,6 +13,8 @@ Versie 2.9 verwerkt de nieuwe Zonneplan-kwartierprijzen volledig: de grafiek, ho
 - actuele stroom- en gasprijs;
 - Zonneplan-kwartiergrafiek met afname- en terugleverprijs en het voordeligste aaneengesloten venster;
 - slim verbruiks- en terugleveradvies;
+- passieve energy-logger-prognose met vensters van 1, 2, 3, 4 en 6 uur;
+- verwachte zonproductie, huisvraag, import, teruglevering, netto kosten en evaluatiefout;
 - tijd, datum, zonsopkomst, zonsondergang en daglengte;
 - prominente maanmodule met fase, verlichting, opkomst, ondergang, leeftijd, afstand en volgende volle/nieuwe maan;
 - meerdere weerbronnen, waaronder Open-Meteo en Weerstation Vierlingsbeek;
@@ -136,11 +138,20 @@ window.DASHBOARD_CONFIG = {
     electricityPriceIdx: '',
     gasPriceIdx: '',
     inverterLimitIdx: ''
+  },
+
+  energyLogger: {
+    enabled: true,
+    baseUrl: '', // automatisch http://DEZE-DASHBOARD-HOST:8787
+    refreshSeconds: 60,
+    timeoutMs: 8000
   }
 };
 ```
 
 Een lege `baseUrl` betekent same-origin en werkt wanneer het dashboard vanuit de `www`-map van Domoticz wordt geladen.
+
+Voor `energyLogger.baseUrl` betekent leeg dat dezelfde hostnaam als Nightglass met poort `8787` wordt gebruikt. Draait de logger op een andere machine, vul dan bijvoorbeeld `http://192.168.1.20:8787` in. De logger-API staat CORS toe en blijft alleen-lezen. Nightglass controleert bovendien de volledige passieve beleidsstatus voordat het advies toont.
 
 ## Iconen aanpassen
 
@@ -188,6 +199,8 @@ Ondersteund:
 ?kiosk=1               kioskmodus
 ?theme=light           licht thema forceren
 ?fetchTimeoutMs=15000  netwerktime-out
+?energyLoggerUrl=http://192.168.1.20:8787  afwijkend loggeradres
+?energyLogger=0         prognosekaart uitschakelen
 ?safeBottom=80         extra vrije ruimte onderaan
 ?safeTop=20            optionele extra bovenmarge
 ?safeLeft=0            optionele extra linkermarge
@@ -204,6 +217,9 @@ scripts/ui/weather.js          weer-, zoncyclus- en maanweergave
 scripts/ui/deviceHistoryWatermarks.js  Domoticz-daghistorie en Nightglass-watermerken
 scripts/ui/kiosk.js            Visual Viewport en veilige marges
 scripts/ui/iconOverrides.js    configureerbare lokale SVG-iconen
+scripts/ui/energyAdvice.js     passieve prognosekaart en foutstatus
+scripts/services/energyLoggerService.js  alleen-lezen loggerclient
+styles/energy-advice.css       prognosekaart en responsive layout
 config.example.js              configuratievoorbeeld
 ```
 

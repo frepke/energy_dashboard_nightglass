@@ -1,3 +1,12 @@
+## 2.10.0
+
+- Nieuwe Nightglass-kaart voor de alleen-lezen `/v1/advice`-uitvoer van energy-logger v1.3+.
+- Toont het beste venster van één uur, alle vensters van 1/2/3/4/6 uur, verwachte zon-, huis-, import- en terugleverenergie, netto kosten, modelversie, horizon en evaluatiefout.
+- Lege `energyLogger.baseUrl` gebruikt automatisch dezelfde host als het dashboard op poort 8787; een afwijkend adres blijft configureerbaar.
+- De client doet uitsluitend `GET` zonder credentials en weigert advies wanneer de bron niet `passive`, `locked`, niet-aanstuurbaar en zonder automatische activering meldt.
+- Uitval of uitschakeling van energy-logger beïnvloedt Domoticz, weer, prijzen en de bestaande slimme inzichten niet.
+- Nederlandse en Engelse labels, licht/donker thema en responsive weergave toegevoegd.
+
 ## 2.9.0
 
 - de Zonneplan-grafiek verwerkt de nieuwe kwartierprijzen uit Forecast JSON zonder tijden op hele uren af te ronden;

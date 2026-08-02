@@ -15,7 +15,8 @@
   <link rel="stylesheet" href="styles/chart.css">
   <link rel="stylesheet" href="styles/insights.css">
   <link rel="stylesheet" href="styles/weather-art.css">
-  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.9.0">
+  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.10.0">
+  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.0">
 
   <script>
     // Nieuwe installaties starten in het Nederlands. Bestaande voorkeuren blijven behouden.
@@ -29,7 +30,7 @@
 </head>
 
 <body>
-<main class="dashboard" data-dashboard-version="nightglass-v2.9.0">
+<main class="dashboard" data-dashboard-version="nightglass-v2.10.0">
   <header class="topbar">
     <div class="topbar-left">
       <div class="brand-lockup" aria-label="Nightglass Energy">
@@ -352,6 +353,46 @@
       </div>
     </section>
 
+    <!-- Alleen-lezen voorspelling uit energy-logger -->
+    <section class="energy-advice panel" id="energyAdvice" data-state="loading"
+             aria-label="Passief energieadvies" data-i18n-label="section-energy-advice">
+      <header class="energy-advice__header">
+        <div>
+          <span class="section-kicker" data-i18n="energy-advice-kicker">VOORSPELLING</span>
+          <h2 data-i18n="energy-advice-title">Passief energieadvies</h2>
+        </div>
+        <div class="energy-advice__status">
+          <span class="energy-advice__live"><i aria-hidden="true"></i><span id="energyAdviceState" data-i18n="energy-advice-loading">Logger verbinden…</span></span>
+          <span class="energy-advice__policy" data-i18n="energy-advice-policy">Alleen advies · vergrendeld in 2026</span>
+        </div>
+      </header>
+
+      <div class="energy-advice__body">
+        <article class="energy-advice__best">
+          <span class="energy-advice__label" data-i18n="energy-advice-best-1h">Beste venster van 1 uur</span>
+          <strong id="energyAdviceMainTime">--:--</strong>
+          <span><span id="energyAdviceMainDay">--</span><i aria-hidden="true">·</i><span id="energyAdviceMainPrice">--</span></span>
+        </article>
+
+        <div class="energy-advice__metrics" aria-label="Verwachte energiestromen" data-i18n-label="energy-advice-metrics-aria">
+          <div><span data-i18n="energy-advice-solar">Zon</span><strong id="energyAdviceSolar">--</strong></div>
+          <div><span data-i18n="energy-advice-house">Huis</span><strong id="energyAdviceHouse">--</strong></div>
+          <div><span data-i18n="energy-advice-import">Import</span><strong id="energyAdviceImport">--</strong></div>
+          <div><span data-i18n="energy-advice-export">Teruglevering</span><strong id="energyAdviceExport">--</strong></div>
+          <div class="energy-advice__metric-cost"><span data-i18n="energy-advice-net-cost">Netto kosten</span><strong id="energyAdviceNetCost">--</strong></div>
+        </div>
+
+        <aside class="energy-advice__quality">
+          <span class="energy-advice__label" data-i18n="energy-advice-quality">Betrouwbaarheid</span>
+          <strong id="energyAdviceConfidence">--</strong>
+          <span id="energyAdviceEvaluation">Nog geen evaluatie</span>
+          <small><span id="energyAdviceModel">--</span><i aria-hidden="true">·</i><span id="energyAdviceHorizon">--</span></small>
+        </aside>
+      </div>
+
+      <div class="energy-advice__windows" id="energyAdviceWindows" aria-label="Beste verbruiksvensters" data-i18n-label="energy-advice-windows-aria"></div>
+    </section>
+
     <!-- Kwartierprijzen -->
     <section class="prices-panel panel" aria-label="Energieprijzen" data-i18n-label="section-prices">
       <div class="pricesHeader">
@@ -392,6 +433,6 @@
 </main>
 
 <script src="config.js" onerror="console.warn('config.js ontbreekt — gebruik config.example.js als basis.')"></script>
-<script type="module" src="scripts/main.js?v=2.9.0"></script>
+<script type="module" src="scripts/main.js?v=2.10.0"></script>
 </body>
 </html>

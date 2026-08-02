@@ -1,0 +1,317 @@
+/* ========================================================================== 
+   ENERGY LOGGER — passive forecast card
+   ========================================================================== */
+
+.energy-advice {
+  min-height: 0;
+  padding: 12px 14px !important;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.energy-advice[hidden] { display: none !important; }
+
+.energy-advice__header {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.energy-advice__header > div:first-child { min-width: 0; }
+
+.energy-advice__header h2 {
+  margin: 3px 0 0;
+  color: var(--text-strong);
+  font-size: clamp(15px, 1.12vw, 20px);
+  font-weight: 850;
+  line-height: 1.08;
+  letter-spacing: -.02em;
+}
+
+.energy-advice__status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.energy-advice__live,
+.energy-advice__policy {
+  min-height: 27px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: rgba(var(--page-rgb), .48);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .035em;
+  white-space: nowrap;
+}
+
+.energy-advice__live i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--blue-light);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), .72);
+}
+
+.energy-advice[data-state="live"] .energy-advice__live i {
+  background: var(--green);
+  box-shadow: 0 0 12px rgba(var(--success-rgb), .74);
+}
+
+.energy-advice[data-state="error"] .energy-advice__live i {
+  background: var(--red);
+  box-shadow: 0 0 12px rgba(var(--danger-rgb), .74);
+}
+
+.energy-advice__policy {
+  color: var(--green);
+  border-color: rgba(var(--success-rgb), .28);
+  background: rgba(var(--success-rgb), .065);
+}
+
+.energy-advice__body {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(210px, .86fr) minmax(430px, 1.75fr) minmax(220px, 1fr);
+  gap: 10px;
+}
+
+.energy-advice__best,
+.energy-advice__metrics,
+.energy-advice__quality {
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid rgba(var(--muted-rgb), .13);
+  border-radius: var(--radius-card);
+  background: rgba(var(--page-rgb), .44);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.energy-advice__best {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+  gap: 4px;
+  border-color: rgba(var(--success-rgb), .25);
+  background:
+    radial-gradient(120% 140% at 0 0, rgba(var(--success-rgb), .12), transparent 64%),
+    rgba(var(--page-rgb), .44);
+}
+
+.energy-advice__label {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .11em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.energy-advice__best > strong {
+  color: var(--green);
+  font-size: clamp(23px, 2vw, 34px);
+  font-weight: 820;
+  line-height: 1;
+  letter-spacing: -.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+.energy-advice__best > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.energy-advice i { font-style: normal; color: var(--soft); }
+
+.energy-advice__metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  align-items: stretch;
+}
+
+.energy-advice__metrics > div {
+  min-width: 0;
+  padding: 7px 9px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  border-left: 1px solid var(--line-soft);
+}
+
+.energy-advice__metrics > div:first-child { border-left: 0; }
+
+.energy-advice__metrics span {
+  color: var(--soft);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.energy-advice__metrics strong {
+  color: var(--text-strong);
+  font-size: clamp(13px, 1.03vw, 18px);
+  font-weight: 820;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.energy-advice__metrics > div:nth-child(1) strong,
+.energy-advice__metrics > div:nth-child(4) strong { color: var(--solar); }
+.energy-advice__metrics > div:nth-child(3) strong { color: var(--orange); }
+.energy-advice__metrics .energy-advice__metric-cost strong { color: var(--green); }
+
+.energy-advice__quality {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+}
+
+.energy-advice__quality > strong {
+  color: var(--blue-light);
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.energy-advice__quality > span:not(.energy-advice__label),
+.energy-advice__quality > small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.energy-advice__quality > small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--soft);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.energy-advice__quality > small span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.energy-advice__windows {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.energy-advice__windows:empty { display: none; }
+
+.energy-advice-window {
+  min-width: 0;
+  min-height: 31px;
+  padding: 5px 9px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(var(--muted-rgb), .12);
+  border-radius: 10px;
+  background: rgba(var(--page-rgb), .38);
+  font-variant-numeric: tabular-nums;
+}
+
+.energy-advice-window__duration {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.energy-advice-window strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.energy-advice-window small {
+  color: var(--soft);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* Five dashboard sections: retain content-aware scrolling on landscape. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dashboard-content,
+  body.dashboard-fit-cozy .dashboard-content,
+  body.dashboard-fit-compact .dashboard-content,
+  body.dashboard-fit-dense .dashboard-content,
+  body.dashboard-fit-micro .dashboard-content {
+    grid-template-rows: auto auto auto auto minmax(clamp(168px, 24dvh, 320px), 1fr) !important;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1260px) {
+  .energy-advice__body {
+    grid-template-columns: minmax(200px, .9fr) minmax(360px, 1.6fr) minmax(190px, .9fr);
+  }
+
+  .energy-advice__metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .energy-advice__metrics > div { border-left: 0; padding: 4px 7px; }
+  .energy-advice__metric-cost { grid-column: span 2; }
+}
+
+@media (max-width: 899px), (orientation: portrait) and (max-width: 1180px) {
+  .dashboard-content { grid-template-rows: auto auto auto auto auto !important; }
+  .energy-advice { overflow: visible; padding: 11px !important; }
+  .energy-advice__header { align-items: flex-start; }
+  .energy-advice__body { grid-template-columns: 1fr 1fr; }
+  .energy-advice__quality { grid-column: 1 / -1; }
+  .energy-advice__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .energy-advice__metrics > div { border-left: 0; }
+  .energy-advice__metric-cost { grid-column: 1 / -1; }
+  .energy-advice__windows { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .energy-advice__header { display: grid; }
+  .energy-advice__status { justify-content: flex-start; }
+  .energy-advice__body { grid-template-columns: 1fr; }
+  .energy-advice__quality { grid-column: auto; }
+  .energy-advice__windows { grid-template-columns: 1fr; }
+  .energy-advice-window { grid-template-columns: 34px minmax(0, 1fr) auto; }
+}
+
+[data-theme="light"] .energy-advice__best,
+[data-theme="light"] .energy-advice__metrics,
+[data-theme="light"] .energy-advice__quality,
+[data-theme="light"] .energy-advice-window,
+[data-theme="light"] .energy-advice__live {
+  background-color: rgba(255,255,255,.52);
+}

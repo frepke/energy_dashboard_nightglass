@@ -1,4 +1,4 @@
-# Snelle installatie — Nightglass Energy Dashboard 2.7
+# Snelle installatie — Nightglass Energy Dashboard 2.10
 
 1. Bewaar bij een upgrade je bestaande `config.js`.
 2. Kopieer deze complete map naar de Domoticz-map `www/energy-dashboard`.
@@ -9,6 +9,8 @@
    ```
 
 4. Open `config.js` en vul minimaal de locatie en Domoticz-instellingen in.
+   Laat `energyLogger.baseUrl` leeg wanneer energy-logger op dezelfde host op
+   poort 8787 draait. Vul anders bijvoorbeeld `http://192.168.1.20:8787` in.
 5. Open het dashboard via:
 
    ```text
@@ -22,6 +24,15 @@ energy-dashboard.html?kiosk=1
 ```
 
 `config.js` wordt bewust niet meegeleverd, zodat wachtwoorden en API-sleutels niet in het pakket staan.
+
+## Energy-logger-prognose
+
+De prognosekaart gebruikt alleen `GET /v1/advice` van energy-logger v1.3 of hoger.
+Controleer vanaf de browsermachine dat `http://DOMOTICZ-IP:8787/v1/advice`
+bereikbaar is. Wanneer de logger tijdelijk uitvalt, blijven alle overige
+Nightglass-onderdelen normaal werken. De kaart accepteert alleen advies wanneer
+de API `mode: passive`, `locked: true`, `control_capable: false` en
+`automatic_activation: false` meldt.
 
 ## Upgrade van 2.6
 

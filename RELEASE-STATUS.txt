@@ -1,5 +1,5 @@
-Nightglass Energy Dashboard 2.9.0
+Nightglass Energy Dashboard 2.10.0
 
-Zonneplan-kwartierprijzen toegevoegd aan grafiek, actuele prijs en slimme adviezen.
-Hover toont tijdslot, afnameprijs en terugleverprijs; beste vensters worden in echte klokuren uit kwartieren berekend.
-Uurprijsdata blijft ondersteund als automatische terugval.
+Passieve energy-logger v1.3-prognose zichtbaar als eigen Nightglass-kaart.
+Toont beste vensters, verwachte energiestromen, netto kosten, modelkwaliteit en evaluatie.
+De browser gebruikt uitsluitend GET en accepteert alleen een hard passief vergrendelde bron.

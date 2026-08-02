@@ -145,6 +145,21 @@ window.DASHBOARD_CONFIG = {
   },
 
   // ----------------------------------------------------------------
+  // Energy Logger v1.3+ — passieve voorspellingen en advies
+  // ----------------------------------------------------------------
+  energyLogger: {
+    enabled: true,
+
+    // Leeg = automatisch dezelfde host als dit dashboard, poort 8787.
+    // Vul een volledig adres in wanneer de logger elders draait, bijvoorbeeld:
+    // baseUrl: 'http://192.168.1.20:8787',
+    baseUrl: '',
+
+    refreshSeconds: 60,
+    timeoutMs: 8000,
+  },
+
+  // ----------------------------------------------------------------
   // Refresh interval in seconds (default: 1)
   // Can also be set via ?refresh=5 URL parameter.
   // ----------------------------------------------------------------

@@ -104,6 +104,34 @@ function fetchTimeoutMs(value) {
   return Number.isFinite(n) && n > 0 ? Math.max(1000, Math.round(n)) : 10000;
 }
 
+const ENERGY_LOGGER_EXT = Object.assign({
+  enabled: true,
+  baseUrl: '',
+  refreshSeconds: 60,
+  timeoutMs: 8000,
+}, EXT_CFG.energyLogger || {});
+
+const energyLoggerEnabledParam = qs.get('energyLoggerEnabled') ?? qs.get('energyLogger');
+
+/** Read-only energy-logger advice endpoint configuration. */
+export const ENERGY_LOGGER_CFG = {
+  enabled: energyLoggerEnabledParam === null
+    ? ENERGY_LOGGER_EXT.enabled !== false
+    : truthyFlag(energyLoggerEnabledParam),
+  // Empty means: same hostname as the dashboard, port 8787.
+  baseUrl: firstNonEmpty(qs.get('energyLoggerUrl'), qs.get('loggerUrl'), ENERGY_LOGGER_EXT.baseUrl),
+  refreshSeconds: Math.max(15, refreshSeconds(firstNonEmpty(
+    qs.get('energyLoggerRefresh'),
+    ENERGY_LOGGER_EXT.refreshSeconds,
+    60,
+  ))),
+  timeoutMs: fetchTimeoutMs(firstNonEmpty(
+    qs.get('energyLoggerTimeoutMs'),
+    ENERGY_LOGGER_EXT.timeoutMs,
+    8000,
+  )),
+};
+
 function vierlingsbeekIdxConfig() {
   const cfg = Object.assign({}, VIERLINGSBEEK_CFG);
   const aliases = {
