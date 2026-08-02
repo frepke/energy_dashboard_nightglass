@@ -1,3 +1,9 @@
+## 2.10.4
+
+- Korte landscape-vensters gebruiken weer normale verticale scrolling, zodat Energiestroom, het passieve energieadvies en de prijsgrafiek niet buiten beeld worden afgesneden.
+- Fullscreen- en kioskhoogtes blijven gekoppeld aan de gemeten Visual Viewport.
+- De onderste tijdlabels van de prijsgrafiek hebben een grotere veilige binnenmarge.
+
 ## 2.10.3
 
 - Landschap/fullscreen gebruikt voor `html`, `body` en het dashboard exact dezelfde gemeten Visual Viewport-hoogte.

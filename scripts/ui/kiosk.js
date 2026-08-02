@@ -57,6 +57,7 @@ function densityForViewport(width, height) {
 
 function setDensityClass(density) {
   for (const mode of ['cozy', 'compact', 'dense', 'micro']) {
+    document.documentElement.classList.toggle(`dashboard-fit-${mode}`, density === mode);
     document.body.classList.toggle(`dashboard-fit-${mode}`, density === mode);
   }
   document.body.dataset.dashboardFit = density;

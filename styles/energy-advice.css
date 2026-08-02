@@ -327,3 +327,86 @@
 [data-theme="light"] .energy-advice__live {
   background-color: rgba(255,255,255,.52);
 }
+
+/* ========================================================================== 
+   V2.10.4 — window scrolling and fullscreen bottom safety
+   --------------------------------------------------------------------------
+   A short landscape browser window uses the micro composition. It must remain
+   vertically scrollable so no panel content is hidden. Taller landscape modes
+   stay locked to the measured Visual Viewport, while the price chart reserves
+   a real bottom lane for its time labels.
+   ========================================================================== */
+@media (min-width: 900px) and (orientation: landscape) {
+  html.dashboard-fit-micro,
+  body.dashboard-fit-micro {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+    scrollbar-width: auto !important;
+  }
+
+  body.dashboard-fit-micro {
+    position: static !important;
+    inset: auto !important;
+    min-height: var(--viewport-height, 100dvh) !important;
+  }
+
+  body.dashboard-fit-micro .dashboard {
+    height: auto !important;
+    min-height: var(--viewport-height, 100dvh) !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body.insight-disabled.dashboard-fit-micro .dashboard-content {
+    grid-template-rows: auto auto auto minmax(clamp(168px, 24dvh, 320px), 1fr) !important;
+    overflow: visible !important;
+  }
+
+  html.dashboard-fit-cozy,
+  html.dashboard-fit-compact,
+  html.dashboard-fit-dense,
+  body.dashboard-fit-cozy,
+  body.dashboard-fit-compact,
+  body.dashboard-fit-dense {
+    height: var(--viewport-height, 100dvh) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    scrollbar-width: none !important;
+  }
+
+  body.dashboard-fit-cozy,
+  body.dashboard-fit-compact,
+  body.dashboard-fit-dense {
+    position: fixed !important;
+    inset: 0 !important;
+  }
+
+  body.dashboard-fit-cozy .dashboard,
+  body.dashboard-fit-compact .dashboard,
+  body.dashboard-fit-dense .dashboard {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.dashboard-fit-micro) .prices-panel {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px) + var(--safe-bottom-extra, 0px)) !important;
+  }
+
+  body:not(.dashboard-fit-micro) .panel[data-i18n-label="section-prices"] .chart {
+    min-height: 0 !important;
+  }
+
+  body:not(.dashboard-fit-micro) .panel[data-i18n-label="section-prices"] .bars {
+    bottom: 38px !important;
+  }
+
+  body:not(.dashboard-fit-micro) .panel[data-i18n-label="section-prices"] .time {
+    bottom: -22px !important;
+  }
+}

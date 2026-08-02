@@ -1,8 +1,8 @@
-Nightglass Energy Dashboard 2.10.3
+Nightglass Energy Dashboard 2.10.4
 
 Passieve energy-logger v1.3-prognose zichtbaar als eigen Nightglass-kaart.
 Toont beste vensters, verwachte energiestromen, netto kosten, modelkwaliteit en evaluatie.
 De browser gebruikt uitsluitend GET en accepteert alleen een hard passief vergrendelde bron.
 De oude Smart Insight-balk is standaard uitgeschakeld; energy-logger blijft actief.
 De live Energiestroom-kaart behoudt daarbij zijn volledige hoogte en inhoud.
-De landschapsweergave gebruikt exact de zichtbare viewporthoogte en verbergt geen inhoud achter een overbodige verticale scrollbar.
+Korte landschapsvensters scrollen volledig; fullscreen gebruikt exact de zichtbare viewporthoogte met extra ruimte onder de tijdlabels.

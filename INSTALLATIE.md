@@ -1,4 +1,4 @@
-# Snelle installatie — Nightglass Energy Dashboard 2.10.3
+# Snelle installatie — Nightglass Energy Dashboard 2.10.4
 
 1. Bewaar bij een upgrade je bestaande `config.js`.
 2. Kopieer deze complete map naar de Domoticz-map `www/energy-dashboard`.
