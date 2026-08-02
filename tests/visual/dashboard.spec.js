@@ -253,10 +253,12 @@ test('price chart section', async ({ page }, testInfo) => {
 test('passive energy advice section', async ({ page }) => {
   const advice = page.locator('#energyAdvice');
   await expect(advice).toHaveAttribute('data-state', 'live');
-  await expect(advice.locator('#energyAdviceMainTime')).toHaveText('13:30–14:30');
+  await expect(advice.locator('#energyAdviceMainLabel')).toHaveText('Best 3-hour window');
+  await expect(advice.locator('#energyAdviceMainTime')).toHaveText('13:00–16:00');
   await expect(advice.locator('#energyAdviceState')).toHaveText('Forecast current');
   await expect(advice.locator('.energy-advice__policy')).toContainText('locked throughout 2026');
   await expect(advice.locator('.energy-advice-window')).toHaveCount(5);
+  await expect(advice.locator('[data-advice-window="3h"]')).toHaveClass(/is-active/);
 });
 
 // ── Tooltip — hover (desktop) ─────────────────────────────────────────────────

@@ -120,6 +120,35 @@ describe('chart DOM rendering', () => {
     expect(bars[3].classList.contains('is-best-window')).toBe(false);
   });
 
+  it('uses the selected energy-logger advice period for the graph highlight', async () => {
+    const { renderBars, markBestWindowBars, setEnergyAdviceWindow } = await import('../scripts/ui/chart.js');
+    const now = new Date(2026, 0, 1, 10).getTime();
+    const items = [0, 1, 2, 3, 4].map(i => makeHour(now + i * 3600000, 10 + i));
+    renderBars(items, now, 10, 20);
+
+    fakeDecisionWindow = {
+      requestedHours: 3,
+      highlightStart: now,
+      highlightEnd: now + 3 * 3600000,
+    };
+    setEnergyAdviceWindow({
+      hours: 3,
+      start: new Date(now + 3600000).toISOString(),
+      end: new Date(now + 4 * 3600000).toISOString(),
+      averageMarginalPriceEurKwh: 0.01857,
+    });
+    markBestWindowBars();
+
+    const bars = document.getElementById('bars').children;
+    expect(bars[0].classList.contains('is-best-window')).toBe(false);
+    expect(bars[1].classList.contains('is-best-window')).toBe(true);
+    expect(bars[2].classList.contains('is-best-window')).toBe(true);
+    expect(bars[3].classList.contains('is-best-window')).toBe(true);
+    expect(bars[4].classList.contains('is-best-window')).toBe(false);
+
+    setEnergyAdviceWindow({ hours: 'all' });
+  });
+
 
 
   it('keeps all-window mode neutral so the price colour scale stays logical', async () => {

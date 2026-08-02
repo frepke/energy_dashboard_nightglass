@@ -2,13 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { addElement, installMiniDom } from './utils/minidom.js';
 
 vi.mock('../scripts/config/resolveConfig.js', () => ({
+  CFG: { usageWindowHours: 3 },
   ENERGY_LOGGER_CFG: { enabled: true, baseUrl: '', refreshSeconds: 60, timeoutMs: 8000 },
 }));
 
 import { renderEnergyAdvice, renderEnergyAdviceError } from '../scripts/ui/energyAdvice.js';
 
 const OUTPUT_IDS = [
-  'energyAdviceState', 'energyAdviceMainTime', 'energyAdviceMainDay', 'energyAdviceMainPrice',
+  'energyAdviceState', 'energyAdviceMainLabel', 'energyAdviceMainTime', 'energyAdviceMainDay', 'energyAdviceMainPrice',
   'energyAdviceSolar', 'energyAdviceHouse', 'energyAdviceImport', 'energyAdviceExport',
   'energyAdviceNetCost', 'energyAdviceConfidence', 'energyAdviceModel', 'energyAdviceHorizon',
   'energyAdviceEvaluation', 'energyAdviceWindows',
@@ -58,6 +59,19 @@ describe('passive energy advice card', () => {
     expect(document.querySelector('#energyAdviceConfidence').textContent).toBe('Low');
     expect(document.querySelector('#energyAdviceEvaluation').textContent).toContain('5 quarters evaluated');
     expect(document.querySelector('#energyAdviceWindows').children).toHaveLength(5);
+  });
+
+  it('synchronizes the primary card and active row with the selected duration', () => {
+    renderEnergyAdvice(payload(), 4);
+
+    expect(document.querySelector('#energyAdviceMainLabel').textContent).toBe('Best 4-hour window');
+    expect(document.querySelector('#energyAdviceMainTime').textContent).toBe('13:00–17:00');
+    expect(document.querySelector('#energyAdviceMainPrice').textContent).toBe('1.86 ct/kWh');
+
+    const rows = document.querySelector('#energyAdviceWindows').children;
+    expect(rows[3].dataset.adviceWindow).toBe('4h');
+    expect(rows[3].classList.contains('is-active')).toBe(true);
+    expect(rows[0].classList.contains('is-active')).toBe(false);
   });
 
   it('shows an isolated logger error without throwing', () => {
