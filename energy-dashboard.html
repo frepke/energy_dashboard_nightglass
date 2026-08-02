@@ -13,10 +13,10 @@
   <link rel="stylesheet" href="styles/flow.css">
   <link rel="stylesheet" href="styles/cards.css">
   <link rel="stylesheet" href="styles/chart.css">
-  <link rel="stylesheet" href="styles/insights.css">
+  <link rel="stylesheet" href="styles/insights.css?v=2.10.1">
   <link rel="stylesheet" href="styles/weather-art.css">
-  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.10.0">
-  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.0">
+  <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.10.1">
+  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.1">
 
   <script>
     // Nieuwe installaties starten in het Nederlands. Bestaande voorkeuren blijven behouden.
@@ -30,7 +30,7 @@
 </head>
 
 <body>
-<main class="dashboard" data-dashboard-version="nightglass-v2.10.0">
+<main class="dashboard" data-dashboard-version="nightglass-v2.10.1">
   <header class="topbar">
     <div class="topbar-left">
       <div class="brand-lockup" aria-label="Nightglass Energy">
@@ -177,7 +177,7 @@
     </section>
 
     <!-- Slim energieadvies -->
-    <section class="smart-insight panel" id="smartInsight" aria-label="Slim energieadvies" data-i18n-label="section-insight">
+    <section class="smart-insight panel" id="smartInsight" aria-label="Slim energieadvies" data-i18n-label="section-insight" hidden>
       <div class="smart-insight-main">
         <div class="smart-insight-icon" id="smartInsightIcon" aria-hidden="true">⚡</div>
         <div class="smart-insight-copy">
@@ -433,6 +433,6 @@
 </main>
 
 <script src="config.js" onerror="console.warn('config.js ontbreekt — gebruik config.example.js als basis.')"></script>
-<script type="module" src="scripts/main.js?v=2.10.0"></script>
+<script type="module" src="scripts/main.js?v=2.10.1"></script>
 </body>
 </html>

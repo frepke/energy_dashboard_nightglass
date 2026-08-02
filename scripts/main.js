@@ -46,6 +46,15 @@ function getWeatherTTL() {
   return WEATHER_TTL_VC;
 }
 
+function updateSmartInsightIfEnabled() {
+  if (CFG.insightEnabled) updateSmartInsight();
+}
+
+function applySmartInsightVisibility() {
+  const panel = $('#smartInsight');
+  if (panel) panel.hidden = !CFG.insightEnabled;
+}
+
 
 const DOMOTICZ_STALE_AFTER_MS = Math.max(180_000, (Number(CFG.refresh) || 30) * 3_000);
 let domoticzSourceState = 'loading';
@@ -130,7 +139,7 @@ initLanguageToggle(() => {
   retranslateWeatherLabels();
   retranslateDeviceHistoryWatermarks();
   updateDomoticzIndicator();
-  updateSmartInsight();
+  updateSmartInsightIfEnabled();
   updateWeatherProviderTooltip();
   refreshController.retranslateLiveLabels();
   energyAdviceController.retranslate();
@@ -169,6 +178,7 @@ initVisibilityController({
 
 validateConfig();
 initI18n();
+applySmartInsightVisibility();
 setupWidthToggle();
 applyIconOverrides();
 initDeviceHistoryWatermarks();
@@ -197,7 +207,7 @@ energyAdviceController.refresh();
 energyAdviceController.start();
 window.addEventListener('usage-window-hours-change', () => {
   markBestWindowBars();
-  updateSmartInsight();
+  updateSmartInsightIfEnabled();
 });
 
 if (!initPlaywrightMock()) {

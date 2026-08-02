@@ -160,6 +160,14 @@ window.DASHBOARD_CONFIG = {
   },
 
   // ----------------------------------------------------------------
+  // Oude Smart Insight-balk — voorlopig uitgeschakeld
+  // De losse energy-logger advieskaart hierboven blijft actief.
+  // ----------------------------------------------------------------
+  insight: {
+    enabled: false,
+  },
+
+  // ----------------------------------------------------------------
   // Refresh interval in seconds (default: 1)
   // Can also be set via ?refresh=5 URL parameter.
   // ----------------------------------------------------------------

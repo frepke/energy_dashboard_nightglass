@@ -211,7 +211,7 @@ export function createRefreshController(setStatus) {
       gridExportYearLoadedAt = Date.now();
     }
 
-    updateSmartInsight();
+    if (CFG.insightEnabled) updateSmartInsight();
 
     if (gas && ids.gas && $('#gasYear').dataset.loaded !== String(ids.gas)) {
       const y = await fetchYearGas(ids.gas);
@@ -363,7 +363,7 @@ export function createRefreshController(setStatus) {
       lastGasNow = forecast.gas_now;
       setGasBadge(forecast.gas_now);
     }
-    updateSmartInsight();
+    if (CFG.insightEnabled) updateSmartInsight();
   }
 
   async function refreshAll(reason) {

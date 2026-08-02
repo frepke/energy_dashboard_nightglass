@@ -1,3 +1,9 @@
+## 2.10.1
+
+- De oude Smart Insight-balk is voorlopig standaard uitgeschakeld en wordt niet meer bijgewerkt.
+- De afzonderlijke, passieve energy-logger-advieskaart blijft volledig actief.
+- Insight kan later bewust worden teruggezet met `insight.enabled: true` of tijdelijk met `?insight=1`.
+
 ## 2.10.0
 
 - Nieuwe Nightglass-kaart voor de alleen-lezen `/v1/advice`-uitvoer van energy-logger v1.3+.

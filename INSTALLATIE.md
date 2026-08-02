@@ -1,4 +1,4 @@
-# Snelle installatie — Nightglass Energy Dashboard 2.10
+# Snelle installatie — Nightglass Energy Dashboard 2.10.1
 
 1. Bewaar bij een upgrade je bestaande `config.js`.
 2. Kopieer deze complete map naar de Domoticz-map `www/energy-dashboard`.
@@ -24,6 +24,18 @@ energy-dashboard.html?kiosk=1
 ```
 
 `config.js` wordt bewust niet meegeleverd, zodat wachtwoorden en API-sleutels niet in het pakket staan.
+
+## Insight voorlopig uit
+
+De oude Smart Insight-balk is standaard uitgeschakeld. De aparte passieve
+energy-logger-prognose blijft zichtbaar. Wil je Insight later terugzetten, voeg
+dan aan `config.js` toe:
+
+```js
+insight: {
+  enabled: true,
+},
+```
 
 ## Energy-logger-prognose
 

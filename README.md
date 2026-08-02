@@ -1,4 +1,4 @@
-# Nightglass Energy Dashboard 2.10
+# Nightglass Energy Dashboard 2.10.1
 
 Een zelfstandig fullscreen energiedashboard voor **Domoticz**, in de visuele taal van Nightglass. Het dashboard gebruikt alleen HTML, CSS en JavaScript: geen framework en geen buildstap voor productie.
 
@@ -12,7 +12,7 @@ Versie 2.10 maakt daarnaast de passieve voorspellingen van energy-logger v1.3+ z
 - Nightglass-achtergrondgrafieken met echte Domoticz-daghistorie;
 - actuele stroom- en gasprijs;
 - Zonneplan-kwartiergrafiek met afname- en terugleverprijs en het voordeligste aaneengesloten venster;
-- slim verbruiks- en terugleveradvies;
+- optionele oude Smart Insight-balk (standaard uitgeschakeld);
 - passieve energy-logger-prognose met vensters van 1, 2, 3, 4 en 6 uur;
 - verwachte zonproductie, huisvraag, import, teruglevering, netto kosten en evaluatiefout;
 - tijd, datum, zonsopkomst, zonsondergang en daglengte;
@@ -201,6 +201,7 @@ Ondersteund:
 ?fetchTimeoutMs=15000  netwerktime-out
 ?energyLoggerUrl=http://192.168.1.20:8787  afwijkend loggeradres
 ?energyLogger=0         prognosekaart uitschakelen
+?insight=1              oude Smart Insight tijdelijk inschakelen
 ?safeBottom=80         extra vrije ruimte onderaan
 ?safeTop=20            optionele extra bovenmarge
 ?safeLeft=0            optionele extra linkermarge

@@ -132,6 +132,20 @@ export const ENERGY_LOGGER_CFG = {
   )),
 };
 
+const INSIGHT_EXT = Object.assign({
+  // Disabled by default: the separate energy-logger advice card remains active.
+  enabled: false,
+}, EXT_CFG.insight || {});
+
+const insightEnabledParam = qs.get('insightEnabled') ?? qs.get('insight');
+
+/** Legacy Smart Insight bar. Disabled by default, but explicitly reversible. */
+export const INSIGHT_CFG = {
+  enabled: insightEnabledParam === null
+    ? INSIGHT_EXT.enabled === true
+    : truthyFlag(insightEnabledParam),
+};
+
 function vierlingsbeekIdxConfig() {
   const cfg = Object.assign({}, VIERLINGSBEEK_CFG);
   const aliases = {
@@ -186,6 +200,7 @@ export const CFG = {
   latitude:            optionalNumber(firstNonEmpty(qs.get('lat'), qs.get('latitude'), WEATHER_CFG.latitude)),
   longitude:           optionalNumber(firstNonEmpty(qs.get('lon'), qs.get('lng'), qs.get('longitude'), WEATHER_CFG.longitude)),
   timezone:            firstNonEmpty(qs.get('tz'), qs.get('timezone'), WEATHER_CFG.timezone),
+  insightEnabled:      INSIGHT_CFG.enabled,
 };
 
 // Zonneplan/contract calculation settings

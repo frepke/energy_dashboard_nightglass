@@ -1,6 +1,10 @@
 /* ============================================================
    SMART INSIGHT BAR — action-first decision layer
    ============================================================ */
+.smart-insight[hidden] {
+  display: none !important;
+}
+
 .smart-insight {
   margin: 0 0 var(--section-gap);
   display: grid;
