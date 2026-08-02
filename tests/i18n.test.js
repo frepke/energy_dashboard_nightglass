@@ -120,6 +120,21 @@ describe('t()', () => {
       expect(typeof translations.en[key]).toBe('string');
     });
   });
+
+  it('has all passive energy-advice labels in both languages', () => {
+    const keys = [
+      'section-energy-advice', 'energy-advice-title', 'energy-advice-live',
+      'energy-advice-policy', 'energy-advice-best-1h', 'energy-advice-solar',
+      'energy-advice-house', 'energy-advice-import', 'energy-advice-export',
+      'energy-advice-net-cost', 'energy-advice-quality',
+      'energy-advice-confidence-low', 'energy-advice-check-config',
+      'energy-advice-policy-error',
+    ];
+    keys.forEach(key => {
+      expect(typeof translations.nl[key]).toBe('string');
+      expect(typeof translations.en[key]).toBe('string');
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------

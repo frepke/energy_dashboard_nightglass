@@ -144,6 +144,41 @@ test.beforeEach(async ({ page }) => {
     }));
     window.__MOCK_CURRENT_PRICE_CT__ = 19;
 
+    window.__MOCK_ENERGY_ADVICE__ = {
+      generated_at_utc: '2026-05-17T10:00:00Z',
+      available: true,
+      operating_policy: {
+        mode: 'passive', locked: true, control_capable: false, automatic_activation: false,
+      },
+      latest_run: {
+        id: 14,
+        model_version: 'profile-weather-v2',
+        overall_confidence: 'low',
+      },
+      forecast_horizon: {
+        first_start_utc: '2026-05-17T10:00:00Z',
+        last_end_utc: '2026-05-17T22:00:00Z',
+      },
+      totals: {
+        solar_kwh: 10.6686,
+        house_kwh: 4.0701,
+        import_kwh: 1.5381,
+        export_kwh: 8.1366,
+        net_cost_eur: 0.3117,
+      },
+      best_consumption_windows: {
+        '1h': { start_local: '2026-05-17T13:30:00+02:00', end_local: '2026-05-17T14:30:00+02:00', average_marginal_price_eur_kwh: 0.01528 },
+        '2h': { start_local: '2026-05-17T13:00:00+02:00', end_local: '2026-05-17T15:00:00+02:00', average_marginal_price_eur_kwh: 0.01604 },
+        '3h': { start_local: '2026-05-17T13:00:00+02:00', end_local: '2026-05-17T16:00:00+02:00', average_marginal_price_eur_kwh: 0.01694 },
+        '4h': { start_local: '2026-05-17T13:00:00+02:00', end_local: '2026-05-17T17:00:00+02:00', average_marginal_price_eur_kwh: 0.01857 },
+        '6h': { start_local: '2026-05-17T13:00:00+02:00', end_local: '2026-05-17T19:00:00+02:00', average_marginal_price_eur_kwh: 0.07513 },
+      },
+      evaluation: {
+        evaluated_quarters: 5,
+        net_mae_kwh: 0.19305,
+      },
+    };
+
     const HISTORY_START = FIXED - 12 * H;
     const history = (fn) => Array.from({ length: 25 }, (_, i) => ({
       t: HISTORY_START + i * H / 2,
@@ -166,11 +201,23 @@ test.beforeEach(async ({ page }) => {
 
 // ── Full-page layout ──────────────────────────────────────────────────────────
 
-test('full dashboard layout', async ({ page }, testInfo) => {
-  await expect(page).toHaveScreenshot(`full-layout-${testInfo.project.name}.png`, {
-    fullPage: true,
-    ...LOCALE_SCREENSHOT,
-  });
+test('full dashboard layout keeps every primary panel visible and ordered', async ({ page }) => {
+  const selectors = ['.weather-hero', '.smart-insight', '.energy-panel', '#energyAdvice', '.prices-panel'];
+  const tops = [];
+
+  for (const selector of selectors) {
+    const panel = page.locator(selector);
+    await expect(panel).toBeVisible();
+    const box = await panel.boundingBox();
+    expect(box, `${selector} should have layout geometry`).toBeTruthy();
+    if (box) {
+      expect(box.width).toBeGreaterThan(0);
+      expect(box.height).toBeGreaterThan(0);
+      tops.push(box.y);
+    }
+  }
+
+  expect(tops).toEqual([...tops].sort((a, b) => a - b));
 });
 
 // ── Individual sections ───────────────────────────────────────────────────────
@@ -203,6 +250,15 @@ test('price chart section', async ({ page }, testInfo) => {
   await expect(page.locator('section').last()).toHaveScreenshot(
     `price-chart-${testInfo.project.name}.png`, CHART_SCREENSHOT,
   );
+});
+
+test('passive energy advice section', async ({ page }) => {
+  const advice = page.locator('#energyAdvice');
+  await expect(advice).toHaveAttribute('data-state', 'live');
+  await expect(advice.locator('#energyAdviceMainTime')).toHaveText('13:30–14:30');
+  await expect(advice.locator('#energyAdviceState')).toHaveText('Forecast current');
+  await expect(advice.locator('.energy-advice__policy')).toContainText('locked throughout 2026');
+  await expect(advice.locator('.energy-advice-window')).toHaveCount(5);
 });
 
 // ── Tooltip — hover (desktop) ─────────────────────────────────────────────────

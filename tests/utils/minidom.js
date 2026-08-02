@@ -59,6 +59,11 @@ export class MiniElement {
 
   appendChild(child) { child.parentElement = this; this.children.push(child); return child; }
   append(...nodes) { nodes.forEach(n => this.appendChild(n)); }
+  replaceChildren(...nodes) {
+    this.children.forEach(child => { child.parentElement = null; });
+    this.children = [];
+    this.append(...nodes);
+  }
   insertBefore(child, ref) {
     if (child.parentElement) child.remove();
     child.parentElement = this;
