@@ -1,3 +1,9 @@
+## 2.10.10
+
+- `brace-expansion` is bijgewerkt van 5.0.8 naar 5.0.9 om GHSA-rgw5-rvv9-x895 te verhelpen.
+- `npm audit --audit-level=high` meldt geen kwetsbaarheden.
+- De dashboardfunctionaliteit en configuratie zijn ongewijzigd.
+
 ## 2.10.9
 
 - De vaste prijstooltipbaan staat op desktop en laptop 12 pixels hoger voor meer ruimte boven de prijsbalken.
