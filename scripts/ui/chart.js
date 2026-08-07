@@ -751,8 +751,25 @@ export function setupTooltip() {
 
     const margin = 10;
     const viewportWidth = globalThis.window?.innerWidth || document.documentElement?.clientWidth || 1600;
+    const viewportHeight = globalThis.window?.innerHeight || document.documentElement?.clientHeight || 900;
     const tooltipWidth = Math.ceil(tip.getBoundingClientRect?.().width || tip.offsetWidth || 0);
+    const tooltipHeight = Math.ceil(tip.getBoundingClientRect?.().height || tip.offsetHeight || 40);
     const halfTooltip = tooltipWidth / 2;
+
+    // Mouse, trackpad and touch all share one calm vertical lane near the top
+    // of the chart. Only the horizontal coordinate follows the selected bar.
+    // Desktop used to derive top from b.top, which made the label jump up and
+    // down with every differently-sized price bar.
+    const chart = w.closest?.('.chart') || document.querySelector('#chart');
+    const chartRect = chart?.getBoundingClientRect?.();
+    const chartTop = Number.isFinite(chartRect?.top) ? chartRect.top : (y - 120);
+    const verticalTransformOffset = useTouchFixed ? 0 : 18;
+    const minVisualTop = margin;
+    const maxVisualTop = Math.max(minVisualTop, viewportHeight - margin - tooltipHeight);
+    const visualLaneTop = Math.min(
+      Math.max(chartTop + 46, minVisualTop),
+      maxVisualTop,
+    );
 
     // Edge-safe positioning. Near the edges we anchor the balloon to the
     // viewport margin instead of keeping a centered transform. This is more
@@ -765,10 +782,6 @@ export function setupTooltip() {
       // On phones a finger sits on top of the selected bar. Keep the balloon in
       // one fixed top lane of the chart, but let it follow the selected hour
       // horizontally so it remains clear which bar is active.
-      const chart = w.closest?.('.chart') || document.querySelector('#chart');
-      const chartRect = chart?.getBoundingClientRect?.();
-      const chartTop = Number.isFinite(chartRect?.top) ? chartRect.top : (y - 120);
-
       if (tooltipWidth > 0) {
         const minX = margin + halfTooltip;
         const maxX = viewportWidth - margin - halfTooltip;
@@ -779,7 +792,7 @@ export function setupTooltip() {
 
       tip.classList.add('is-touch-fixed');
       tip.style.left = tooltipX + 'px';
-      tip.style.top = Math.max(margin + 18, chartTop + 46) + 'px';
+      tip.style.top = visualLaneTop + 'px';
     } else {
       if (tooltipWidth > 0 && x - halfTooltip < margin) {
         tooltipX = margin;
@@ -796,7 +809,10 @@ export function setupTooltip() {
       }
 
       tip.style.left = tooltipX + 'px';
-      tip.style.top  = Math.max(margin + 18, y - 10) + 'px';
+      // Desktop's visible-state transform lifts the tooltip by 18px. Add the
+      // same amount to the inline top so its painted top matches the shared
+      // visual lane used by touch devices.
+      tip.style.top = visualLaneTop + verticalTransformOffset + 'px';
     }
 
     const finalRect = tip.getBoundingClientRect();

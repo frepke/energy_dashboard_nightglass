@@ -1,3 +1,9 @@
+## 2.10.8
+
+- De prijstooltip gebruikt op desktop, laptop en touchschermen één vaste verticale baan boven de grafiek.
+- Tijdens hoveren volgt alleen de horizontale positie de actieve prijsbalk; verschillen in balkhoogte veroorzaken geen verticale sprongen meer.
+- De bestaande begrenzing houdt het label binnen de zichtbare browserranden.
+
 ## 2.10.5
 
 - Alle liggende venstergroottes gebruiken nu natuurlijke inhoudshoogte; als de beschikbare hoogte te klein is, scrolt het document zonder Energiestroom samen te drukken.
