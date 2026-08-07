@@ -766,7 +766,7 @@ export function setupTooltip() {
     const chartRect = chart?.getBoundingClientRect?.();
     const chartTop = Number.isFinite(chartRect?.top) ? chartRect.top : (y - 120);
     const verticalTransformOffset = useTouchFixed ? 0 : 18;
-    const laneOffset = useTouchFixed ? 46 : 10;
+    const laneOffset = useTouchFixed ? 46 : 34;
     const minVisualTop = margin;
     const maxVisualTop = Math.max(minVisualTop, viewportHeight - margin - tooltipHeight);
     const visualLaneTop = Math.min(
