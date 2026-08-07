@@ -21,7 +21,7 @@
     "eslint": "^10.8.0",
     "globals": "^17.8.0",
     "vitest": "^4.1.5",
-    "@playwright/test": "^1.62.0",
+    "@playwright/test": "^1.62.1",
     "http-server": "^14.1.1"
   },
   "vitest": {
