@@ -225,6 +225,42 @@ describe('chart DOM rendering', () => {
     expect(tip.querySelector('.tip-price').textContent).toBe(secondWrap.dataset.price);
   });
 
+  it('moves the desktop tooltip continuously with the pointer instead of snapping to bar centres', async () => {
+    const { renderBars, setupTooltip } = await import('../scripts/ui/chart.js');
+    const now = new Date(2026, 0, 1, 10).getTime();
+    renderBars([
+      makeHour(now, 12),
+      makeHour(now + 15 * 60000, 18),
+    ], now, 0, 20);
+
+    setupTooltip();
+    const bars = document.getElementById('bars');
+    const [firstWrap, secondWrap] = bars.children;
+    firstWrap.getBoundingClientRect = () => ({ left: 100, right: 120, top: 80, bottom: 120, width: 20, height: 40 });
+    secondWrap.getBoundingClientRect = () => ({ left: 124, right: 144, top: 80, bottom: 120, width: 20, height: 40 });
+
+    bars.dispatch('pointerover', { target: firstWrap, clientX: 104, clientY: 90 });
+    const tip = document.querySelector('.tooltip');
+    const line = document.querySelector('.hoverline');
+    expect(tip.style.left).toBe('104px');
+    expect(line.style.left).toBe('104px');
+    expect(tip.querySelector('.tip-price').textContent).toBe(firstWrap.dataset.price);
+
+    // Still on the same price bar: geometry follows every pointer coordinate.
+    bars.dispatch('pointermove', { target: firstWrap, clientX: 117, clientY: 90 });
+    expect(tip.style.left).toBe('117px');
+    expect(line.style.left).toBe('117px');
+    expect(tip.querySelector('.tip-price').textContent).toBe(firstWrap.dataset.price);
+
+    // Crossing into the next bar changes its data, but retains the exact
+    // pointer coordinate instead of snapping to that bar's 134px centre.
+    bars.dispatch('pointermove', { target: secondWrap, clientX: 125, clientY: 90 });
+    expect(tip.style.left).toBe('125px');
+    expect(line.style.left).toBe('125px');
+    expect(tip.querySelector('.tip-price').textContent).toBe(secondWrap.dataset.price);
+    expect(tip.classList.contains('is-visible')).toBe(true);
+  });
+
   it('shows quarter-hour range, buy tariff and feed-in tariff in the tooltip', async () => {
     const { renderBars, setupTooltip } = await import('../scripts/ui/chart.js');
     const now = new Date(2026, 7, 1, 10, 15).getTime();
