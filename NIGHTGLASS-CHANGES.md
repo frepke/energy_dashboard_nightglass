@@ -1,3 +1,10 @@
+## 2.10.14
+
+- Het prijslabel volgt op desktop en laptop continu de horizontale muispositie en springt niet meer van balkmidden naar balkmidden.
+- De verticale aanwijslijn beweegt met dezelfde exacte positie mee; tijd en prijs blijven gekoppeld aan het actieve kwartier.
+- De vaste hoverhoogte van 2.10.10/2.10.13 en het bestaande iPhone-gedrag zijn ongewijzigd.
+- Een regressietest controleert beweging binnen één balk en de vloeiende overgang naar een volgende balk.
+
 ## 2.10.13
 
 - De prijstooltip blijft tijdens desktop- en laptophover continu zichtbaar bij het passeren van de smalle ruimte tussen twee prijsbalkjes.

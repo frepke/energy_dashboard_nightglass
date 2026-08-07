@@ -1,6 +1,6 @@
 {
   "name": "energy_dashboard",
-  "version": "2.10.13",
+  "version": "2.10.14",
   "description": "A private, self-hosted energy dashboard for Domoticz with Zonneplan dynamic pricing.",
   "type": "module",
   "scripts": {

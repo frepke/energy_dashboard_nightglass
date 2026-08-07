@@ -1,4 +1,4 @@
-Nightglass Energy Dashboard 2.10.13
+Nightglass Energy Dashboard 2.10.14
 
 Passieve energy-logger v1.3-prognose zichtbaar als eigen Nightglass-kaart.
 Toont beste vensters, verwachte energiestromen, netto kosten, modelkwaliteit en evaluatie.
@@ -10,4 +10,5 @@ De duurkeuze 1u, 2u, 3u, 4u of 6u synchroniseert de advieskaart, actieve venster
 Lokale energy-loggertijden blijven gelijk in browser en CI, ongeacht de tijdzone van het uitvoerende systeem.
 De prijstooltip beweegt op desktop en laptop alleen horizontaal in een iets hogere, rustig leesbare baan en blijft binnen beeld.
 De hoverhoogte van 2.10.10 is behouden; tussen opeenvolgende prijsbalkjes blijft hetzelfde tooltiplabel continu zichtbaar zonder knipperende hide/show-cyclus.
+Op desktop en laptop volgen het tooltiplabel en de verticale aanwijslijn nu vloeiend de exacte muispositie; tijd en prijs wisselen pas bij het volgende kwartier.
 De ontwikkelafhankelijkheid brace-expansion is bijgewerkt naar 5.0.9; npm audit meldt geen kwetsbaarheden.

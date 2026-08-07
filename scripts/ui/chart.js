@@ -698,7 +698,7 @@ export function setupTooltip() {
     if (!bar) return;
 
     const b = bar.getBoundingClientRect();
-    const x = r.left + r.width / 2;
+    const barCenterX = r.left + r.width / 2;
     const y = b.top;
     const c = w.dataset.color || '#00c9a7';
 
@@ -718,6 +718,12 @@ export function setupTooltip() {
     $('.tip-window', tip).hidden = !windowInfo;
 
     const useTouchFixed = !!options.touchFixed;
+    // A mouse/trackpad tooltip follows the pointer continuously instead of
+    // jumping from one bar centre to the next. The active data value remains
+    // tied to `w`, so only the balloon and guide line glide pixel by pixel.
+    // Touch keeps its proven bar-centred positioning on iPhone.
+    const pointerX = Number(options.pointerX);
+    const x = !useTouchFixed && Number.isFinite(pointerX) ? pointerX : barCenterX;
     const forceTouchPrime = !!options.forceTouchPrime;
     const sameBarAlreadyVisible = useTouchFixed && !forceTouchPrime
       && w === activeWrap && tip.classList.contains('is-visible');
@@ -758,8 +764,8 @@ export function setupTooltip() {
 
     // Mouse, trackpad and touch all use a calm vertical lane near the top of
     // the chart. Desktop sits slightly higher for more air above the bars;
-    // touch keeps the proven iPhone lane. Only the horizontal coordinate
-    // follows the selected bar.
+    // touch keeps the proven iPhone lane. On desktop the horizontal coordinate
+    // follows the pointer continuously; touch remains centred on its bar.
     // Desktop used to derive top from b.top, which made the label jump up and
     // down with every differently-sized price bar.
     const chart = w.closest?.('.chart') || document.querySelector('#chart');
@@ -915,7 +921,7 @@ export function setupTooltip() {
     if (e.pointerType === 'touch' || Date.now() - lastTouchTs < 700) return;
     const w = e.target.closest('.barwrap');
     if (!w || activeWrap === w) return;
-    show(e);
+    show(e, { pointerX: e.clientX });
   });
 
   bars.addEventListener('pointermove', e => {
@@ -929,7 +935,7 @@ export function setupTooltip() {
         : null);
     if (!w) return;
     if (activeWrap !== w) setActiveWrap(w);
-    positionTooltip(w, true);
+    positionTooltip(w, true, { pointerX: e.clientX });
   });
 
   bars.addEventListener('pointerout', e => {
