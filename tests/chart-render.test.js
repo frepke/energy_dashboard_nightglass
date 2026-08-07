@@ -195,6 +195,36 @@ describe('chart DOM rendering', () => {
     expect(line.classList.contains('is-visible')).toBe(false);
   });
 
+  it('keeps one visible tooltip while the pointer crosses gaps between bars', async () => {
+    const { renderBars, setupTooltip } = await import('../scripts/ui/chart.js');
+    const now = new Date(2026, 0, 1, 10).getTime();
+    renderBars([
+      makeHour(now, 12),
+      makeHour(now + 15 * 60000, 18),
+    ], now, 0, 20);
+
+    setupTooltip();
+    const bars = document.getElementById('bars');
+    const [firstWrap, secondWrap] = bars.children;
+    const tip = document.querySelector('.tooltip');
+
+    bars.dispatch('pointerover', { target: firstWrap });
+    expect(tip.classList.contains('is-visible')).toBe(true);
+    expect(tip.querySelector('.tip-price').textContent).toBe(firstWrap.dataset.price);
+
+    // Moving from a bar into the chart's inter-bar gap must not hide/reveal
+    // the label. It remains the same visible DOM element until the next bar
+    // updates its contents and horizontal position.
+    bars.dispatch('pointerout', { target: firstWrap, relatedTarget: bars });
+    expect(tip.classList.contains('is-visible')).toBe(true);
+    expect(tip.classList.contains('is-positioning')).toBe(false);
+
+    bars.dispatch('pointermove', { target: secondWrap });
+    expect(tip.classList.contains('is-visible')).toBe(true);
+    expect(tip.classList.contains('is-positioning')).toBe(false);
+    expect(tip.querySelector('.tip-price').textContent).toBe(secondWrap.dataset.price);
+  });
+
   it('shows quarter-hour range, buy tariff and feed-in tariff in the tooltip', async () => {
     const { renderBars, setupTooltip } = await import('../scripts/ui/chart.js');
     const now = new Date(2026, 7, 1, 10, 15).getTime();
