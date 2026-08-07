@@ -1,3 +1,8 @@
+## 2.10.12
+
+- De vaste prijstooltipbaan staat op desktop en laptop opnieuw 12 pixels hoger, nu in totaal 36 pixels boven de iPhone-baan.
+- De iPhone-positie, horizontale beweging en begrenzing binnen het scherm blijven ongewijzigd.
+
 ## 2.10.11
 
 - De vaste prijstooltipbaan staat op desktop en laptop nogmaals 12 pixels hoger, nu in totaal 24 pixels boven de iPhone-baan.
