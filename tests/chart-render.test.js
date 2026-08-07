@@ -242,9 +242,9 @@ describe('chart DOM rendering', () => {
     const firstTop = tip.style.top;
     const firstLeft = tip.style.left;
 
-    // The desktop lane is intentionally 12px above the touch/iPhone lane.
+    // The desktop lane is intentionally 24px above the touch/iPhone lane.
     // Its visible transform lifts 18px from this inline top value.
-    expect(firstTop).toBe('352px');
+    expect(firstTop).toBe('340px');
 
     bars.dispatch('pointermove', { target: tallWrap });
     expect(tip.style.top).toBe(firstTop);
