@@ -1,3 +1,8 @@
+## 2.10.9
+
+- De vaste prijstooltipbaan staat op desktop en laptop 12 pixels hoger voor meer ruimte boven de prijsbalken.
+- De bestaande iPhone-positie, horizontale beweging en begrenzing binnen het scherm blijven ongewijzigd.
+
 ## 2.10.8
 
 - De prijstooltip gebruikt op desktop, laptop en touchschermen één vaste verticale baan boven de grafiek.

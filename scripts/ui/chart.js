@@ -756,18 +756,21 @@ export function setupTooltip() {
     const tooltipHeight = Math.ceil(tip.getBoundingClientRect?.().height || tip.offsetHeight || 40);
     const halfTooltip = tooltipWidth / 2;
 
-    // Mouse, trackpad and touch all share one calm vertical lane near the top
-    // of the chart. Only the horizontal coordinate follows the selected bar.
+    // Mouse, trackpad and touch all use a calm vertical lane near the top of
+    // the chart. Desktop sits slightly higher for more air above the bars;
+    // touch keeps the proven iPhone lane. Only the horizontal coordinate
+    // follows the selected bar.
     // Desktop used to derive top from b.top, which made the label jump up and
     // down with every differently-sized price bar.
     const chart = w.closest?.('.chart') || document.querySelector('#chart');
     const chartRect = chart?.getBoundingClientRect?.();
     const chartTop = Number.isFinite(chartRect?.top) ? chartRect.top : (y - 120);
     const verticalTransformOffset = useTouchFixed ? 0 : 18;
+    const laneOffset = useTouchFixed ? 46 : 34;
     const minVisualTop = margin;
     const maxVisualTop = Math.max(minVisualTop, viewportHeight - margin - tooltipHeight);
     const visualLaneTop = Math.min(
-      Math.max(chartTop + 46, minVisualTop),
+      Math.max(chartTop + laneOffset, minVisualTop),
       maxVisualTop,
     );
 
