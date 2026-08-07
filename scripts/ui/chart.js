@@ -920,7 +920,13 @@ export function setupTooltip() {
 
   bars.addEventListener('pointermove', e => {
     if (e.pointerType === 'touch' || Date.now() - lastTouchTs < 700) return;
-    const w = e.target.closest('.barwrap');
+    // A price chart has a narrow visual gap between adjacent bar columns.
+    // Keep using the nearest bar while the pointer crosses that gap so the
+    // already-visible tooltip can update in place instead of blinking off.
+    const w = e.target.closest('.barwrap')
+      || (Number.isFinite(e.clientX) && Number.isFinite(e.clientY)
+        ? nearestWrapAtX(e.clientX, e.clientY)
+        : null);
     if (!w) return;
     if (activeWrap !== w) setActiveWrap(w);
     positionTooltip(w, true);
@@ -928,8 +934,15 @@ export function setupTooltip() {
 
   bars.addEventListener('pointerout', e => {
     if (e.pointerType === 'touch' || Date.now() - lastTouchTs < 700) return;
-    const next = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.barwrap') : null;
-    if (!next) hide();
+    // pointerout bubbles for every child and also fires when the pointer moves
+    // from a bar into the few pixels of chart background between two bars.
+    // That background still belongs to #bars, so hiding here caused a full
+    // opacity reset followed by a new reveal on every adjacent bar. Leave the
+    // tooltip visible until pointerleave confirms that the chart itself was
+    // actually left.
+    const related = e.relatedTarget;
+    const staysInsideBars = related === bars || related?.closest?.('#bars') === bars;
+    if (!staysInsideBars) hide();
   });
 
   bars.addEventListener('pointerleave', e => {

@@ -1,3 +1,10 @@
+## 2.10.13
+
+- De prijstooltip blijft tijdens desktop- en laptophover continu zichtbaar bij het passeren van de smalle ruimte tussen twee prijsbalkjes.
+- Inhoud en horizontale positie wisselen binnen hetzelfde label; de tooltip wordt niet meer per balk verborgen en opnieuw getoond.
+- De door de gebruiker gekozen verticale hoverhoogte van 2.10.10 blijft exact behouden; de latere hoogtewijzigingen uit 2.10.11 en 2.10.12 zijn niet overgenomen.
+- Touch- en iPhonegedrag blijven ongewijzigd.
+
 ## 2.10.10
 
 - `brace-expansion` is bijgewerkt van 5.0.8 naar 5.0.9 om GHSA-rgw5-rvv9-x895 te verhelpen.
