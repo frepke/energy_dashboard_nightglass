@@ -216,6 +216,37 @@ describe('chart DOM rendering', () => {
     expect(tip.querySelector('.tip-sell-price').textContent).toContain('22.89');
   });
 
+  it('keeps the desktop tooltip in one vertical lane across different bar heights', async () => {
+    const { renderBars, setupTooltip } = await import('../scripts/ui/chart.js');
+    const now = new Date(2026, 7, 7, 10).getTime();
+    renderBars([
+      makeHour(now, 0.12),
+      makeHour(now + 15 * 60000, 0.38),
+    ], now, 0.12, 0.38);
+
+    const bars = document.getElementById('bars');
+    const chart = addElement(document.body, 'div', { id: 'chart', className: 'chart' });
+    bars.remove();
+    chart.appendChild(bars);
+    chart.getBoundingClientRect = () => ({ left: 20, top: 300, bottom: 600, width: 800, height: 300 });
+
+    const [shortWrap, tallWrap] = bars.children;
+    shortWrap.getBoundingClientRect = () => ({ left: 100, top: 360, bottom: 580, width: 20, height: 220 });
+    tallWrap.getBoundingClientRect = () => ({ left: 140, top: 320, bottom: 580, width: 20, height: 260 });
+    shortWrap.querySelector('.bar').getBoundingClientRect = () => ({ left: 100, top: 500, bottom: 580, width: 20, height: 80 });
+    tallWrap.querySelector('.bar').getBoundingClientRect = () => ({ left: 140, top: 360, bottom: 580, width: 20, height: 220 });
+
+    setupTooltip();
+    bars.dispatch('pointerover', { target: shortWrap });
+    const tip = document.querySelector('.tooltip');
+    const firstTop = tip.style.top;
+    const firstLeft = tip.style.left;
+
+    bars.dispatch('pointermove', { target: tallWrap });
+    expect(tip.style.top).toBe(firstTop);
+    expect(tip.style.left).not.toBe(firstLeft);
+  });
+
   it('pins tooltip on touchend and dismisses on tap outside', async () => {
     const { renderBars, setupTooltip } = await import('../scripts/ui/chart.js');
     const now = new Date(2026, 0, 1, 10).getTime();
