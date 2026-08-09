@@ -371,15 +371,46 @@
         <article class="energy-advice__best">
           <span class="energy-advice__label" id="energyAdviceMainLabel">Beste venster van 1 uur</span>
           <strong id="energyAdviceMainTime">--:--</strong>
-          <span><span id="energyAdviceMainDay">--</span><i aria-hidden="true">·</i><span id="energyAdviceMainPrice">--</span></span>
+          <span class="energy-advice__best-meta">
+            <span id="energyAdviceMainDay">--</span>
+            <i aria-hidden="true">·</i>
+            <span class="energy-advice__sale-price">
+              <span id="energyAdviceMainPriceLabel" data-i18n="energy-advice-average-sale-price">Gem. verkoopprijs</span>
+              <strong id="energyAdviceMainPrice">--</strong>
+            </span>
+          </span>
         </article>
 
         <div class="energy-advice__metrics" aria-label="Verwachte energiestromen" data-i18n-label="energy-advice-metrics-aria">
-          <div><span data-i18n="energy-advice-solar">Zon</span><strong id="energyAdviceSolar">--</strong></div>
-          <div><span data-i18n="energy-advice-house">Huis</span><strong id="energyAdviceHouse">--</strong></div>
-          <div><span data-i18n="energy-advice-import">Import</span><strong id="energyAdviceImport">--</strong></div>
-          <div><span data-i18n="energy-advice-export">Teruglevering</span><strong id="energyAdviceExport">--</strong></div>
-          <div class="energy-advice__metric-cost"><span data-i18n="energy-advice-net-cost">Netto kosten</span><strong id="energyAdviceNetCost">--</strong></div>
+          <div class="energy-advice__metrics-heading">
+            <span data-i18n="energy-advice-forecast-totals">Prognosetotalen</span>
+            <strong id="energyAdviceMetricsHorizon">tot --</strong>
+          </div>
+          <div class="energy-advice__metric energy-advice__metric--solar">
+            <span data-i18n="energy-advice-solar">Opwek</span>
+            <strong id="energyAdviceSolar">--</strong>
+            <small data-i18n="energy-advice-solar-note">van zonnepanelen</small>
+          </div>
+          <div class="energy-advice__metric">
+            <span data-i18n="energy-advice-house">Huisverbruik</span>
+            <strong id="energyAdviceHouse">--</strong>
+            <small data-i18n="energy-advice-house-note">totaal verbruik</small>
+          </div>
+          <div class="energy-advice__metric energy-advice__metric--import">
+            <span data-i18n="energy-advice-import">Inkoop net</span>
+            <strong id="energyAdviceImport">--</strong>
+            <small data-i18n="energy-advice-import-note">kost geld</small>
+          </div>
+          <div class="energy-advice__metric energy-advice__metric--export">
+            <span data-i18n="energy-advice-export">Teruglevering</span>
+            <strong id="energyAdviceExport">--</strong>
+            <small data-i18n="energy-advice-export-note">levert geld op</small>
+          </div>
+          <div class="energy-advice__metric energy-advice__metric-cost">
+            <span id="energyAdviceNetCostLabel" data-i18n="energy-advice-net-payable">Netto te betalen</span>
+            <strong id="energyAdviceNetCost">--</strong>
+            <small id="energyAdviceNetCostNote" data-i18n="energy-advice-net-payable-note">inkoopkosten − verkoopopbrengst</small>
+          </div>
         </div>
 
         <aside class="energy-advice__quality">

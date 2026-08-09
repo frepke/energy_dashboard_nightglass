@@ -1,7 +1,7 @@
-Nightglass Energy Dashboard 2.10.14
+Nightglass Energy Dashboard 2.10.15
 
 Passieve energy-logger v1.3-prognose zichtbaar als eigen Nightglass-kaart.
-Toont beste vensters, verwachte energiestromen, netto kosten, modelkwaliteit en evaluatie.
+Toont beste vensters, begrijpelijk benoemde energiestromen, netto kosten of opbrengst, modelkwaliteit en evaluatie.
 De browser gebruikt uitsluitend GET en accepteert alleen een hard passief vergrendelde bron.
 De oude Smart Insight-balk is standaard uitgeschakeld; energy-logger blijft actief.
 De live Energiestroom-kaart behoudt daarbij zijn volledige hoogte en inhoud.
@@ -12,3 +12,5 @@ De prijstooltip beweegt op desktop en laptop alleen horizontaal in een iets hoge
 De hoverhoogte van 2.10.10 is behouden; tussen opeenvolgende prijsbalkjes blijft hetzelfde tooltiplabel continu zichtbaar zonder knipperende hide/show-cyclus.
 Op desktop en laptop volgen het tooltiplabel en de verticale aanwijslijn nu vloeiend de exacte muispositie; tijd en prijs wisselen pas bij het volgende kwartier.
 De ontwikkelafhankelijkheid brace-expansion is bijgewerkt naar 5.0.9; npm audit meldt geen kwetsbaarheden.
+De advieskaart noemt het geselecteerde tarief expliciet de gemiddelde verkoopprijs en legt per energiestroom uit wat de kWh-waarde betekent.
+Een positief geldsaldo heet netto te betalen; een negatief saldo wordt zonder minteken als netto opbrengst getoond.

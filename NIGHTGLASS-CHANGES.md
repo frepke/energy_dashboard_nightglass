@@ -1,3 +1,11 @@
+## 2.10.15
+
+- Het tarief bij het gekozen venster heet nu expliciet `Gem. verkoopprijs`, zodat duidelijk is dat dit de terugleververgoeding is.
+- De energiestromen zijn hernoemd naar `Opwek`, `Huisverbruik`, `Inkoop net` en `Teruglevering`, met een korte uitleg onder iedere waarde.
+- Boven de kWh-waarden staat nu expliciet tot welk tijdstip de prognosetotalen lopen; deze totalen worden niet verward met alleen het gekozen prijsvenster.
+- Een positief nettosaldo wordt getoond als `Netto te betalen`; een negatief saldo als een positieve `Netto opbrengst`.
+- De nettoregel vermeldt dat het saldo bestaat uit inkoopkosten minus verkoopopbrengst.
+
 ## 2.10.14
 
 - Het prijslabel volgt op desktop en laptop continu de horizontale muispositie en springt niet meer van balkmidden naar balkmidden.

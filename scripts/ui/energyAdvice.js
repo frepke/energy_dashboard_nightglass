@@ -135,6 +135,24 @@ function bestWindowLabel(hours) {
   return t('energy-advice-best-window').replace('{hours}', String(hours));
 }
 
+function netCostPresentation(value) {
+  const amount = finite(value);
+  if (amount === null) {
+    return {
+      label: t('energy-advice-net-balance'),
+      amount: '--',
+      note: t('energy-advice-net-balance-note'),
+    };
+  }
+
+  const isRevenue = amount < 0;
+  return {
+    label: t(isRevenue ? 'energy-advice-net-revenue' : 'energy-advice-net-payable'),
+    amount: `€ ${formatNumber(Math.abs(amount), 2)}`,
+    note: t(isRevenue ? 'energy-advice-net-revenue-note' : 'energy-advice-net-payable-note'),
+  };
+}
+
 export function renderEnergyAdvice(payload, selectedHours = initialWindowHours()) {
   const panel = $('#energyAdvice');
   if (!panel) return;
@@ -147,23 +165,29 @@ export function renderEnergyAdvice(payload, selectedHours = initialWindowHours()
   const primary = selection?.window;
   const primaryLabel = formatWindow(primary);
   const horizonEnd = payload.forecast_horizon?.last_end_utc;
+  const horizonLabel = horizonEnd
+    ? `${t('energy-advice-until')} ${formatLocalDateTime(horizonEnd, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}`
+    : t('energy-advice-until-unknown');
+  const netCost = netCostPresentation(totals.net_cost_eur);
 
   panel.dataset.state = 'live';
   setText('energyAdviceState', t('energy-advice-live'));
   setText('energyAdviceMainLabel', bestWindowLabel(selection?.hours || 1));
   setText('energyAdviceMainTime', primaryLabel.time);
   setText('energyAdviceMainDay', primaryLabel.day);
+  setText('energyAdviceMainPriceLabel', t('energy-advice-average-sale-price'));
   setText('energyAdviceMainPrice', formatCt(primary?.average_marginal_price_eur_kwh));
   setText('energyAdviceSolar', formatKwh(totals.solar_kwh));
   setText('energyAdviceHouse', formatKwh(totals.house_kwh));
   setText('energyAdviceImport', formatKwh(totals.import_kwh));
   setText('energyAdviceExport', formatKwh(totals.export_kwh));
-  setText('energyAdviceNetCost', `€ ${formatNumber(totals.net_cost_eur, 2)}`);
+  setText('energyAdviceMetricsHorizon', horizonLabel);
+  setText('energyAdviceNetCostLabel', netCost.label);
+  setText('energyAdviceNetCost', netCost.amount);
+  setText('energyAdviceNetCostNote', netCost.note);
   setText('energyAdviceConfidence', t(confidenceKey(run.overall_confidence)));
   setText('energyAdviceModel', run.model_version || '--');
-  setText('energyAdviceHorizon', horizonEnd
-    ? `${t('energy-advice-until')} ${formatLocalDateTime(horizonEnd, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}`
-    : t('energy-advice-until-unknown'));
+  setText('energyAdviceHorizon', horizonLabel);
 
   const evaluated = Math.max(0, Number(evaluation.evaluated_quarters) || 0);
   const mae = finite(evaluation.net_mae_kwh);

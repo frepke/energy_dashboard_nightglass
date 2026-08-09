@@ -131,14 +131,36 @@
   font-variant-numeric: tabular-nums;
 }
 
-.energy-advice__best > span:last-child {
+.energy-advice__best-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+.energy-advice__sale-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.energy-advice__sale-price > span {
+  color: var(--soft);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.energy-advice__sale-price > strong {
+  color: var(--solar);
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 .energy-advice i { font-style: normal; color: var(--soft); }
@@ -150,7 +172,7 @@
   align-items: stretch;
 }
 
-.energy-advice__metrics > div {
+.energy-advice__metrics > .energy-advice__metric {
   min-width: 0;
   padding: 7px 9px;
   display: grid;
@@ -159,17 +181,35 @@
   border-left: 1px solid var(--line-soft);
 }
 
-.energy-advice__metrics > div:first-child { border-left: 0; }
+.energy-advice__metrics > .energy-advice__metric--solar { border-left: 0; }
+
+.energy-advice__metrics-heading {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 9px 1px;
+}
+
+.energy-advice__metrics-heading > span {
+  color: var(--muted);
+}
+
+.energy-advice__metrics-heading > strong {
+  color: var(--soft);
+  font-size: 9px;
+  font-weight: 750;
+  white-space: nowrap;
+}
 
 .energy-advice__metrics span {
   color: var(--soft);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .07em;
+  line-height: 1.15;
   text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .energy-advice__metrics strong {
@@ -181,9 +221,16 @@
   white-space: nowrap;
 }
 
-.energy-advice__metrics > div:nth-child(1) strong,
-.energy-advice__metrics > div:nth-child(4) strong { color: var(--solar); }
-.energy-advice__metrics > div:nth-child(3) strong { color: var(--orange); }
+.energy-advice__metrics small {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 650;
+  line-height: 1.15;
+}
+
+.energy-advice__metrics > .energy-advice__metric--solar strong,
+.energy-advice__metrics > .energy-advice__metric--export strong { color: var(--solar); }
+.energy-advice__metrics > .energy-advice__metric--import strong { color: var(--orange); }
 .energy-advice__metrics .energy-advice__metric-cost strong { color: var(--green); }
 
 .energy-advice__quality {
@@ -313,7 +360,7 @@
   }
 
   .energy-advice__metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .energy-advice__metrics > div { border-left: 0; padding: 4px 7px; }
+  .energy-advice__metrics > .energy-advice__metric { border-left: 0; padding: 4px 7px; }
   .energy-advice__metric-cost { grid-column: span 2; }
 }
 
