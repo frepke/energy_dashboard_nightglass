@@ -159,21 +159,6 @@ Een lege `baseUrl` betekent same-origin en werkt wanneer het dashboard vanuit de
 
 Voor `energyLogger.baseUrl` betekent leeg dat dezelfde hostnaam als Nightglass met poort `8787` wordt gebruikt. Draait de logger op een andere machine, vul dan bijvoorbeeld `http://192.168.1.20:8787` in. De logger-API staat CORS toe en blijft alleen-lezen. Nightglass controleert bovendien de volledige passieve beleidsstatus voordat het advies toont.
 
-### Omvormer-schaduwregeling
-
-Nightglass simuleert bij ieder actueel prijsinterval wat een toekomstige
-omvormerregeling zou doen. Alleen bij een negatieve verkoopprijs én werkelijke
-teruglevering wordt een begrenzing tot het lokale verbruik voorgesteld. De
-beslissing, voorgestelde limiet en financiële indicatie worden lokaal in de
-browser bijgehouden.
-
-Deze functie is uitsluitend een simulatie. Er is geen stuurverbinding of
-schrijf-API aanwezig en er wordt nooit een commando verzonden. De toekomstige
-veiligheidsvoorwaarden worden wel zichtbaar geëvalueerd: datum minimaal
-`2027-01-01` in `Europe/Amsterdam`, modelvertrouwen minimaal `MEDIUM` en een
-handmatige vrijgave. Ook als die voorwaarden in een test allemaal waar zijn,
-blijft echte aansturing in deze versie technisch uitgeschakeld.
-
 ## Iconen aanpassen
 
 Overrides staan in `config.js` en gebruiken lokale SVG-iconen:

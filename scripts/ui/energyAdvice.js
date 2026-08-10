@@ -5,7 +5,6 @@ import { activeLocale } from '../core/formatters.js';
 import { LIVE_STATE } from '../core/state.js';
 import { CFG, ENERGY_LOGGER_CFG } from '../config/resolveConfig.js';
 import { fetchEnergyAdvice } from '../services/energyLoggerService.js';
-import { evaluateInverterShadow, recordShadowDecision } from '../domain/inverterShadow.js';
 import { t } from '../i18n.js';
 
 const WINDOW_KEYS = ['1h', '2h', '3h', '4h', '6h'];
@@ -48,28 +47,6 @@ function formatKwh(value) {
 function formatCt(valueEur) {
   const n = finite(valueEur);
   return n === null ? '--' : `${formatNumber(n * 100, 2)} ct/kWh`;
-}
-
-function formatCtValue(valueCt) {
-  const n = finite(valueCt);
-  return n === null ? '--' : `${formatNumber(n, 2)} ct/kWh`;
-}
-
-function formatWatts(value) {
-  const n = finite(value);
-  return n === null ? '-- W' : `${formatNumber(Math.round(n), 0)} W`;
-}
-
-function formatEuro(value) {
-  const n = finite(value);
-  return n === null ? '--' : `€ ${formatNumber(Math.abs(n), 2)}`;
-}
-
-function fillTemplate(key, values) {
-  return Object.entries(values).reduce(
-    (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
-    t(key),
-  );
 }
 
 function priceWindowBounds(window) {
@@ -232,68 +209,6 @@ function netCostPresentation(value) {
   };
 }
 
-function renderInverterShadow(payload, now = Date.now()) {
-  const confidence = payload.latest_run?.overall_confidence || 'low';
-  const decision = evaluateInverterShadow({
-    now,
-    solarW: LIVE_STATE.solarW,
-    houseW: LIVE_STATE.houseW,
-    gridW: LIVE_STATE.gridW,
-    gridDir: LIVE_STATE.gridDir,
-    priceForecast: LIVE_STATE.priceForecast,
-    confidence,
-    manualRelease: false,
-  });
-
-  recordShadowDecision(decision, globalThis.localStorage, now);
-
-  const actionKey = {
-    'curtail-surplus': 'energy-shadow-action-curtail',
-    unrestricted: 'energy-shadow-action-unrestricted',
-    'no-intervention': 'energy-shadow-action-none',
-    'waiting-data': 'energy-shadow-action-wait',
-  }[decision.action] || 'energy-shadow-action-wait';
-
-  let detail = t('energy-shadow-detail-wait');
-  if (decision.action === 'curtail-surplus') {
-    detail = fillTemplate('energy-shadow-detail-curtail', {
-      percent: decision.suggestedLimitPct,
-      power: formatWatts(decision.targetW),
-    });
-  } else if (decision.action === 'unrestricted') {
-    detail = t('energy-shadow-detail-unrestricted');
-  } else if (decision.action === 'no-intervention') {
-    detail = t('energy-shadow-detail-none');
-  }
-
-  const effect = decision.action === 'curtail-surplus'
-    ? fillTemplate('energy-shadow-effect-avoided', { amount: formatEuro(decision.estimatedEffectEur) })
-    : t('energy-shadow-effect-none');
-  const confidenceLabel = t(confidenceKey(confidence));
-
-  setText('energyShadowAction', t(actionKey));
-  setText('energyShadowDetail', detail);
-  setText('energyShadowSalePrice', formatCtValue(decision.salePriceCt));
-  setText('energyShadowEffect', effect);
-  setText('energyShadowDateGate', t(decision.gates.dateReady
-    ? 'energy-shadow-gate-date-ready'
-    : 'energy-shadow-gate-date-blocked'));
-  setText('energyShadowConfidenceGate', fillTemplate(
-    decision.gates.confidenceReady
-      ? 'energy-shadow-gate-confidence-ready'
-      : 'energy-shadow-gate-confidence-blocked',
-    { confidence: confidenceLabel },
-  ));
-  setText('energyShadowManualGate', t('energy-shadow-gate-manual-blocked'));
-  setText('energyShadowCommand', t('energy-shadow-no-command'));
-
-  const shadow = $('#energyShadow');
-  if (shadow) {
-    shadow.dataset.action = decision.action;
-    shadow.dataset.commandSent = 'false';
-  }
-}
-
 export function renderEnergyAdvice(payload, selectedHours = initialWindowHours()) {
   const panel = $('#energyAdvice');
   if (!panel) return;
@@ -339,7 +254,6 @@ export function renderEnergyAdvice(payload, selectedHours = initialWindowHours()
     : t('energy-advice-not-evaluated'));
 
   renderWindowList(windows, normalizeWindowHours(selectedHours));
-  renderInverterShadow(payload);
 }
 
 export function renderEnergyAdviceError(error) {
@@ -351,11 +265,6 @@ export function renderEnergyAdviceError(error) {
   setText('energyAdviceMainDay', t('energy-advice-unavailable'));
   setText('energyAdviceMainPurchasePrice', '');
   setText('energyAdviceMainPrice', '');
-  setText('energyShadowAction', t('energy-shadow-action-wait'));
-  setText('energyShadowDetail', t('energy-shadow-detail-wait'));
-  setText('energyShadowSalePrice', '--');
-  setText('energyShadowEffect', t('energy-shadow-effect-none'));
-  setText('energyShadowCommand', t('energy-shadow-no-command'));
   setText('energyAdviceEvaluation', error?.message === 'energy_logger_policy_not_passive'
     ? t('energy-advice-policy-error')
     : t('energy-advice-check-config'));
@@ -368,10 +277,8 @@ export function createEnergyAdviceController() {
   let selectedHours = initialWindowHours();
   let priceListenerActive = false;
 
-  function handleEnergyStateChange(event) {
-    const patch = event?.detail?.patch || {};
-    const relevant = ['priceForecast', 'solarW', 'houseW', 'gridW', 'gridDir'];
-    if (!relevant.some(key => Object.prototype.hasOwnProperty.call(patch, key))) return;
+  function handlePriceForecastChange(event) {
+    if (!Object.prototype.hasOwnProperty.call(event?.detail?.patch || {}, 'priceForecast')) return;
     renderCurrent();
   }
 
@@ -418,7 +325,7 @@ export function createEnergyAdviceController() {
     clearInterval(timerId);
     timerId = setInterval(refresh, seconds * 1000);
     if (!priceListenerActive && typeof window !== 'undefined') {
-      window.addEventListener('state:change', handleEnergyStateChange);
+      window.addEventListener('state:change', handlePriceForecastChange);
       priceListenerActive = true;
     }
   }
@@ -427,7 +334,7 @@ export function createEnergyAdviceController() {
     clearInterval(timerId);
     timerId = null;
     if (priceListenerActive && typeof window !== 'undefined') {
-      window.removeEventListener('state:change', handleEnergyStateChange);
+      window.removeEventListener('state:change', handlePriceForecastChange);
       priceListenerActive = false;
     }
   }

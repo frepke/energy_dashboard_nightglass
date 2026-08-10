@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="styles/insights.css?v=2.10.13">
   <link rel="stylesheet" href="styles/weather-art.css">
   <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.10.13">
-  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.17">
+  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.16">
 
   <script>
     // Nieuwe installaties starten in het Nederlands. Bestaande voorkeuren blijven behouden.
@@ -426,31 +426,6 @@
         </aside>
       </div>
 
-      <section class="energy-advice__shadow" id="energyShadow" data-action="waiting-data"
-               aria-label="Gesimuleerde omvormerregeling" data-i18n-label="energy-shadow-aria">
-        <div class="energy-advice__shadow-heading">
-          <div>
-            <span class="energy-advice__label" data-i18n="energy-shadow-title">Schaduwregeling omvormer</span>
-            <strong id="energyShadowAction">Wacht op actuele kwartierdata</strong>
-            <small id="energyShadowDetail">Nog niet genoeg gegevens voor een simulatie</small>
-          </div>
-          <span class="energy-advice__shadow-mode" data-i18n="energy-shadow-mode">SIMULATIE · GEEN AANSTURING</span>
-        </div>
-
-        <div class="energy-advice__shadow-values">
-          <span><small data-i18n="energy-shadow-sale-price">Verkoopprijs nu</small><strong id="energyShadowSalePrice">--</strong></span>
-          <span><small data-i18n="energy-shadow-effect">Indicatie dit kwartier</small><strong id="energyShadowEffect">Geen financieel effect</strong></span>
-        </div>
-
-        <div class="energy-advice__shadow-gates" aria-label="Veiligheidsblokkades" data-i18n-label="energy-shadow-gates-aria">
-          <span id="energyShadowDateGate">Datum: geblokkeerd tot 2027</span>
-          <span id="energyShadowConfidenceGate">Model: geblokkeerd</span>
-          <span id="energyShadowManualGate">Handmatige vrijgave: uit</span>
-        </div>
-
-        <small class="energy-advice__shadow-command" id="energyShadowCommand">Geen commando verzonden</small>
-      </section>
-
       <div class="energy-advice__windows" id="energyAdviceWindows" aria-label="Beste verbruiksvensters" data-i18n-label="energy-advice-windows-aria"></div>
     </section>
 
@@ -494,6 +469,6 @@
 </main>
 
 <script src="config.js" onerror="console.warn('config.js ontbreekt — gebruik config.example.js als basis.')"></script>
-<script type="module" src="scripts/main.js?v=2.10.17"></script>
+<script type="module" src="scripts/main.js?v=2.10.16"></script>
 </body>
 </html>
