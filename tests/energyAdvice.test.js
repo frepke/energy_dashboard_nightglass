@@ -16,9 +16,6 @@ const OUTPUT_IDS = [
   'energyAdviceNetCostLabel', 'energyAdviceNetCost', 'energyAdviceNetCostNote',
   'energyAdviceMetricsHorizon', 'energyAdviceConfidence', 'energyAdviceModel', 'energyAdviceHorizon',
   'energyAdviceEvaluation', 'energyAdviceWindows',
-  'energyShadow', 'energyShadowAction', 'energyShadowDetail', 'energyShadowSalePrice',
-  'energyShadowEffect', 'energyShadowDateGate', 'energyShadowConfidenceGate',
-  'energyShadowManualGate', 'energyShadowCommand',
 ];
 
 function setupAdviceDom() {
@@ -119,30 +116,5 @@ describe('passive energy advice card', () => {
     expect(document.querySelector('#energyAdvice').dataset.state).toBe('error');
     expect(document.querySelector('#energyAdviceState').textContent).toBe('Logger unavailable');
     expect(document.querySelector('#energyAdviceEvaluation').textContent).toContain('port 8787');
-  });
-
-  it('renders a read-only shadow decision without sending a command', () => {
-    const now = Date.now();
-    LIVE_STATE.solarW = 5000;
-    LIVE_STATE.houseW = 1500;
-    LIVE_STATE.gridW = 3500;
-    LIVE_STATE.gridDir = 'export';
-    LIVE_STATE.priceForecast.push({
-      ts: now - 5 * 60_000,
-      endTs: now + 10 * 60_000,
-      intervalMinutes: 15,
-      ct: 22,
-      sellCt: -2,
-    });
-
-    renderEnergyAdvice(payload());
-
-    expect(document.querySelector('#energyShadow').dataset.action).toBe('curtail-surplus');
-    expect(document.querySelector('#energyShadowAction').textContent).toBe('Would limit grid export');
-    expect(document.querySelector('#energyShadowDetail').textContent).toContain('30%');
-    expect(document.querySelector('#energyShadowSalePrice').textContent).toBe('-2.00 ct/kWh');
-    expect(document.querySelector('#energyShadowConfidenceGate').textContent).toContain('blocked');
-    expect(document.querySelector('#energyShadowCommand').textContent).toBe('No command sent');
-    expect(document.querySelector('#energyShadow').dataset.commandSent).toBe('false');
   });
 });
