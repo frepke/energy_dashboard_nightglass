@@ -125,8 +125,14 @@ describe('t()', () => {
     const keys = [
       'section-energy-advice', 'energy-advice-title', 'energy-advice-live',
       'energy-advice-policy', 'energy-advice-best-1h', 'energy-advice-solar',
+      'energy-advice-forecast-totals',
       'energy-advice-house', 'energy-advice-import', 'energy-advice-export',
-      'energy-advice-net-cost', 'energy-advice-quality',
+      'energy-advice-average-sale-price', 'energy-advice-solar-note',
+      'energy-advice-house-note', 'energy-advice-import-note', 'energy-advice-export-note',
+      'energy-advice-net-cost', 'energy-advice-net-balance',
+      'energy-advice-net-payable', 'energy-advice-net-payable-note',
+      'energy-advice-net-revenue', 'energy-advice-net-revenue-note',
+      'energy-advice-quality',
       'energy-advice-confidence-low', 'energy-advice-check-config',
       'energy-advice-policy-error',
     ];
