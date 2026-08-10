@@ -142,12 +142,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.energy-advice__purchase-price,
 .energy-advice__sale-price {
   display: inline-flex;
   align-items: baseline;
   gap: 4px;
 }
 
+.energy-advice__purchase-price > span,
 .energy-advice__sale-price > span {
   color: var(--soft);
   font-size: 9px;
@@ -156,12 +158,15 @@
   text-transform: uppercase;
 }
 
+.energy-advice__purchase-price > strong,
 .energy-advice__sale-price > strong {
   color: var(--solar);
   font-size: 11px;
   font-weight: 850;
   white-space: nowrap;
 }
+
+.energy-advice__purchase-price > strong { color: var(--blue-light); }
 
 .energy-advice i { font-style: normal; color: var(--soft); }
 

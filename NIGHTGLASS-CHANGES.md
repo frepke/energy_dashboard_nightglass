@@ -1,3 +1,9 @@
+## 2.10.16
+
+- De advieskaart toont voor het gekozen tijdvak nu zowel de `Gem. inkoopprijs` als de `Gem. verkoopprijs` in ct/kWh.
+- De inkoopprijs is een tijdgewogen gemiddelde van de Zonneplan-afnameprijzen over exact hetzelfde energy-loggervenster.
+- Een onvolledig geladen prijstijdvak toont `--`, zodat geen gedeeltelijk gemiddelde als volledig tarief wordt gepresenteerd.
+
 ## 2.10.15
 
 - Het tarief bij het gekozen venster heet nu expliciet `Gem. verkoopprijs`, zodat duidelijk is dat dit de terugleververgoeding is.

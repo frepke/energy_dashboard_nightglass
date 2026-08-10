@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="styles/insights.css?v=2.10.13">
   <link rel="stylesheet" href="styles/weather-art.css">
   <link rel="stylesheet" href="styles/nightglass-v2.css?v=2.10.13">
-  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.13">
+  <link rel="stylesheet" href="styles/energy-advice.css?v=2.10.16">
 
   <script>
     // Nieuwe installaties starten in het Nederlands. Bestaande voorkeuren blijven behouden.
@@ -374,6 +374,11 @@
           <span class="energy-advice__best-meta">
             <span id="energyAdviceMainDay">--</span>
             <i aria-hidden="true">·</i>
+            <span class="energy-advice__purchase-price">
+              <span id="energyAdviceMainPurchasePriceLabel" data-i18n="energy-advice-average-purchase-price">Gem. inkoopprijs</span>
+              <strong id="energyAdviceMainPurchasePrice">--</strong>
+            </span>
+            <i aria-hidden="true">·</i>
             <span class="energy-advice__sale-price">
               <span id="energyAdviceMainPriceLabel" data-i18n="energy-advice-average-sale-price">Gem. verkoopprijs</span>
               <strong id="energyAdviceMainPrice">--</strong>
@@ -464,6 +469,6 @@
 </main>
 
 <script src="config.js" onerror="console.warn('config.js ontbreekt — gebruik config.example.js als basis.')"></script>
-<script type="module" src="scripts/main.js?v=2.10.13"></script>
+<script type="module" src="scripts/main.js?v=2.10.16"></script>
 </body>
 </html>

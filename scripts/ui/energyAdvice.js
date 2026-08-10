@@ -2,6 +2,7 @@
 
 import { $ } from '../core/dom.js';
 import { activeLocale } from '../core/formatters.js';
+import { LIVE_STATE } from '../core/state.js';
 import { CFG, ENERGY_LOGGER_CFG } from '../config/resolveConfig.js';
 import { fetchEnergyAdvice } from '../services/energyLoggerService.js';
 import { t } from '../i18n.js';
@@ -26,6 +27,7 @@ function initialWindowHours() {
 }
 
 function finite(value) {
+  if (value === null || value === undefined || value === '') return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 }
@@ -45,6 +47,60 @@ function formatKwh(value) {
 function formatCt(valueEur) {
   const n = finite(valueEur);
   return n === null ? '--' : `${formatNumber(n * 100, 2)} ct/kWh`;
+}
+
+function priceWindowBounds(window) {
+  const start = new Date(window?.start_local || window?.start_utc).getTime();
+  const end = new Date(window?.end_local || window?.end_utc).getTime();
+  return Number.isFinite(start) && Number.isFinite(end) && end > start
+    ? { start, end }
+    : null;
+}
+
+/**
+ * Returns the time-weighted Zonneplan purchase tariff for an energy-logger
+ * window. A value is only shown when the price forecast covers the complete
+ * window, preventing a partial average while quarter prices are still loading.
+ */
+function averagePurchasePriceEurKwh(window, priceForecast = LIVE_STATE.priceForecast) {
+  const bounds = priceWindowBounds(window);
+  if (!bounds || !Array.isArray(priceForecast)) return null;
+
+  const intervals = priceForecast
+    .map(item => {
+      const start = Number(item?.ts);
+      const fallbackDuration = Math.max(1, Number(item?.intervalMinutes) || 60) * 60_000;
+      const explicitEnd = Number(item?.endTs);
+      const end = Number.isFinite(explicitEnd) && explicitEnd > start
+        ? explicitEnd
+        : start + fallbackDuration;
+      const priceCt = finite(item?.ct);
+      return {
+        start: Math.max(bounds.start, start),
+        end: Math.min(bounds.end, end),
+        priceCt,
+      };
+    })
+    .filter(item => item.priceCt !== null && item.end > item.start)
+    .sort((a, b) => a.start - b.start);
+
+  let cursor = bounds.start;
+  let weightedCtMs = 0;
+  let coveredMs = 0;
+
+  intervals.forEach(item => {
+    const start = Math.max(cursor, item.start);
+    if (start > cursor) return;
+    const end = Math.max(start, item.end);
+    const duration = end - start;
+    weightedCtMs += item.priceCt * duration;
+    coveredMs += duration;
+    cursor = Math.max(cursor, end);
+  });
+
+  const requiredMs = bounds.end - bounds.start;
+  if (cursor < bounds.end || coveredMs < requiredMs) return null;
+  return (weightedCtMs / coveredMs) / 100;
 }
 
 function dateFromLocalWallClock(value) {
@@ -175,6 +231,8 @@ export function renderEnergyAdvice(payload, selectedHours = initialWindowHours()
   setText('energyAdviceMainLabel', bestWindowLabel(selection?.hours || 1));
   setText('energyAdviceMainTime', primaryLabel.time);
   setText('energyAdviceMainDay', primaryLabel.day);
+  setText('energyAdviceMainPurchasePriceLabel', t('energy-advice-average-purchase-price'));
+  setText('energyAdviceMainPurchasePrice', formatCt(averagePurchasePriceEurKwh(primary)));
   setText('energyAdviceMainPriceLabel', t('energy-advice-average-sale-price'));
   setText('energyAdviceMainPrice', formatCt(primary?.average_marginal_price_eur_kwh));
   setText('energyAdviceSolar', formatKwh(totals.solar_kwh));
@@ -205,6 +263,7 @@ export function renderEnergyAdviceError(error) {
   setText('energyAdviceState', t('energy-advice-offline'));
   setText('energyAdviceMainTime', '--:--');
   setText('energyAdviceMainDay', t('energy-advice-unavailable'));
+  setText('energyAdviceMainPurchasePrice', '');
   setText('energyAdviceMainPrice', '');
   setText('energyAdviceEvaluation', error?.message === 'energy_logger_policy_not_passive'
     ? t('energy-advice-policy-error')
@@ -216,6 +275,12 @@ export function createEnergyAdviceController() {
   let lastPayload = null;
   let busy = false;
   let selectedHours = initialWindowHours();
+  let priceListenerActive = false;
+
+  function handlePriceForecastChange(event) {
+    if (!Object.prototype.hasOwnProperty.call(event?.detail?.patch || {}, 'priceForecast')) return;
+    renderCurrent();
+  }
 
   function announceSelectedWindow() {
     if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return;
@@ -259,11 +324,19 @@ export function createEnergyAdviceController() {
     const seconds = Math.max(15, Number(ENERGY_LOGGER_CFG.refreshSeconds) || 60);
     clearInterval(timerId);
     timerId = setInterval(refresh, seconds * 1000);
+    if (!priceListenerActive && typeof window !== 'undefined') {
+      window.addEventListener('state:change', handlePriceForecastChange);
+      priceListenerActive = true;
+    }
   }
 
   function stop() {
     clearInterval(timerId);
     timerId = null;
+    if (priceListenerActive && typeof window !== 'undefined') {
+      window.removeEventListener('state:change', handlePriceForecastChange);
+      priceListenerActive = false;
+    }
   }
 
   function retranslate() {
