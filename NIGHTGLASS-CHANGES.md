@@ -1,3 +1,11 @@
+## 2.10.17
+
+- Nieuwe schaduwregeling berekent per actueel prijsinterval wat een toekomstige omvormerregeling zou adviseren, zonder ooit een commando te verzenden.
+- Bij een negatieve verkoopprijs en werkelijke teruglevering simuleert Nightglass een begrenzing tot het lokale verbruik; bij een niet-negatieve verkoopprijs blijft de simulatie onbeperkt opwekken.
+- De kaart toont de voorgestelde limiet, het doelvermogen en een indicatie van het mogelijke financiële effect bij gelijkblijvend vermogen gedurende het prijsinterval.
+- Datumgrens (`2027-01-01` in `Europe/Amsterdam`), modelvertrouwen (`MEDIUM` of `HIGH`) en handmatige vrijgave staan als afzonderlijke veiligheidsblokkades in beeld.
+- De beslissingen worden per prijsinterval lokaal in de browser bijgehouden. De module bevat geen schrijfclient, actuator-endpoint of stuurpad; `realControlAllowed` en `commandSent` blijven hard `false`.
+
 ## 2.10.16
 
 - De advieskaart toont voor het gekozen tijdvak nu zowel de `Gem. inkoopprijs` als de `Gem. verkoopprijs` in ct/kWh.

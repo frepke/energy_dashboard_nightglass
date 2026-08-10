@@ -1,4 +1,4 @@
-Nightglass Energy Dashboard 2.10.16
+Nightglass Energy Dashboard 2.10.17
 
 Passieve energy-logger v1.3-prognose zichtbaar als eigen Nightglass-kaart.
 Toont beste vensters, begrijpelijk benoemde energiestromen, netto kosten of opbrengst, modelkwaliteit en evaluatie.
@@ -15,3 +15,5 @@ De ontwikkelafhankelijkheid brace-expansion is bijgewerkt naar 5.0.9; npm audit 
 De advieskaart noemt het geselecteerde tarief expliciet de gemiddelde verkoopprijs en legt per energiestroom uit wat de kWh-waarde betekent.
 Voor hetzelfde geselecteerde tijdvak staat daar nu ook de tijdgewogen gemiddelde inkoopprijs uit de Zonneplan-kwartierprijzen naast.
 Een positief geldsaldo heet netto te betalen; een negatief saldo wordt zonder minteken als netto opbrengst getoond.
+De nieuwe omvormer-schaduwregeling simuleert per prijsinterval een begrenzing bij negatieve verkoopprijzen en houdt het resultaat lokaal bij.
+De datumgrens van 1 januari 2027, minimaal MEDIUM modelvertrouwen en handmatige vrijgave worden apart getoond; echte aansturing bestaat in deze versie niet.
