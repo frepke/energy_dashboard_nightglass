@@ -180,11 +180,10 @@ window.DASHBOARD_CONFIG = {
   // fetchTimeoutMs: 10000,
 
   // ----------------------------------------------------------------
-  // Optional: Zonneplan Zonnebonus contract settings
-  // Only relevant if you have a Zonneplan feed-in tariff contract.
+  // Supplier components are configured centrally in the Domoticz plugin:
+  // supplier_settings.py -> SUPPLIER_CONTRACT.
+  // Forecast JSON supplies the effective price and supplier_contract metadata.
+  // Nightglass never adds a second bonus/allowance locally.
   // ----------------------------------------------------------------
-  // zonnebonusAlwaysOn:              true,  // true = bonus is always active
-  // zonnebonusInkoopvergoedingCt:    2,     // ct/kWh purchase allowance
-  // zonnebonusPct:                   0.10,  // 10% bonus on top of market + allowance
-  // zonnebonusAnnualExportLimitKwh:  7500,  // annual export cap in kWh; uses P1 year export when available
+  // Older zonnebonus* settings no longer determine tariff calculations.
 };

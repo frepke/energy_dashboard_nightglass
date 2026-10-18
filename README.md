@@ -10,6 +10,27 @@ Versie 2.10.6 koppelt de duurkeuze in de prijsgrafiek aan het passieve energiead
 
 Versie 2.10.7 bewaart de lokale tijden uit de energy-logger-API zonder ze nogmaals naar de tijdzone van de browser of CI-runner om te rekenen.
 
+## Centrale leverancierscomponenten
+
+De matching Domoticz-pluginupdate (v1.4) beheert vergoeding, percentagebonus,
+variabele terugleverkosten, daglichtvoorwaarde en bonusjaargrens in één variabele:
+`SUPPLIER_CONTRACT` in **`supplier_settings.py` in de pluginmap**. Wijzig de waarden
+daar en herstart de Zonneplan-hardware/plugin. Nightglass voegt geen tweede bonus
+of vergoeding toe. De oude `zonnebonus*`-instellingen in dashboard `config.js`
+worden niet meer gebruikt voor prijsberekeningen; je persoonlijke `config.js`
+hoeft niet vervangen te worden. De plugin blijft de Zonneplan-bron uitlezen;
+een overstap naar een andere API vergt ook een passende bronkoppeling.
+
+De Forecast JSON bevat `supplier_contract` en per slot `sell_price_components`.
+De logger ontvangt de effectieve `sell_price_ex_tax` en dezelfde prijs via het
+actuele verkoopdevice. Geen logger-image-upgrade nodig. Verstreken evaluaties
+worden niet herschreven. Bij onbekende P1-jaarstand telt de plugin geen
+onbevestigde percentagebonus mee; controleer de componentstatus in Forecast JSON.
+Daylight/cap-berekeningen zijn planningsschattingen, geen exacte jaarafrekening.
+
+Pas de plugin en Nightglass beide aan. Daarna hard vernieuwen en één nieuw
+voorspelkwartier afwachten. De passieve modus en aansturingsblokkade blijven gelden.
+
 ## Functies
 
 - live energiestroom tussen net, woning en zonnepanelen;

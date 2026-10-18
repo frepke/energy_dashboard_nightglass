@@ -307,6 +307,10 @@ describe('expandCheapPlateau / activeDecisionWindow', () => {
 // ---------------------------------------------------------------------------
 
 describe('getZonnebonusContext', () => {
+  beforeEach(() => {
+    LIVE_STATE.supplierContract = { version: 1, sell_price_includes_contract_components: true, bonus_annual_limit_kwh: 7500 };
+    LIVE_STATE.currentSellComponents = { bonus_status: 'eligible', bonus_eur_kwh: .02 };
+  });
   it('marks export opportunity when solar surplus is available and eligible', () => {
     // High solar power (> 50 W threshold), exporting (true), price > 0 so baseFeedIn > 0
     const ctx = getZonnebonusContext(20, 500, 400, true);
@@ -320,11 +324,11 @@ describe('getZonnebonusContext', () => {
     expect(ctx.exportOpportunity).toBe(false);
   });
 
-  it('calculates feedInRewardCt including zonnebonus', () => {
-    // priceCt = 20 ct, inkoopvergoeding = 2 ct → baseFeedIn = 22 ct
-    // bonus = 22 * 0.10 = 2.2 ct → feedIn = 24.2 ct
+  it('uses the effective supplier sale price without adding allowance or bonus twice', () => {
     const ctx = getZonnebonusContext(20, 500, 400, true);
-    expect(ctx.feedInRewardCt).toBeCloseTo(24.2, 1);
+    expect(ctx.feedInRewardCt).toBe(20);
+    expect(ctx.bonusCt).toBe(2);
+    expect(ctx.marketPriceCt).toBeNull();
   });
 
   it('handles null price gracefully', () => {
@@ -339,10 +343,11 @@ describe('getZonnebonusContext', () => {
     expect(ctx.annualLimitReached).toBe(false);
     expect(ctx.remainingAnnualExportKwh).toBe(100);
     expect(ctx.eligible).toBe(true);
-    expect(ctx.feedInRewardCt).toBeCloseTo(24.2, 1);
+    expect(ctx.feedInRewardCt).toBe(20);
   });
 
   it('disables the Zonnebonus bonus when the annual export cap is reached', () => {
+    LIVE_STATE.currentSellComponents = { bonus_status: 'annual_limit_reached', bonus_eur_kwh: 0 };
     const ctx = getZonnebonusContext(20, 500, 400, true, 7500);
     expect(ctx.annualLimitKnown).toBe(true);
     expect(ctx.annualLimitReached).toBe(true);
@@ -350,7 +355,7 @@ describe('getZonnebonusContext', () => {
     expect(ctx.eligible).toBe(false);
     expect(ctx.exportOpportunity).toBe(false);
     expect(ctx.bonusCt).toBe(0);
-    expect(ctx.feedInRewardCt).toBeCloseTo(22, 1);
+    expect(ctx.feedInRewardCt).toBe(20);
   });
 
   it('uses LIVE_STATE.gridExportYearKwh as annual cap input when omitted', () => {
@@ -358,6 +363,22 @@ describe('getZonnebonusContext', () => {
     const ctx = getZonnebonusContext(20, 500, 400, true);
     expect(ctx.annualLimitReached).toBe(true);
     expect(ctx.eligible).toBe(false);
+  });
+
+  it('does not invent a supplier bonus for an older unmarked source', () => {
+    LIVE_STATE.supplierContract = null;
+    const ctx = getZonnebonusContext(25.02402, 500, 400, true);
+    expect(ctx.feedInRewardCt).toBe(25.02402);
+    expect(ctx.bonusCt).toBe(0);
+    expect(ctx.eligible).toBe(false);
+    expect(ctx.annualLimitKnown).toBe(false);
+  });
+
+  it('does not assume a bonus when the plugin cannot verify the annual counter', () => {
+    LIVE_STATE.currentSellComponents = { bonus_status: 'annual_export_unknown', bonus_eur_kwh: 0 };
+    const ctx = getZonnebonusContext(25.02402, 500, 400, true);
+    expect(ctx.eligible).toBe(false);
+    expect(ctx.feedInRewardCt).toBe(25.02402);
   });
 });
 
