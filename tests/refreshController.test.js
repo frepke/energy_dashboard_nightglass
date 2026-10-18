@@ -391,10 +391,14 @@ describe('refreshPrices', () => {
         interval_minutes: 15,
         price: 0.3397908 + i * 0.001,
         sell_price_ex_tax: 0.2289427 + i * 0.001,
+        sell_price_components: { bonus_status: 'eligible', bonus_eur_kwh: .02 },
         is_current: i === 0,
       };
     });
-    mockApiLive.mockResolvedValue(makeForecast(rows, { interval_minutes: 15, source: 'quarter-hourly' }));
+    mockApiLive.mockResolvedValue(makeForecast(rows, {
+      interval_minutes: 15, source: 'quarter-hourly',
+      supplier_contract: { version: 1, sell_price_includes_contract_components: true },
+    }));
 
     const { ctrl } = makeController();
     await ctrl.refreshAll('poll');
@@ -411,6 +415,9 @@ describe('refreshPrices', () => {
       sellCt: 22.89427,
     });
     expect(setElecBadge).toHaveBeenCalledWith(rows[0].price, '#00e0ba');
+    expect(LIVE_STATE.currentSellPriceCt).toBeCloseTo(22.89427);
+    expect(LIVE_STATE.currentSellComponents.bonus_status).toBe('eligible');
+    expect(LIVE_STATE.supplierContract.sell_price_includes_contract_components).toBe(true);
   });
 
   it('skips forecast rows with invalid prices instead of treating them as 0', async () => {

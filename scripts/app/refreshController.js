@@ -263,6 +263,7 @@ export function createRefreshController(setStatus) {
           intervalMinutes,
           p: Number(price),
           sell: isNum(sell) ? Number(sell) : null,
+          sellComponents: h?.sell_price_components || null,
           isCurrent: h?.is_current === true,
           placeholder: false,
         };
@@ -344,6 +345,9 @@ export function createRefreshController(setStatus) {
       priceForecast,
       cheapestFuture,
       currentPriceCt: current && isNum(current.p) ? Number(current.p) * 100 : null,
+      currentSellPriceCt: current && isNum(current.sell) ? Number(current.sell) * 100 : null,
+      currentSellComponents: current?.sellComponents || null,
+      supplierContract: forecast.supplier_contract || null,
     });
 
     lastPriceView = { slice, nowTs, min, max, current };

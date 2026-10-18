@@ -203,13 +203,9 @@ export const CFG = {
   insightEnabled:      INSIGHT_CFG.enabled,
 };
 
-// Zonneplan/contract calculation settings
+// Local display/insight thresholds only. Supplier components come from the
+// Domoticz plugin's supplier_settings.py and Forecast JSON metadata.
 export const CONTRACT_CFG = {
-  zonnebonusAlwaysOn:          EXT_CFG.zonnebonusAlwaysOn !== false,
-  // Feed-in reward = (market price + inkoopvergoeding) * (1 + bonusPct)
-  zonnebonusInkoopvergoedingCt: Number.isFinite(+EXT_CFG.zonnebonusInkoopvergoedingCt) ? +EXT_CFG.zonnebonusInkoopvergoedingCt : 2,
-  zonnebonusPct:                Number.isFinite(+EXT_CFG.zonnebonusPct)                 ? +EXT_CFG.zonnebonusPct                 : 0.10,
-  zonnebonusAnnualExportLimitKwh: Number.isFinite(+EXT_CFG.zonnebonusAnnualExportLimitKwh) ? +EXT_CFG.zonnebonusAnnualExportLimitKwh : 7500,
   daylightSolarThresholdW:      Number.isFinite(+EXT_CFG.daylightSolarThresholdW)      ? +EXT_CFG.daylightSolarThresholdW      : 50,
   exportSolarThresholdW:        Number.isFinite(+EXT_CFG.exportSolarThresholdW)        ? +EXT_CFG.exportSolarThresholdW        : 200
 };

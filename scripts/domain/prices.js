@@ -405,53 +405,47 @@ function positiveLimit(value) {
 }
 
 function optionalKwh(value) {
+  if (value === null || value === undefined || value === '') return null;
   const n = Number(value);
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
 /**
- * Zonneplan Zonnebonus context — determines feed-in reward and export eligibility.
+ * Supplier feed-in context — the plugin owns allowance/bonus/cost calculations.
  *
- * The annual export cap is applied when a current-year export value is known.
- * If the yearly value cannot be read from Domoticz yet, the dashboard keeps the
- * previous optimistic behaviour and exposes `annualLimitKnown: false` instead
- * of hiding Zonnebonus advice on missing data.
+ * Never reconstruct a market price from an all-in purchase tariff, and never
+ * add a second bonus to an effective tariff published by the plugin.
  */
-export function getZonnebonusContext(priceCt, solarW, localSolarW, isExporting, annualExportKwhInput = LIVE_STATE.gridExportYearKwh) {
+export function getZonnebonusContext(sellPriceCt, solarW, localSolarW, isExporting, annualExportKwhInput = LIVE_STATE.gridExportYearKwh) {
   const hasSolar =
     Math.max(Number(solarW) || 0, Number(localSolarW) || 0) >=
     CONTRACT_CFG.daylightSolarThresholdW;
 
-  const annualLimitKwh = positiveLimit(CONTRACT_CFG.zonnebonusAnnualExportLimitKwh);
-  const annualExportKwh = optionalKwh(annualExportKwhInput);
+  const contract = LIVE_STATE.supplierContract;
+  const components = LIVE_STATE.currentSellComponents;
+  const verified = contract?.version === 1 && contract.sell_price_includes_contract_components === true;
+  const annualLimitKwh = positiveLimit(contract?.bonus_annual_limit_kwh);
+  const sourceRemaining = verified ? optionalKwh(components?.bonus_remaining_annual_kwh) : null;
+  const annualExportKwh = optionalKwh(annualExportKwhInput)
+    ?? (annualLimitKwh !== null && sourceRemaining !== null ? annualLimitKwh - sourceRemaining : null);
   const annualLimitKnown = annualLimitKwh !== null && annualExportKwh !== null;
   const remainingAnnualExportKwh = annualLimitKnown
     ? Math.max(0, annualLimitKwh - annualExportKwh)
     : null;
-  const annualLimitReached = annualLimitKnown && annualExportKwh >= annualLimitKwh;
+  const annualLimitReached = (verified && components?.bonus_status === 'annual_limit_reached')
+    || (annualLimitKnown && annualExportKwh >= annualLimitKwh);
   const withinAnnualLimit = !annualLimitReached;
 
-  const marketPriceCt = isNum(priceCt) ? Number(priceCt) : null;
-  const baseFeedInCt = isNum(marketPriceCt)
-    ? marketPriceCt + CONTRACT_CFG.zonnebonusInkoopvergoedingCt
-    : null;
-
-  const bonusApplies =
-    CONTRACT_CFG.zonnebonusAlwaysOn &&
-    withinAnnualLimit &&
-    isNum(baseFeedInCt) &&
-    baseFeedInCt > 0;
-
-  const bonusCt = bonusApplies
-    ? baseFeedInCt * CONTRACT_CFG.zonnebonusPct
-    : 0;
-
-  const feedInRewardCt = isNum(baseFeedInCt)
-    ? baseFeedInCt + bonusCt
-    : null;
+  const feedInRewardCt = isNum(sellPriceCt) ? Number(sellPriceCt) : null;
+  const bonusCt = verified && isNum(components?.bonus_eur_kwh)
+    ? Number(components.bonus_eur_kwh) * 100 : 0;
+  const bonusApplies = verified && components?.bonus_status === 'eligible' && bonusCt > 0;
+  const baseFeedInCt = feedInRewardCt === null ? null : feedInRewardCt - bonusCt;
 
   const eligible =
     bonusApplies &&
+    feedInRewardCt !== null &&
+    withinAnnualLimit &&
     hasSolar;
 
   const exportOpportunity =
@@ -460,7 +454,7 @@ export function getZonnebonusContext(priceCt, solarW, localSolarW, isExporting, 
 
   return {
     hasSolar,
-    marketPriceCt,
+    marketPriceCt: null, // Not inferred from an all-in tariff.
     baseFeedInCt,
     bonusCt,
     feedInRewardCt,

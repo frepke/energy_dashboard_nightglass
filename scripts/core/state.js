@@ -36,6 +36,9 @@ export const LIVE_STATE = {
   gasYearValue:   null, // m³ (for gasYear label)
   gridExportYearKwh: null, // kWh exported to the grid in the current calendar year
   currentPriceCt: null,
+  currentSellPriceCt: null,
+  currentSellComponents: null,
+  supplierContract: null,
   gridPriceCt:    null,
   priceForecast:  [],   // [{ ts: number, ct: number }]
   cheapestFuture: null,
