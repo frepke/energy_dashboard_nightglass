@@ -58,11 +58,11 @@ function priceWindowBounds(window) {
 }
 
 /**
- * Returns the time-weighted Zonneplan purchase tariff for an energy-logger
+ * Returns a time-weighted Zonneplan tariff for an energy-logger
  * window. A value is only shown when the price forecast covers the complete
  * window, preventing a partial average while quarter prices are still loading.
  */
-function averagePurchasePriceEurKwh(window, priceForecast = LIVE_STATE.priceForecast) {
+function averageTariffEurKwh(window, priceField, priceForecast = LIVE_STATE.priceForecast) {
   const bounds = priceWindowBounds(window);
   if (!bounds || !Array.isArray(priceForecast)) return null;
 
@@ -74,7 +74,7 @@ function averagePurchasePriceEurKwh(window, priceForecast = LIVE_STATE.priceFore
       const end = Number.isFinite(explicitEnd) && explicitEnd > start
         ? explicitEnd
         : start + fallbackDuration;
-      const priceCt = finite(item?.ct);
+      const priceCt = finite(item?.[priceField]);
       return {
         start: Math.max(bounds.start, start),
         end: Math.min(bounds.end, end),
@@ -232,9 +232,11 @@ export function renderEnergyAdvice(payload, selectedHours = initialWindowHours()
   setText('energyAdviceMainTime', primaryLabel.time);
   setText('energyAdviceMainDay', primaryLabel.day);
   setText('energyAdviceMainPurchasePriceLabel', t('energy-advice-average-purchase-price'));
-  setText('energyAdviceMainPurchasePrice', formatCt(averagePurchasePriceEurKwh(primary)));
+  setText('energyAdviceMainPurchasePrice', formatCt(averageTariffEurKwh(primary, 'ct')));
   setText('energyAdviceMainPriceLabel', t('energy-advice-average-sale-price'));
-  setText('energyAdviceMainPrice', formatCt(primary?.average_marginal_price_eur_kwh));
+  // Marginal consumption prices mix purchase and sale tariffs depending on
+  // predicted solar surplus. They select the window, but are not its sale price.
+  setText('energyAdviceMainPrice', formatCt(averageTariffEurKwh(primary, 'sellCt')));
   setText('energyAdviceSolar', formatKwh(totals.solar_kwh));
   setText('energyAdviceHouse', formatKwh(totals.house_kwh));
   setText('energyAdviceImport', formatKwh(totals.import_kwh));
