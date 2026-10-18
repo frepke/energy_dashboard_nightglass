@@ -17,12 +17,12 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@playwright/test": "^1.62.1",
+    "@vitest/coverage-v8": "^4.1.12",
     "eslint": "^10.8.1",
     "globals": "^17.11.0",
-    "vitest": "^4.1.5",
-    "@playwright/test": "^1.62.1",
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "vitest": "^4.1.12"
   },
   "vitest": {
     "environment": "node",

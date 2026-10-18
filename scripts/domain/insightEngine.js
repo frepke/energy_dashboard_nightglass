@@ -19,7 +19,6 @@
 
 import { LIVE_STATE }   from '../core/state.js';
 import { isNum }        from '../core/formatters.js';
-import { CONTRACT_CFG } from '../config/resolveConfig.js';
 import {
   classifyPrice, getZonnebonusContext,
   activeDecisionWindow, getDynamicThresholds, currentPriceSlotTs,
@@ -57,7 +56,7 @@ export function buildInsightContext() {
                                                         : LIVE_STATE.gridPriceCt;
 
   const price     = classifyPrice(priceCt);
-  const zonne     = getZonnebonusContext(priceCt, solarW, localSolarW, isExporting);
+  const zonne     = getZonnebonusContext(LIVE_STATE.currentSellPriceCt, solarW, localSolarW, isExporting);
   const bestBlock = activeDecisionWindow();
   const bestAvg   = bestBlock && isNum(bestBlock.avg) ? bestBlock.avg : null;
 
@@ -139,7 +138,7 @@ export function buildInsightContext() {
     // Day-awareness fields
     isTodayCheapestHour, bestWindowIsToday, bestWindowIsTomorrow,
     // Contract policy
-    alwaysOnZonnebonus: CONTRACT_CFG.zonnebonusAlwaysOn,
+    alwaysOnZonnebonus: LIVE_STATE.supplierContract?.bonus_enabled === true,
     // Dynamic price thresholds
     _thr,
   };

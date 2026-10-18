@@ -97,6 +97,9 @@ beforeEach(() => {
   LIVE_STATE.solarW         = 0;
   LIVE_STATE.localSolarW    = 0;
   LIVE_STATE.currentPriceCt = null;
+  LIVE_STATE.currentSellPriceCt = 24.2; // Independently supplied effective tariff.
+  LIVE_STATE.currentSellComponents = { bonus_status: 'eligible', bonus_eur_kwh: .022 };
+  LIVE_STATE.supplierContract = { version: 1, sell_price_includes_contract_components: true, bonus_annual_limit_kwh: 7500 };
   LIVE_STATE.gridPriceCt    = null;
   LIVE_STATE.cheapestFuture = null;
   LIVE_STATE.updatedAt      = null;
@@ -177,15 +180,13 @@ describe('buildInsightContext()', () => {
     LIVE_STATE.gridW          = 300;
 
     const ctx = buildInsightContext();
-    // feedIn = (20 + 2) * 1.10 = 24.2; advantage = 24.2 - 20 = 4.2
+    // Source supplies 24.2; don't derive it from all-in import price 20.
     expect(ctx.exportAdvantage).toBeCloseTo(4.2, 1);
   });
 
   it('marks exportIsExceptional when advantage >= threshold', () => {
-    // Need feedIn - price >= 5.0
-    // feedIn = (price + 2) * 1.10 → solve for price:
-    // (price + 2) * 1.10 - price >= 5 → 1.10*price + 2.2 - price >= 5 → 0.10*price >= 2.8 → price >= 28
-    LIVE_STATE.currentPriceCt = 30; // (30+2)*1.10 = 35.2; 35.2-30 = 5.2 > 5.0
+    LIVE_STATE.currentPriceCt = 30;
+    LIVE_STATE.currentSellPriceCt = 35.2; // Genuine source reward, not synthesized.
     LIVE_STATE.solarW         = 500;
     LIVE_STATE.gridDir        = 'export';
     LIVE_STATE.gridW          = 300;
@@ -348,6 +349,7 @@ describe('evaluateInsightStrategies()', () => {
   });
 
   it('returns export-now only when export advantage is genuinely exceptional', () => {
+    LIVE_STATE.currentSellPriceCt = 37.4;
     const now = hourStart();
     // High current price → high export advantage; uniform prices mean no meaningful
     // consumption window exists (windowIsSignificant = false, Rule 3 skipped).
@@ -370,6 +372,7 @@ describe('evaluateInsightStrategies()', () => {
   });
 
   it('prefers use-now over export-now when best window covers current hour even with high export price', () => {
+    LIVE_STATE.currentSellPriceCt = 15.4;
     const now = hourStart();
     // Very high export price scenario — but current hour IS the best window
     LIVE_STATE.priceForecast  = makeHours(now, 6, 40, { 0: 12, 1: 12, 2: 12 });
