@@ -759,6 +759,9 @@ function loadMoonTexture(extCfg = {}) {
   if (moonTexturePromise) return moonTexturePromise;
   const sources = [
     extCfg.moonTextureSrc || '',
+    // NASA/LRO photographic nearside mosaic (Wikimedia, public domain).
+    // Works without an API key; the original local texture remains a fallback.
+    'https://upload.wikimedia.org/wikipedia/commons/c/c9/Moon_nearside_LRO.jpg',
     'moon-texture.png',
     'moon-texture.jpg',
     'moon-png-44673.png'
@@ -772,6 +775,7 @@ function loadMoonTexture(extCfg = {}) {
         return;
       }
       const img    = new Image();
+      if (/^https?:\/\//i.test(sources[i])) img.crossOrigin = 'anonymous';
       img.onload   = () => resolve(img);
       img.onerror  = () => { i += 1; tryNext(); };
       img.src      = sources[i];
@@ -851,12 +855,12 @@ export async function drawLocalMoon(phase, extCfg = {}) {
     ctx.rotate(textureAngle);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.filter = 'contrast(1.12) brightness(1.02) saturate(0.68)';
+    ctx.filter = 'contrast(1.16) brightness(1.08) saturate(0.65)';
     ctx.drawImage(img, -r, -r, r * 2, r * 2);
   } else {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.filter = 'contrast(1.12) brightness(1.02) saturate(0.68)';
+    ctx.filter = 'contrast(1.16) brightness(1.08) saturate(0.65)';
     ctx.drawImage(img, 0, 0, size, size);
   }
   ctx.restore();
@@ -907,12 +911,12 @@ export async function drawLocalMoon(phase, extCfg = {}) {
     }
 
     const avgLuma = lumaCount ? lumaSum / lumaCount : 0.82;
-    const flattening = clamp(Number(extCfg.moonTextureFlattening ?? 0.83), 0, 1);
-    const litTextureStrength = clamp(Number(extCfg.moonLitTextureStrength ?? 1.22), 0, 1.7);
+    const flattening = clamp(Number(extCfg.moonTextureFlattening ?? 0.15), 0, 1);
+    const litTextureStrength = clamp(Number(extCfg.moonLitTextureStrength ?? 1.30), 0, 1.7);
     const unlitTextureStrength = clamp(Number(extCfg.moonUnlitTextureOpacity ?? (mix(0.13, 0.19, daylight) + crescentFactor * 0.01)), 0, 0.55);
-    const litMicroContrast = clamp(Number(extCfg.moonLitMicroContrast ?? 0.30), 0, 0.60);
+    const litMicroContrast = clamp(Number(extCfg.moonLitMicroContrast ?? 0.10), 0, 0.60);
     const unlitDetailLift = clamp(Number(extCfg.moonUnlitDetailLift ?? 0.055), 0, 0.40);
-    const terminatorReliefStrength = clamp(Number(extCfg.moonTerminatorReliefStrength ?? 0.24), 0, 0.50);
+    const terminatorReliefStrength = clamp(Number(extCfg.moonTerminatorReliefStrength ?? 0.20), 0, 0.50);
     const ambientBlue = clamp(Number(extCfg.moonAmbientBlue ?? 0.055), 0, 0.50);
     const relitDisc = ctx.createImageData(size, size);
     const data = relitDisc.data;
@@ -938,9 +942,9 @@ export async function drawLocalMoon(phase, extCfg = {}) {
         const limbLift = mix(0.84, 1.0, Math.pow(rz, 0.62));
         const liftedLuma = clamp(srcLuma / limbLift, 0, 1.15);
         const detail = liftedLuma - avgLuma;
-        const detailGain = mix(0.96, 1.58, flattening);
-        const albedo = clamp(0.82 + detail * detailGain, 0.44, 1.03);
-        const detailNorm = clamp((albedo - 0.82) / 0.18, -1, 1);
+        const detailGain = mix(1.10, 1.55, flattening);
+        const albedo = clamp(0.72 + detail * detailGain, 0.23, 1.03);
+        const detailNorm = clamp((albedo - 0.72) / 0.30, -1, 1);
 
         const leftLuma = sampleImageLuma(textureData, size, x - 1, y, srcLuma);
         const rightLuma = sampleImageLuma(textureData, size, x + 1, y, srcLuma);
@@ -959,7 +963,7 @@ export async function drawLocalMoon(phase, extCfg = {}) {
         const terminatorBand = 1 - smoothstep(terminatorSoftness * 0.85, terminatorSoftness * 2.6, Math.abs(sunlight));
         const craterBoost = (detailNorm * 0.75 + reliefNorm * 0.25) * terminatorBand * terminatorReliefStrength;
 
-        const litGrayBase = (0.40 + 0.38 * lambert + 0.08 * rz) * (0.94 + (albedo - 0.82) * litTextureStrength);
+        const litGrayBase = (0.44 + 0.35 * lambert + 0.07 * rz) * (0.92 + (albedo - 0.72) * litTextureStrength);
         const litGray = clamp(
           litGrayBase
           + detailNorm * litMicroContrast * (0.35 + 0.65 * litShape)
