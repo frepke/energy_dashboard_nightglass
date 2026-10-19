@@ -713,7 +713,14 @@ function moonRiseSet(date = new Date(), cfg = {}) {
   const HORIZON = -0.833 * DEG; // standard refraction + semi-diameter
   const startMs  = new Date(date).setHours(0, 0, 0, 0);
   const STEP_MS  = 10 * 60 * 1000; // 10-min steps for initial scan
-  const END_MS   = startMs + 24 * 3600 * 1000;
+  // Keep the rise within the requested local calendar day, but allow the
+  // first moonset to fall on the following day.
+  const tomorrow = new Date(startMs);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const nextDay = new Date(tomorrow);
+  nextDay.setDate(nextDay.getDate() + 1);
+  const todayEndMs = tomorrow.getTime();
+  const END_MS = nextDay.getTime();
 
   let prevAlt = localBodyAltitude(moonEquatorial(new Date(startMs)), new Date(startMs), cfg) ?? 0;
   let rise = null;
@@ -722,7 +729,7 @@ function moonRiseSet(date = new Date(), cfg = {}) {
   for (let ms = startMs + STEP_MS; ms <= END_MS && !(rise && set); ms += STEP_MS) {
     const d    = new Date(ms);
     const alt  = localBodyAltitude(moonEquatorial(d), d, cfg) ?? 0;
-    if (prevAlt < HORIZON && alt >= HORIZON && !rise) {
+    if (ms - STEP_MS < todayEndMs && prevAlt < HORIZON && alt >= HORIZON && !rise) {
       // Bisect to find exact crossing
       rise = bisectHorizonCrossing(ms - STEP_MS, ms, HORIZON, cfg, true);
     }
