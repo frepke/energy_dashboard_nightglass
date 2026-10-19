@@ -73,7 +73,7 @@ vi.mock('../scripts/ui/chart.js', () => ({
 }));
 
 vi.mock('../scripts/config/resolveConfig.js', () => ({
-  CFG: { refresh: 30, forecastIdx: '', ws: false },
+  CFG: { refresh: 30, forecastIdx: '', ws: false, historyHours: 4 },
 }));
 
 vi.mock('../scripts/i18n.js', () => ({
