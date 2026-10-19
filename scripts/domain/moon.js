@@ -51,7 +51,7 @@ function resolveMoonShadowColor(extCfg = {}) {
     if (parsed) return parsed;
   }
 
-  return { r: 10, g: 15, b: 32 };
+  return { r: 16, g: 22, b: 42 };
 }
 
 function rgba({ r, g, b }, alpha) {
@@ -339,8 +339,8 @@ function resolveMoonTerminatorSoftness(illumFraction, daylight, lowAltitude, ext
 }
 
 function resolveMoonUnlitOpacity(illumFraction, daylight, lowAltitude, extCfg = {}) {
-  const nightUnlitOpacity = clamp(Number(extCfg.moonUnlitOpacity ?? 0.50), 0, 1);
-  const dayUnlitOpacity = clamp(Number(extCfg.moonDayUnlitOpacity ?? 0.68), 0, 1);
+  const nightUnlitOpacity = clamp(Number(extCfg.moonUnlitOpacity ?? 0.60), 0, 1);
+  const dayUnlitOpacity = clamp(Number(extCfg.moonDayUnlitOpacity ?? 0.76), 0, 1);
   const crescentFactor = 1 - smoothstep(0.08, 0.28, illumFraction);
   const earthshineBoost = clamp(Number(extCfg.moonEarthshineBoost ?? 0.12), 0, 0.35) * crescentFactor * (1 - daylight);
   const atmosphericLift = clamp(Number(extCfg.moonLowAltitudeUnlitBoost ?? 0.06), 0, 0.20) * lowAltitude;
@@ -963,7 +963,7 @@ export async function drawLocalMoon(phase, extCfg = {}) {
         const terminatorBand = 1 - smoothstep(terminatorSoftness * 0.85, terminatorSoftness * 2.6, Math.abs(sunlight));
         const craterBoost = (detailNorm * 0.75 + reliefNorm * 0.25) * terminatorBand * terminatorReliefStrength;
 
-        const litGrayBase = (0.44 + 0.35 * lambert + 0.07 * rz) * (0.92 + (albedo - 0.72) * litTextureStrength);
+        const litGrayBase = (0.46 + 0.36 * lambert + 0.08 * rz) * (0.95 + (albedo - 0.72) * litTextureStrength);
         const litGray = clamp(
           litGrayBase
           + detailNorm * litMicroContrast * (0.35 + 0.65 * litShape)
@@ -971,7 +971,7 @@ export async function drawLocalMoon(phase, extCfg = {}) {
           0,
           0.96
         );
-        const unlitBase = clamp(0.018 + unlitOpacity * 0.16 + lowAltitude * 0.015, 0, 0.24);
+        const unlitBase = clamp(0.050 + unlitOpacity * 0.20 + lowAltitude * 0.015, 0, 0.34);
         const unlitTextureLift = Math.max(unlitDetailLift, unlitTextureStrength * 0.36);
         const unlitGray = clamp(
           unlitBase
@@ -982,7 +982,7 @@ export async function drawLocalMoon(phase, extCfg = {}) {
         );
         const gray = clamp(mix(unlitGray, litGray, litShape), 0, 1);
 
-        const coolTintMix = (1 - litShape) * (mix(0.17, 0.23, daylight) + ambientBlue * 0.16)
+        const coolTintMix = (1 - litShape) * (mix(0.12, 0.17, daylight) + ambientBlue * 0.08)
           + terminatorBand * 0.025
           + litShape * 0.035;
         const base = gray * 255;
