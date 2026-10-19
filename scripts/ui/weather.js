@@ -654,7 +654,12 @@ function renderMoon() {
   const fullMoonLabel = $('#moonFullMoonWhen');
   const newMoonLabel = $('#moonNewMoonWhen');
   if (moonRise) moonRise.textContent = timeFmt(moon.rise);
-  if (moonSet) moonSet.textContent = timeFmt(moon.set);
+  if (moonSet) {
+    const nextDay = moon.set instanceof Date
+      && new Date(moon.set.getFullYear(), moon.set.getMonth(), moon.set.getDate()).getTime()
+        > new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    moonSet.textContent = timeFmt(moon.set) + (nextDay ? (getLang() === 'nl' ? ' (+1 dag)' : ' (+1 day)') : '');
+  }
   if (moonAge) moonAge.textContent = moonAgeLabel(moon.ageDays);
   if (moonDistance) {
     moonDistance.textContent = Number.isFinite(moon.distanceKm)
