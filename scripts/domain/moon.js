@@ -907,13 +907,13 @@ export async function drawLocalMoon(phase, extCfg = {}) {
     }
 
     const avgLuma = lumaCount ? lumaSum / lumaCount : 0.82;
-    const flattening = clamp(Number(extCfg.moonTextureFlattening ?? 0.70), 0, 1);
-    const litTextureStrength = clamp(Number(extCfg.moonLitTextureStrength ?? 0.98), 0, 1.7);
-    const unlitTextureStrength = clamp(Number(extCfg.moonUnlitTextureOpacity ?? (mix(0.22, 0.24, daylight) + crescentFactor * 0.02)), 0, 0.55);
-    const litMicroContrast = clamp(Number(extCfg.moonLitMicroContrast ?? 0.18), 0, 0.60);
-    const unlitDetailLift = clamp(Number(extCfg.moonUnlitDetailLift ?? 0.08), 0, 0.40);
-    const terminatorReliefStrength = clamp(Number(extCfg.moonTerminatorReliefStrength ?? 0.09), 0, 0.50);
-    const ambientBlue = clamp(Number(extCfg.moonAmbientBlue ?? 0.11), 0, 0.50);
+    const flattening = clamp(Number(extCfg.moonTextureFlattening ?? 0.83), 0, 1);
+    const litTextureStrength = clamp(Number(extCfg.moonLitTextureStrength ?? 1.22), 0, 1.7);
+    const unlitTextureStrength = clamp(Number(extCfg.moonUnlitTextureOpacity ?? (mix(0.13, 0.19, daylight) + crescentFactor * 0.01)), 0, 0.55);
+    const litMicroContrast = clamp(Number(extCfg.moonLitMicroContrast ?? 0.30), 0, 0.60);
+    const unlitDetailLift = clamp(Number(extCfg.moonUnlitDetailLift ?? 0.055), 0, 0.40);
+    const terminatorReliefStrength = clamp(Number(extCfg.moonTerminatorReliefStrength ?? 0.24), 0, 0.50);
+    const ambientBlue = clamp(Number(extCfg.moonAmbientBlue ?? 0.055), 0, 0.50);
     const relitDisc = ctx.createImageData(size, size);
     const data = relitDisc.data;
 
@@ -947,7 +947,10 @@ export async function drawLocalMoon(phase, extCfg = {}) {
         const upLuma = sampleImageLuma(textureData, size, x, y - 1, srcLuma);
         const downLuma = sampleImageLuma(textureData, size, x, y + 1, srcLuma);
         const lightGrad = (rightLuma - leftLuma) * ca + (downLuma - upLuma) * sa;
-        const reliefNorm = clamp(lightGrad * 2.8, -1, 1);
+        // Local high-frequency luminance reveals crater rims and smaller surface
+        // structures without adding artificial circles to the moon texture.
+        const highPass = srcLuma - (leftLuma + rightLuma + upLuma + downLuma) * 0.25;
+        const reliefNorm = clamp(lightGrad * 5.0 + highPass * 3.2, -1, 1);
 
         const sunlight = rx * lightX + rz * lightZ;
         const lit = smoothstep(-terminatorSoftness, terminatorSoftness, sunlight);
@@ -956,28 +959,28 @@ export async function drawLocalMoon(phase, extCfg = {}) {
         const terminatorBand = 1 - smoothstep(terminatorSoftness * 0.85, terminatorSoftness * 2.6, Math.abs(sunlight));
         const craterBoost = (detailNorm * 0.75 + reliefNorm * 0.25) * terminatorBand * terminatorReliefStrength;
 
-        const litGrayBase = (0.56 + 0.28 * lambert + 0.06 * rz) * (0.90 + (albedo - 0.82) * litTextureStrength);
+        const litGrayBase = (0.40 + 0.38 * lambert + 0.08 * rz) * (0.94 + (albedo - 0.82) * litTextureStrength);
         const litGray = clamp(
           litGrayBase
           + detailNorm * litMicroContrast * (0.35 + 0.65 * litShape)
           + craterBoost * 0.55,
           0,
-          0.88
+          0.96
         );
-        const unlitBase = clamp(0.090 + unlitOpacity * 0.24 + lowAltitude * 0.03, 0, 0.46);
+        const unlitBase = clamp(0.018 + unlitOpacity * 0.16 + lowAltitude * 0.015, 0, 0.24);
         const unlitTextureLift = Math.max(unlitDetailLift, unlitTextureStrength * 0.36);
         const unlitGray = clamp(
           unlitBase
-          + detailNorm * unlitTextureLift
-          + craterBoost * 0.14,
+          + detailNorm * unlitTextureLift * 0.42
+          + craterBoost * 0.09,
           0,
-          0.46
+          0.26
         );
         const gray = clamp(mix(unlitGray, litGray, litShape), 0, 1);
 
-        const coolTintMix = (1 - litShape) * (mix(0.48, 0.33, daylight) + ambientBlue * 0.25)
-          + terminatorBand * 0.08
-          + litShape * 0.06;
+        const coolTintMix = (1 - litShape) * (mix(0.20, 0.27, daylight) + ambientBlue * 0.20)
+          + terminatorBand * 0.025
+          + litShape * 0.035;
         const base = gray * 255;
         const blueLift = ambientBlue * (0.7 + 0.3 * (1 - litShape));
         const lunarTint = {
@@ -1057,8 +1060,8 @@ export async function drawLocalMoon(phase, extCfg = {}) {
   const glowX = cx + Math.cos(litAngle) * r * 0.34;
   const glowY = cy + Math.sin(litAngle) * r * 0.34;
   const glow = ctx.createRadialGradient(glowX, glowY, r * 0.08, glowX, glowY, r * 1.55);
-  glow.addColorStop(0, 'rgba(235,245,255,0.105)');
-  glow.addColorStop(0.45, 'rgba(180,210,255,0.045)');
+  glow.addColorStop(0, 'rgba(235,245,255,0.045)');
+  glow.addColorStop(0.45, 'rgba(180,210,255,0.018)');
   glow.addColorStop(1, 'rgba(180,210,255,0)');
   ctx.globalCompositeOperation = 'screen';
   ctx.fillStyle = glow;
@@ -1084,7 +1087,7 @@ export async function drawLocalMoon(phase, extCfg = {}) {
   // the existing canvas mock still observes the historical final operation.
   ctx.save();
   ctx.globalCompositeOperation = 'overlay';
-  ctx.fillStyle = 'rgba(255,255,255,0.045)';
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fill();

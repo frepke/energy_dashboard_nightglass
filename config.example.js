@@ -86,13 +86,13 @@ window.DASHBOARD_CONFIG = {
   // moonLowAltitudeTerminatorBoost: 0.045,
   // moonQuarterTerminatorTighten: 0.010,
   // moonEarthshineBoost: 0.12,
-  // moonTextureFlattening: 0.70,  // remove baked lighting from the source moon texture
-  // moonLitTextureStrength: 0.98,
-  // moonUnlitTextureOpacity: 0.22,
-  // moonLitMicroContrast: 0.18,
-  // moonUnlitDetailLift: 0.08,
-  // moonTerminatorReliefStrength: 0.09,
-  // moonAmbientBlue: 0.11,
+  // moonTextureFlattening: 0.83,  // remove baked lighting from the source moon texture
+  // moonLitTextureStrength: 1.22,
+  // moonUnlitTextureOpacity: 0.13,
+  // moonLitMicroContrast: 0.30,
+  // moonUnlitDetailLift: 0.055,
+  // moonTerminatorReliefStrength: 0.24,
+  // moonAmbientBlue: 0.055,
 
   // ----------------------------------------------------------------
   // Domoticz connection
