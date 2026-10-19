@@ -99,6 +99,12 @@ function usageWindowHours(value) {
   return Number.isFinite(n) && n >= 1 ? Math.max(1, Math.min(24, Math.round(n))) : 4;
 }
 
+function historyHours(value) {
+  if (value === undefined || value === null || String(value).trim() === '') return 4;
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.max(0, Math.min(72, Math.round(n))) : 4;
+}
+
 function fetchTimeoutMs(value) {
   const n = Number(value);
   return Number.isFinite(n) && n > 0 ? Math.max(1000, Math.round(n)) : 10000;
@@ -182,6 +188,7 @@ export const CFG = {
   refresh:             refreshSeconds(firstNonEmpty(qs.get('refresh'), EXT_CFG.refresh, 1)),
   fetchTimeoutMs:      fetchTimeoutMs(firstNonEmpty(qs.get('fetchTimeoutMs'), qs.get('timeout'), EXT_CFG.fetchTimeoutMs, 10000)),
   usageWindowHours:    usageWindowHours(firstNonEmpty(qs.get('usageWindowHours'), qs.get('hours'), EXT_CFG.usageWindowHours, 3)),
+  historyHours:         historyHours(qs.get('historyHours') ?? EXT_CFG.historyHours),
   forecastIdx:         firstNonEmpty(qs.get('forecastIdx'), qs.get('forecastJsonIdx'), qs.get('fidx'), DOMOTICZ_CFG.forecastIdx, EXT_CFG.forecastIdx),
   ws:                  qs.has('ws') ? qs.get('ws') !== '0' : DOMOTICZ_CFG.ws === true,
   usageIdx:            firstNonEmpty(qs.get('usageIdx'), DOMOTICZ_CFG.usageIdx, EXT_CFG.usageIdx),

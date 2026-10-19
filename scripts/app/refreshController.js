@@ -29,8 +29,6 @@ import {
 } from '../ui/chart.js';
 import { t } from '../i18n.js';
 
-// How many past clock-hours to include in the price chart.
-const HISTORY_HOURS = 4;
 const MINUTE_MS = 60000;
 
 function parseForecastDate(raw) {
@@ -274,7 +272,7 @@ export function createRefreshController(setStatus) {
     const currentLive = liveItems.find(x => x.isCurrent || (x.ts <= nowActualTs && nowActualTs < x.endTs));
     const nowTs = currentLive?.ts ?? floorToPriceSlot(nowActualTs, priceIntervalMinutes);
 
-    const historyStartTs = nowTs - HISTORY_HOURS * 3600000;
+    const historyStartTs = nowTs - CFG.historyHours * 3600000;
 
     let cachedItems;
     try {
