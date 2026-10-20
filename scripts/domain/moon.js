@@ -849,6 +849,12 @@ export async function drawLocalMoon(phase, extCfg = {}) {
   const lunarGamma       = mix(1.42, 1.15, daylight);
   const crescentFactor   = 1 - smoothstep(0.10, 0.34, illumFraction);
 
+  const unlitAlphaCfg = clamp(Number(extCfg.moonUnlitAlpha ?? 1), 0, 1);
+  const underlayBrightness = clamp(Number(extCfg.moonUnlitUnderlayBrightness ?? 0.45), 0.05, 1.2);
+  const underlayFilter = unlitAlphaCfg < 1
+    ? `contrast(1.16) brightness(${underlayBrightness}) saturate(0.65)`
+    : 'contrast(1.16) brightness(1.08) saturate(0.65)';
+
   // First draw the raw texture as a graceful fallback and so canvas mocks still
   // observe a direct draw call. In browsers that support pixel access we then
   // replace it with a relit version that neutralizes the built-in full-moon
@@ -862,12 +868,12 @@ export async function drawLocalMoon(phase, extCfg = {}) {
     ctx.rotate(textureAngle);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.filter = 'contrast(1.16) brightness(1.08) saturate(0.65)';
+    ctx.filter = underlayFilter;
     ctx.drawImage(img, -r, -r, r * 2, r * 2);
   } else {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.filter = 'contrast(1.16) brightness(1.08) saturate(0.65)';
+    ctx.filter = underlayFilter;
     ctx.drawImage(img, 0, 0, size, size);
   }
   ctx.restore();
@@ -1017,9 +1023,8 @@ export async function drawLocalMoon(phase, extCfg = {}) {
     sctx.putImageData(relitDisc, 0, 0);
 
     ctx.save();
-    // With a transparent shadow side, remove the fallback texture first so the
-    // card background shines through instead of the baked full-moon texture.
-    if (unlitAlpha < 1) ctx.clearRect(0, 0, size, size);
+    // With unlitAlpha < 1 the shadow is a semi-transparent layer over the moon
+    // texture drawn first (dimmed by moonUnlitUnderlayBrightness).
     ctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(relitCanvas, 0, 0);
     ctx.restore();
