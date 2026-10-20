@@ -92,7 +92,8 @@ window.DASHBOARD_CONFIG = {
   // moonLitMicroContrast: 0.30,
   // moonUnlitDetailLift: 0.055,
   // Shadow side of the moon (softer / more transparent):
-  // moonUnlitAlpha: 0.55,        // 1 = opaque (default), lower = more see-through shadow side
+  // moonUnlitAlpha: 0.55,       // 1 = opaque shadow (default); lower = shadow lets the moon surface show through
+  // moonUnlitUnderlayBrightness: 0.45, // brightness of the surface seen through the shadow (only if moonUnlitAlpha < 1)
   // moonUnlitMaxGray: 0.26,      // brightness cap of the shadow side (default 0.26, try 0.40)
   // moonUnlitBaseGain: 0.20,     // how much moonUnlitOpacity lifts the shadow (default 0.20, try 0.35)
   // moonTerminatorReliefStrength: 0.24,
