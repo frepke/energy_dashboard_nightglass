@@ -925,6 +925,10 @@ export async function drawLocalMoon(phase, extCfg = {}) {
     const unlitDetailLift = clamp(Number(extCfg.moonUnlitDetailLift ?? 0.055), 0, 0.40);
     const terminatorReliefStrength = clamp(Number(extCfg.moonTerminatorReliefStrength ?? 0.20), 0, 0.50);
     const ambientBlue = clamp(Number(extCfg.moonAmbientBlue ?? 0.055), 0, 0.50);
+    // Unlit (shadow) side tuning: brightness and real transparency.
+    const unlitBaseGain = clamp(Number(extCfg.moonUnlitBaseGain ?? 0.20), 0, 0.80);
+    const unlitMaxGray = clamp(Number(extCfg.moonUnlitMaxGray ?? 0.26), 0.05, 0.60);
+    const unlitAlpha = clamp(Number(extCfg.moonUnlitAlpha ?? 1), 0, 1);
     const relitDisc = ctx.createImageData(size, size);
     const data = relitDisc.data;
 
@@ -978,14 +982,14 @@ export async function drawLocalMoon(phase, extCfg = {}) {
           0,
           0.96
         );
-        const unlitBase = clamp(0.050 + unlitOpacity * 0.20 + lowAltitude * 0.015, 0, 0.34);
+        const unlitBase = clamp(0.050 + unlitOpacity * unlitBaseGain + lowAltitude * 0.015, 0, Math.max(0.34, unlitMaxGray));
         const unlitTextureLift = Math.max(unlitDetailLift, unlitTextureStrength * 0.36);
         const unlitGray = clamp(
           unlitBase
           + detailNorm * unlitTextureLift * 0.42
           + craterBoost * 0.09,
           0,
-          0.26
+          unlitMaxGray
         );
         const gray = clamp(mix(unlitGray, litGray, litShape), 0, 1);
 
@@ -1002,7 +1006,7 @@ export async function drawLocalMoon(phase, extCfg = {}) {
         data[idx]     = clamp(Math.round(lunarTint.r * (1 - coolTintMix) + activeShadowColor.r * coolTintMix), 0, 255);
         data[idx + 1] = clamp(Math.round(lunarTint.g * (1 - coolTintMix) + activeShadowColor.g * coolTintMix), 0, 255);
         data[idx + 2] = clamp(Math.round(lunarTint.b * (1 - coolTintMix) + activeShadowColor.b * coolTintMix), 0, 255);
-        data[idx + 3] = Math.round(255 * srcAlpha);
+        data[idx + 3] = Math.round(255 * srcAlpha * mix(unlitAlpha, 1, litShape));
       }
     }
 
@@ -1013,6 +1017,9 @@ export async function drawLocalMoon(phase, extCfg = {}) {
     sctx.putImageData(relitDisc, 0, 0);
 
     ctx.save();
+    // With a transparent shadow side, remove the fallback texture first so the
+    // card background shines through instead of the baked full-moon texture.
+    if (unlitAlpha < 1) ctx.clearRect(0, 0, size, size);
     ctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(relitCanvas, 0, 0);
     ctx.restore();
