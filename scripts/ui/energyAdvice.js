@@ -133,7 +133,7 @@ function formatWindow(window) {
 
   return {
     day: formatLocalDateTime(start, { weekday: 'short', day: 'numeric', month: 'short' }, hasLocalTimes),
-    time: `${formatLocalDateTime(start, { hour: '2-digit', minute: '2-digit' }, hasLocalTimes)}–${formatLocalDateTime(end, { hour: '2-digit', minute: '2-digit' }, hasLocalTimes)}`,
+    time: `${formatLocalDateTime(start, { hour: '2-digit', minute: '2-digit' }, hasLocalTimes)} – ${formatLocalDateTime(end, { hour: '2-digit', minute: '2-digit' }, hasLocalTimes)}`,
   };
 }
 

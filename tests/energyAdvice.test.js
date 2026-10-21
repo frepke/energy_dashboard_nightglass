@@ -93,7 +93,7 @@ describe('passive energy advice card', () => {
     renderEnergyAdvice(payload(), 4);
 
     expect(document.querySelector('#energyAdviceMainLabel').textContent).toBe('Best 4-hour window');
-    expect(document.querySelector('#energyAdviceMainTime').textContent).toBe('13:00–17:00');
+    expect(document.querySelector('#energyAdviceMainTime').textContent).toBe('13:00 – 17:00');
     expect(document.querySelector('#energyAdviceMainPurchasePrice').textContent).toBe('23.00 ct/kWh');
     expect(document.querySelector('#energyAdviceMainPrice').textContent).toBe('12.00 ct/kWh');
 
@@ -123,7 +123,7 @@ describe('passive energy advice card', () => {
 
     expect(document.querySelector('#energyAdviceMainPurchasePrice').textContent).toBe('36.11 ct/kWh');
     expect(document.querySelector('#energyAdviceMainPrice').textContent).toBe('25.02 ct/kWh');
-    expect(document.querySelector('#energyAdviceMainTime').textContent).toBe('13:00–19:00');
+    expect(document.querySelector('#energyAdviceMainTime').textContent).toBe('13:00 – 19:00');
   });
 
   it('requires complete sale coverage without losing the purchase average', () => {
@@ -140,7 +140,7 @@ describe('passive energy advice card', () => {
     LIVE_STATE.priceForecast[0].sellCt = -4;
     LIVE_STATE.priceForecast[1].sellCt = 2;
 
-    renderEnergyAdvice(payload(), 1); // 13:30–14:30 covers half of each slot.
+    renderEnergyAdvice(payload(), 1); // 13:30 – 14:30 covers half of each slot.
 
     expect(document.querySelector('#energyAdviceMainPurchasePrice').textContent).toBe('21.00 ct/kWh');
     expect(document.querySelector('#energyAdviceMainPrice').textContent).toBe('-1.00 ct/kWh');
