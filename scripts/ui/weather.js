@@ -5,7 +5,7 @@
 import { $ }                    from '../core/dom.js';
 import { pad2, hhmmFrom, fmtDayLengthTime, formatNumber, formatDate } from '../core/formatters.js';
 import { CFG }                 from '../config/resolveConfig.js';
-import { moonInfo, nextFullMoonDate, prevFullMoonDate, nextNewMoonDate, prevNewMoonDate, moonLocationLabel, drawLocalMoon } from '../domain/moon.js';
+import { moonInfo, moonEventTimeLabel, nextFullMoonDate, prevFullMoonDate, nextNewMoonDate, prevNewMoonDate, moonLocationLabel, drawLocalMoon } from '../domain/moon.js';
 import { fetchWeatherData as fetchWeatherDataOWM, WEATHER_TTL as WEATHER_TTL_OWM } from '../services/weatherService.js';
 import { fetchWeatherData as fetchWeatherDataVC, WEATHER_TTL as WEATHER_TTL_VC }  from '../services/visualCrossingService.js';
 import { fetchWeatherData as fetchWeatherDataOM, WEATHER_TTL as WEATHER_TTL_OM }  from '../services/openMeteoService.js';
@@ -643,23 +643,14 @@ function renderMoon() {
   const illum = Number.isFinite(moon.illum) ? formatNumber(moon.illum, 1) : moon.illum;
   $('#moonIllum').textContent = illum + t('illum-suffix');
 
-  const timeFmt = value => value instanceof Date
-    ? value.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
-    : '--:--';
-
   const moonRise = $('#moonRise');
   const moonSet = $('#moonSet');
   const moonAge = $('#moonAge');
   const moonDistance = $('#moonDistance');
   const fullMoonLabel = $('#moonFullMoonWhen');
   const newMoonLabel = $('#moonNewMoonWhen');
-  if (moonRise) moonRise.textContent = timeFmt(moon.rise);
-  if (moonSet) {
-    const nextDay = moon.set instanceof Date
-      && new Date(moon.set.getFullYear(), moon.set.getMonth(), moon.set.getDate()).getTime()
-        > new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    moonSet.textContent = timeFmt(moon.set) + (nextDay ? (getLang() === 'nl' ? ' (+1 dag)' : ' (+1 day)') : '');
-  }
+  if (moonRise) moonRise.textContent = moonEventTimeLabel(moon.rise, now, locale);
+  if (moonSet) moonSet.textContent = moonEventTimeLabel(moon.set, now, locale);
   if (moonAge) moonAge.textContent = moonAgeLabel(moon.ageDays);
   if (moonDistance) {
     moonDistance.textContent = Number.isFinite(moon.distanceKm)

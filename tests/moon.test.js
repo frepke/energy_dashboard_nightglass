@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { moonInfo, moonPhaseNameIcon, moonRenderOrientation, nextFullMoonDate, nextNewMoonDate, nextNewMoonLabel } from '../scripts/domain/moon.js';
+import { moonInfo, moonEventTimeLabel, moonPhaseNameIcon, moonRenderOrientation, nextFullMoonDate, nextNewMoonDate, nextNewMoonLabel } from '../scripts/domain/moon.js';
 
 describe('moonPhaseNameIcon', () => {
   it('returns new moon at phase 0', () => {
@@ -69,6 +69,72 @@ describe('moonInfo', () => {
   it('does not round near-full illumination up to 100.0%', () => {
     const info = moonInfo(new Date('2026-05-31T07:12:00Z'));
     expect(info.illum).toBe(99.8);
+  });
+});
+
+describe('paired moonrise and moonset', () => {
+  const location = { latitude: 51.596, longitude: 5.947 };
+
+  it('shows the previous evening rise while the moon is still above the horizon', () => {
+    const now = new Date('2026-11-02T12:00:00+01:00');
+    const info = moonInfo(now, location);
+    expect(Math.abs(info.rise - new Date('2026-11-01T22:54:00+01:00'))).toBeLessThan(60000);
+    expect(Math.abs(info.set - new Date('2026-11-02T14:45:00+01:00'))).toBeLessThan(60000);
+    expect(info.rise.getTime()).toBeLessThan(now.getTime());
+    expect(info.set.getTime()).toBeGreaterThan(now.getTime());
+  });
+
+  it('switches both events to the next lunar period after moonset', () => {
+    const now = new Date('2026-11-02T16:00:00+01:00');
+    const info = moonInfo(now, location);
+    expect(Math.abs(info.rise - new Date('2026-11-03T00:20:00+01:00'))).toBeLessThan(60000);
+    expect(Math.abs(info.set - new Date('2026-11-03T15:00:00+01:00'))).toBeLessThan(60000);
+    expect(info.rise.getTime()).toBeGreaterThan(now.getTime());
+    expect(info.set.getTime()).toBeGreaterThan(info.rise.getTime());
+  });
+
+  it('pairs a late evening rise with the following day set, not the earlier set today', () => {
+    const info = moonInfo(new Date('2026-11-01T23:30:00+01:00'), location);
+    expect(info.rise.getTime()).toBeLessThan(info.set.getTime());
+    expect(Math.abs(info.set - new Date('2026-11-02T14:45:00+01:00'))).toBeLessThan(60000);
+  });
+
+  it('switches at the rise and set without selecting a different lunar period early', () => {
+    const next = moonInfo(new Date('2026-11-02T16:00:00+01:00'), location);
+    for (const ms of [next.rise.getTime() - 60000, next.rise.getTime() + 60000, next.set.getTime() - 60000]) {
+      const info = moonInfo(new Date(ms), location);
+      expect(Math.abs(info.rise - next.rise)).toBeLessThan(1000);
+      expect(Math.abs(info.set - next.set)).toBeLessThan(1000);
+    }
+    const afterSet = moonInfo(new Date(next.set.getTime() + 60000), location);
+    expect(afterSet.rise.getTime()).toBeGreaterThan(next.set.getTime());
+  });
+
+  it('leaves genuinely unavailable crossings empty', () => {
+    const info = moonInfo(new Date('2026-11-02T12:00:00Z'));
+    expect(info.rise).toBeNull();
+    expect(info.set).toBeNull();
+  });
+});
+
+describe('moonEventTimeLabel', () => {
+  const now = new Date(2026, 10, 2, 12);
+
+  it('labels previous and following calendar days in Dutch and English', () => {
+    expect(moonEventTimeLabel(new Date(2026, 10, 1, 22, 54), now, 'nl-NL')).toBe('22:54 (−1 dag)');
+    expect(moonEventTimeLabel(new Date(2026, 10, 3, 0, 20), now, 'en-GB')).toBe('00:20 (+1 day)');
+    expect(moonEventTimeLabel(new Date(2026, 10, 4, 0, 20), now, 'nl-NL')).toBe('00:20 (+2 dagen)');
+  });
+
+  it('shows just the time today and a placeholder for missing values', () => {
+    expect(moonEventTimeLabel(new Date(2026, 10, 2, 14, 45), now, 'nl-NL')).toBe('14:45');
+    expect(moonEventTimeLabel(null, now, 'nl-NL')).toBe('--:--');
+    expect(moonEventTimeLabel(new Date(NaN), now, 'nl-NL')).toBe('--:--');
+  });
+
+  it('uses calendar days across a daylight saving transition', () => {
+    expect(moonEventTimeLabel(new Date(2026, 2, 29, 23, 30), new Date(2026, 2, 30, 0, 10), 'en-GB'))
+      .toBe('23:30 (−1 day)');
   });
 });
 

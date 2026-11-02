@@ -703,7 +703,7 @@ export function moonInfo(date = new Date(), cfg = {}) {
 }
 
 /**
- * Iteratively find moonrise and moonset for the given date and location.
+ * Find the current visible lunar period, or the next one while below the horizon.
  * Returns {rise: Date|null, set: Date|null}.
  */
 function moonRiseSet(date = new Date(), cfg = {}) {
@@ -711,34 +711,49 @@ function moonRiseSet(date = new Date(), cfg = {}) {
     return { rise: null, set: null };
   }
   const HORIZON = -0.833 * DEG; // standard refraction + semi-diameter
-  const startMs  = new Date(date).setHours(0, 0, 0, 0);
+  const nowMs = date.getTime();
+  if (!Number.isFinite(nowMs)) return { rise: null, set: null };
   const STEP_MS  = 10 * 60 * 1000; // 10-min steps for initial scan
-  // Keep the rise within the requested local calendar day, but allow the
-  // first moonset to fall on the following day.
-  const tomorrow = new Date(startMs);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const nextDay = new Date(tomorrow);
-  nextDay.setDate(nextDay.getDate() + 1);
-  const todayEndMs = tomorrow.getTime();
-  const END_MS = nextDay.getTime();
+  // Search both sides of now, independently of local midnight and DST.
+  // At polar locations a crossing may not exist nearby; keep that value null.
+  const RANGE_MS = 3 * MS_PER_DAY;
+  const startMs = nowMs - RANGE_MS;
+  const END_MS = nowMs + RANGE_MS;
+  const aboveHorizon = localBodyAltitude(moonEquatorial(date), date, cfg) >= HORIZON;
 
   let prevAlt = localBodyAltitude(moonEquatorial(new Date(startMs)), new Date(startMs), cfg) ?? 0;
   let rise = null;
-  let set  = null;
 
-  for (let ms = startMs + STEP_MS; ms <= END_MS && !(rise && set); ms += STEP_MS) {
+  for (let ms = startMs + STEP_MS; ms <= END_MS; ms += STEP_MS) {
     const d    = new Date(ms);
     const alt  = localBodyAltitude(moonEquatorial(d), d, cfg) ?? 0;
-    if (ms - STEP_MS < todayEndMs && prevAlt < HORIZON && alt >= HORIZON && !rise) {
-      // Bisect to find exact crossing
-      rise = bisectHorizonCrossing(ms - STEP_MS, ms, HORIZON, cfg, true);
+    if (prevAlt < HORIZON && alt >= HORIZON) {
+      const crossing = bisectHorizonCrossing(ms - STEP_MS, ms, HORIZON, cfg, true);
+      if (aboveHorizon ? crossing.getTime() <= nowMs : !rise && crossing.getTime() > nowMs) {
+        rise = crossing;
+      }
     }
-    if (prevAlt >= HORIZON && alt < HORIZON && !set) {
-      set = bisectHorizonCrossing(ms - STEP_MS, ms, HORIZON, cfg, false);
+    if (prevAlt >= HORIZON && alt < HORIZON) {
+      const crossing = bisectHorizonCrossing(ms - STEP_MS, ms, HORIZON, cfg, false);
+      if (crossing.getTime() > nowMs && (aboveHorizon || rise)) {
+        return { rise, set: crossing };
+      }
     }
     prevAlt = alt;
   }
-  return { rise, set };
+  return { rise, set: null };
+}
+
+/** Format a lunar event with its local calendar-day offset, including across DST. */
+export function moonEventTimeLabel(value, now = new Date(), locale = getLocale()) {
+  if (!(value instanceof Date) || !Number.isFinite(value.getTime())) return '--:--';
+  const calendarDay = d => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / MS_PER_DAY;
+  const offset = calendarDay(value) - calendarDay(now);
+  const time = value.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+  if (!offset) return time;
+  const unit = locale.startsWith('nl') ? (Math.abs(offset) === 1 ? 'dag' : 'dagen')
+    : (Math.abs(offset) === 1 ? 'day' : 'days');
+  return `${time} (${offset > 0 ? '+' : '−'}${Math.abs(offset)} ${unit})`;
 }
 
 function bisectHorizonCrossing(ms0, ms1, horizon, cfg, rising) {
