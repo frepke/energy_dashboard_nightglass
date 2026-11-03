@@ -6708,3 +6708,22 @@ body.dashboard-fit-micro .history-watermark.is-visible {
 
   .tip-window { grid-column: 2; }
 }
+
+/* Keep letter descenders (e.g. the g in "Waning Crescent") visible.
+   This is the active dashboard stylesheet; weather-final.css is not loaded. */
+.command-zone--celestial .moon-info,
+.command-zone--celestial .moon-phase {
+  overflow: visible !important;
+}
+
+.command-zone--celestial .moon-phase {
+  line-height: 1.2 !important;
+  padding-bottom: 2px !important;
+  margin-bottom: 0 !important;
+  text-overflow: clip !important;
+}
+
+body.dashboard-fit-micro .command-zone--celestial .moon-phase {
+  line-height: 1.18 !important;
+  padding-bottom: 2px !important;
+}
